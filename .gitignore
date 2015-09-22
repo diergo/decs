@@ -1,8 +1,19 @@
+# created by build
 .gradle
 build/
 
-# Ignore Gradle GUI config
-gradle-app.setting
+# created by running application
+*.log
+*.pid
 
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
+# created by IntelliJ IDEA
+.idea
+*.iml
+
+# created by Eclipse
+.classpath
+.project
+.settings
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
