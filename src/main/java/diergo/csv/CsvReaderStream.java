@@ -1,37 +1,34 @@
 package diergo.csv;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.Reader;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
-
-import static diergo.csv.Option.*;
 
 public class CsvReaderStream {
 
     public static final String DEFAULT_SEPARATORS = ",;\t";
-    private static final Logger LOG = LoggerFactory.getLogger(CsvReaderStream.class);
     private static final String[] EMPTY_LINE = new String[0];
 
     public static CsvReaderStream.Builder toCsvStream(Reader in) {
         return new Builder(BufferedReader.class.isInstance(in) ? BufferedReader.class.cast(in) : new BufferedReader(in));
     }
 
-    private final Set<Option> options;
-    private final SeparatorDeterminer determiner;
+    private final Function<String,Character> determiner;
+    private final char quote;
+    private final String commentStart;
     private final StringBuffer formerLines = new StringBuffer();
     private Character separator;
 
-    CsvReaderStream(Set<Option> options, SeparatorDeterminer determiner) {
-        this.options = options;
-        this.determiner = determiner;
+    CsvReaderStream(CharSequence separators, char quote, String commentStart) {
+        this.determiner = separators.length() == 1 ? line -> separators.charAt(0) : new AutoSeparatorDeterminer(separators);
+        this.quote = quote;
+        this.commentStart = commentStart;
     }
 
     String[] parseLine(String line) {
@@ -43,16 +40,11 @@ public class CsvReaderStream {
             return EMPTY_LINE;
         }
         int i = 0;
-        if (line.startsWith("#")) {
-            if (options.contains(COMMENTS_SKIPPED)) {
-                LOG.debug("Skipped comment '{}'", line);
-                return null;
-            } else {
-                return new String[]{line};
-            }
+        if (line.startsWith(commentStart)) {
+            return new String[]{line};
         }
         if (separator == null) {
-            separator = determiner.determineSeparator(line);
+            separator = determiner.apply(line);
         }
         CharBuffer elem = CharBuffer.allocate(line.length());
         List<String> data = new ArrayList<>();
@@ -62,7 +54,7 @@ public class CsvReaderStream {
             if (c == separator && (!quoted || isQuote)) {
                 data.add(getValue(elem));
                 isQuote = false;
-            } else if (c == QUOTE) {
+            } else if (c == quote) {
                 if (isQuote) {
                     elem.append(c);
                     isQuote = false;
@@ -97,50 +89,132 @@ public class CsvReaderStream {
         value.rewind();
         value.limit(length);
         try {
-            String result = value.toString();
-            if (options.contains(TRIM)) {
-                result = result.trim();
-            }
-            if (options.contains(EMPTY_AS_NULL) && result.length() == 0) {
-                return null;
-            }
-            return result;
+            return value.toString();
         } finally {
             value.clear();
         }
     }
 
+    private static String[] trimElements(String[] fields) {
+        for (int i = 0; i < fields.length; ++i) {
+            fields[i] = fields[i].trim();
+        }
+        return fields;
+    }
+
+    private static String[] replaceEmptyAsNull(String[] fields) {
+        for (int i = 0; i < fields.length; ++i) {
+            if (fields[i].length() == 0) {
+                fields[i] = null;
+            }
+        }
+        return fields;
+    }
+
     public static class Builder {
         private final BufferedReader in;
-        private final Set<Option> options = EnumSet.noneOf(Option.class);
-        private SeparatorDeterminer determiner = new AutoSeparatorDeterminer(DEFAULT_SEPARATORS);
+        private CharSequence separators = DEFAULT_SEPARATORS;
+        private char quote = '"';
+        private String commentStart = "#";
+        private boolean skipComments;
+        private boolean trimFields;
+        private boolean treatEmptyAsNull;
 
         public Builder(BufferedReader in) {
             this.in = in;
         }
 
+        public Builder quotedWith(char quote) {
+            this.quote = quote;
+            return this;
+        }
+
+        public Builder commentsStartWith(String commentStart) {
+            this.commentStart = commentStart;
+            return this;
+        }
+
+        public Builder skipComments() {
+            skipComments = true;
+            return this;
+        }
+
+        public Builder trimFields() {
+            trimFields = true;
+            return this;
+        }
+
+        public Builder treatEmptyAsNull() {
+            treatEmptyAsNull = true;
+            return this;
+        }
+
         public Builder separatedBy(char separator) {
-            this.determiner = new FixedSeparatorDeterminer(separator);
+            this.separators = String.valueOf(separator);
             return this;
         }
 
         public Builder separatedByAnyOf(CharSequence possibleSeparators) {
-            this.determiner = new AutoSeparatorDeterminer(possibleSeparators);
+            this.separators = possibleSeparators;
             return this;
         }
 
-        public Builder withOption(Option option) {
-            this.options.add(option);
-            return this;
+        public Stream<String[]> stream() {
+            Stream<String> lines = in.lines();
+            if (skipComments) {
+                lines = lines.filter(line -> !line.startsWith("#"));
+            }
+            Stream<String[]> csv = lines.map(new CsvReaderStream(separators, quote, commentStart)::parseLine).filter(fields -> fields != null);
+            if (trimFields) {
+                csv = csv.map(CsvReaderStream::trimElements);
+            }
+            if (treatEmptyAsNull) {
+                csv = csv.map(CsvReaderStream::replaceEmptyAsNull);
+            }
+            return csv;
+        }
+    }
+    
+    private class AutoSeparatorDeterminer implements Function<String,Character> {
+        private final CharSequence possibleSeparators;
+        private Character separator = null;
+
+        private AutoSeparatorDeterminer(CharSequence possibleSeparators) {
+            this.possibleSeparators = possibleSeparators;
         }
 
-        public Builder withoutOption(Option option) {
-            this.options.remove(option);
-            return this;
+        @Override
+        public Character apply(String line) {
+            if (separator != null) {
+                return separator;
+            }
+            if (line == null || line.trim().length() == 0) {
+                throw new IllegalStateException("Separator not determined");
+            }
+            separator = getBestVotedSeparator(voteForSeparators(line));
+            return separator;
         }
 
-        public Stream<String[]> build() {
-            return in.lines().map(new CsvReaderStream(options, determiner)::parseLine).filter(fields -> fields != null);
+        private Map<Character, Integer> voteForSeparators(String line) {
+            Map<Character, Integer> votes = new HashMap<>();
+            for (char c : possibleSeparators.toString().toCharArray()) {
+                try {
+                    votes.put(c, getFieldCountFromLineParsed(line, c));
+                } catch (IllegalArgumentException e) {
+                    votes.put(c, 0);
+                }
+            }
+            return votes;
+        }
+
+        private char getBestVotedSeparator(Map<Character, Integer> votes) {
+            return votes.entrySet().stream()
+                .reduce((e1, e2) -> e1.getValue() < e2.getValue() ? e2 : e1)
+                .get().getKey();
+        }
+
+        private int getFieldCountFromLineParsed(String line, char separator) {
+            return CsvReaderStream.this.parseLine(line).length;
         }
     }
 }
