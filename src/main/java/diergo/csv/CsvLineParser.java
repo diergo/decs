@@ -28,7 +28,12 @@ class CsvLineParser implements Function<String,String[]> {
         if (isEmpty(line)) {
             return EMPTY_LINE;
         }
-        return parseLine(line, determiner.apply(line));
+        String[] values = parseLine(line, determiner.apply(line));
+        if (values == null) {
+            formerLine.append(line);
+            formerLine.append('\n');
+        }
+        return values;
     }
 
     private String[] parseLine(String line, char separator) {
@@ -62,8 +67,6 @@ class CsvLineParser implements Function<String,String[]> {
             ++i;
         }
         if (quoted && !isQuote) {
-            formerLine.append(line);
-            formerLine.append('\n');
             return null;
         }
         columns.add(getValue(column));
