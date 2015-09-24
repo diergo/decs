@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.Spliterators;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class CsvReaderBuilder implements Iterable<String[]> {
@@ -22,6 +23,7 @@ public class CsvReaderBuilder implements Iterable<String[]> {
     }
 
     private final Stream<String> in;
+    private Function<CsvReaderBuilder, Function<String, String[]>> parserFactory;
     private CharSequence separators = DEFAULT_SEPARATORS;
     private char quote = DEFAULT_QUOTE;
     private String commentStart = DEFAULT_COMMENT_START;
@@ -31,6 +33,7 @@ public class CsvReaderBuilder implements Iterable<String[]> {
 
     private CsvReaderBuilder(Stream<String> in) {
         this.in = in;
+        parserFactory = CsvReaderBuilder::createParser;
     }
 
     public CsvReaderBuilder quotedWith(char quote) {
@@ -67,6 +70,11 @@ public class CsvReaderBuilder implements Iterable<String[]> {
         this.separators = possibleSeparators;
         return this;
     }
+    
+    CsvReaderBuilder usingParser(Function<CsvReaderBuilder, Function<String, String[]>> parserFactory) {
+        this.parserFactory = parserFactory;
+        return this;
+    }
 
     @Override
     public Iterator<String[]> iterator() {
@@ -78,7 +86,7 @@ public class CsvReaderBuilder implements Iterable<String[]> {
         if (skipComments) {
             lines = lines.filter(line -> !line.startsWith(commentStart));
         }
-        Stream<String[]> csv = lines.map(new CsvLineParser(separators, quote, commentStart)::apply).filter(fields -> fields != null);
+        Stream<String[]> csv = lines.map(parserFactory.apply(CsvReaderBuilder.this)).filter(fields -> fields != null);
         if (trimValues) {
             csv = csv.map(CsvReaderBuilder::trimValues);
         }
@@ -86,6 +94,10 @@ public class CsvReaderBuilder implements Iterable<String[]> {
             csv = csv.map(CsvReaderBuilder::replaceEmptyAsNull);
         }
         return csv;
+    }
+
+    private Function<String, String[]> createParser() {
+        return new CsvLineParser(separators, quote, commentStart);
     }
 
     private static String[] trimValues(String[] values) {

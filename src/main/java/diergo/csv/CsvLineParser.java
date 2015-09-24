@@ -11,10 +11,10 @@ class CsvLineParser implements Function<String,String[]> {
 
     private static final String[] EMPTY_LINE = new String[0];
 
-    private final Function<String,Character> determiner;
-    private final char quote;
-    private final String commentStart;
-    private final StringBuffer formerLine = new StringBuffer();
+    final Function<String,Character> determiner;
+    final char quote;
+    final String commentStart;
+    final StringBuffer formerLine = new StringBuffer();
 
     CsvLineParser(CharSequence separators, char quote, String commentStart) {
         this.determiner = separators.length() == 1 ? line -> separators.charAt(0) : new AutoSeparatorDeterminer(separators);
@@ -28,10 +28,13 @@ class CsvLineParser implements Function<String,String[]> {
         if (isEmpty(line)) {
             return EMPTY_LINE;
         }
+        return parseLine(line, determiner.apply(line));
+    }
+
+    private String[] parseLine(String line, char separator) {
         if (line.startsWith(commentStart)) {
             return new String[]{line};
         }
-        char separator = determiner.apply(line);
         CharBuffer column = CharBuffer.allocate(line.length());
         List<String> columns = new ArrayList<>();
         boolean quoted = false;
@@ -104,7 +107,7 @@ class CsvLineParser implements Function<String,String[]> {
                 return separator;
             }
             if (isEmpty(line)) {
-                throw new IllegalStateException("Separator not determined");
+                throw new IllegalStateException("Separator cannot be determined from an empty line");
             }
             separator = getBestVotedSeparator(voteForSeparators(line));
             return separator;
@@ -114,7 +117,7 @@ class CsvLineParser implements Function<String,String[]> {
             Map<Character, Integer> votes = new HashMap<>();
             for (char c : possibleSeparators.toString().toCharArray()) {
                 try {
-                    votes.put(c, getFieldCountFromLineParsed(line));
+                    votes.put(c, getFieldCountFromLineParsed(line, c));
                 } catch (IllegalArgumentException e) {
                     votes.put(c, 0);
                 }
@@ -128,8 +131,9 @@ class CsvLineParser implements Function<String,String[]> {
                     .get().getKey();
         }
 
-        private int getFieldCountFromLineParsed(String line) {
-            return CsvLineParser.this.apply(line).length;
+        private int getFieldCountFromLineParsed(String line, char separator) {
+            String[] values = CsvLineParser.this.parseLine(line, separator);
+            return values == null ? 0 : values.length;
         }
     }
 }

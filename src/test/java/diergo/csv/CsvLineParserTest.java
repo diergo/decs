@@ -1,6 +1,5 @@
 package diergo.csv;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
@@ -50,6 +49,14 @@ public class CsvLineParserTest {
     public void quotedFieldWithMissingEndQuoteReturnsNullAndIsStoredInternallyAsAdditionalLine() {
         assertThat(parse("\"hi;"), nullValue());
         assertThat(parser.apply("ho\""), is(new String[] {"hi;\nho"}));
+    }
+
+    @Test
+    public void theAutoSeparatorDeterminerCanBeConfigured() {
+        String separators = ";: ,|";
+        for (char separator : separators.toCharArray()) {
+            assertThat(parse(separators, '"', "#", "a" + separator + "b"), is(new String[] {"a", "b"}));
+        }
     }
 
     private String[] parse(String line) {
