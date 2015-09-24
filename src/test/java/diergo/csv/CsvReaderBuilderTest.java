@@ -20,7 +20,7 @@ public class CsvReaderBuilderTest {
 
     @Test
     public void commentsAreSkippedOptionally() {
-        StringReader csv = new StringReader("#comment;no fields");
+        StringReader csv = new StringReader("#comment;no columns");
         Stream<String[]> rows = toCsvStream(csv)
             .separatedBy(';').commentsStartWith("#").skipComments().build();
         assertThat(rows.count(), is(0L));

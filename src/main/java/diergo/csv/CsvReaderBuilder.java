@@ -26,7 +26,7 @@ public class CsvReaderBuilder implements Iterable<String[]> {
     private char quote = DEFAULT_QUOTE;
     private String commentStart = DEFAULT_COMMENT_START;
     private boolean skipComments;
-    private boolean trimFields;
+    private boolean trimValues;
     private boolean treatEmptyAsNull;
 
     private CsvReaderBuilder(Stream<String> in) {
@@ -48,8 +48,8 @@ public class CsvReaderBuilder implements Iterable<String[]> {
         return this;
     }
 
-    public CsvReaderBuilder trimFields() {
-        trimFields = true;
+    public CsvReaderBuilder trimValues() {
+        trimValues = true;
         return this;
     }
 
@@ -79,8 +79,8 @@ public class CsvReaderBuilder implements Iterable<String[]> {
             lines = lines.filter(line -> !line.startsWith(commentStart));
         }
         Stream<String[]> csv = lines.map(new CsvLineParser(separators, quote, commentStart)::apply).filter(fields -> fields != null);
-        if (trimFields) {
-            csv = csv.map(CsvReaderBuilder::trimElements);
+        if (trimValues) {
+            csv = csv.map(CsvReaderBuilder::trimValues);
         }
         if (treatEmptyAsNull) {
             csv = csv.map(CsvReaderBuilder::replaceEmptyAsNull);
@@ -88,19 +88,19 @@ public class CsvReaderBuilder implements Iterable<String[]> {
         return csv;
     }
 
-    private static String[] trimElements(String[] fields) {
-        for (int i = 0; i < fields.length; ++i) {
-            fields[i] = fields[i].trim();
+    private static String[] trimValues(String[] values) {
+        for (int i = 0; i < values.length; ++i) {
+            values[i] = values[i].trim();
         }
-        return fields;
+        return values;
     }
 
-    private static String[] replaceEmptyAsNull(String[] fields) {
-        for (int i = 0; i < fields.length; ++i) {
-            if (fields[i].length() == 0) {
-                fields[i] = null;
+    private static String[] replaceEmptyAsNull(String[] values) {
+        for (int i = 0; i < values.length; ++i) {
+            if (values[i].length() == 0) {
+                values[i] = null;
             }
         }
-        return fields;
+        return values;
     }
 }

@@ -15,7 +15,6 @@ class CsvLineParser implements Function<String,String[]> {
     private final char quote;
     private final String commentStart;
     private final StringBuffer formerLine = new StringBuffer();
-    private Character separator;
 
     CsvLineParser(CharSequence separators, char quote, String commentStart) {
         this.determiner = separators.length() == 1 ? line -> separators.charAt(0) : new AutoSeparatorDeterminer(separators);
@@ -25,24 +24,19 @@ class CsvLineParser implements Function<String,String[]> {
 
     @Override
     public String[] apply(String line) {
-        if (formerLine.length() > 0) {
-            line = formerLine.append(line).toString();
-            formerLine.delete(0, formerLine.length());
-        }
+        line = recoverFormerIncompleteLine(line);
         if (isEmpty(line)) {
             return EMPTY_LINE;
         }
-        int i = 0;
         if (line.startsWith(commentStart)) {
             return new String[]{line};
         }
-        if (separator == null) {
-            separator = determiner.apply(line);
-        }
+        char separator = determiner.apply(line);
         CharBuffer column = CharBuffer.allocate(line.length());
         List<String> columns = new ArrayList<>();
         boolean quoted = false;
         boolean isQuote = false;
+        int i = 0;
         for (char c : line.toCharArray()) {
             if (c == separator && (!quoted || isQuote)) {
                 columns.add(getValue(column));
@@ -73,6 +67,14 @@ class CsvLineParser implements Function<String,String[]> {
         return columns.toArray(new String[columns.size()]);
     }
 
+    private String recoverFormerIncompleteLine(String line) {
+        if (formerLine.length() > 0) {
+            line = formerLine.append(line).toString();
+            formerLine.delete(0, formerLine.length());
+        }
+        return line;
+    }
+
     private boolean isEmpty(String line) {
         return line == null || line.trim().length() == 0;
     }
@@ -101,7 +103,7 @@ class CsvLineParser implements Function<String,String[]> {
             if (separator != null) {
                 return separator;
             }
-            if (line == null || line.trim().length() == 0) {
+            if (isEmpty(line)) {
                 throw new IllegalStateException("Separator not determined");
             }
             separator = getBestVotedSeparator(voteForSeparators(line));
