@@ -13,11 +13,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-import static java.util.stream.Collector.Characteristics.IDENTITY_FINISH;
-
-public class CsvWriterCollector implements Collector<String, Writer, Writer> {
+public class CsvWriterCollector implements Collector<String, Writer, Void> {
     
-    public static Collector<String, Writer, Writer> toWriter(Writer out) {
+    public static Collector<String, Writer, Void> toWriter(Writer out) {
         return new CsvWriterCollector(out);
     }
 
@@ -45,13 +43,13 @@ public class CsvWriterCollector implements Collector<String, Writer, Writer> {
     }
 
     @Override
-    public Function<Writer, Writer> finisher() {
-        return (o) -> o;
+    public Function<Writer, Void> finisher() {
+        return (o) -> null;
     }
 
     @Override
     public Set<Characteristics> characteristics() {
-        return EnumSet.of(IDENTITY_FINISH);
+        return EnumSet.noneOf(Characteristics.class);
     }
 
     private void appendLine(String line, Writer out) {
