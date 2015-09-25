@@ -1,18 +1,20 @@
 package diergo.csv;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static diergo.csv.CsvReaderBuilder.toCsvStream;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.greaterThan;
@@ -26,10 +28,12 @@ public class CsvReaderCompatibilityIntegrationTest {
     public static final String MAXMIND_WORLD_CITIES_POP =
         "http://www.maxmind.com/download/worldcities/worldcitiespop.txt.gz";
 
+    private static Path UNIVOCITY_CORRECTNESS;
+    private static Path WORLDS_CITIES_POP;
+
     @Test
     public void readerIsCompatibleToUniVocityData() throws IOException {
-        InputStream in = new URL(UNI_VELOCITY_CORRECTNESS).openStream();
-        InputStreamReader csv = new InputStreamReader(in, StandardCharsets.ISO_8859_1);
+        InputStreamReader csv = new InputStreamReader(new FileInputStream(UNIVOCITY_CORRECTNESS.toFile()), StandardCharsets.ISO_8859_1);
 
         List<Row> rows = toCsvStream(csv).separatedBy(',').treatEmptyAsNull().build().collect(toList());
 
@@ -46,12 +50,21 @@ public class CsvReaderCompatibilityIntegrationTest {
 
     @Test
     public void readerHandlesHugeAmountOfData() throws IOException {
-        InputStream in = new GZIPInputStream(new URL(MAXMIND_WORLD_CITIES_POP).openStream());
-        InputStreamReader worldCitiesPopulation = new InputStreamReader(in, StandardCharsets.UTF_8);
+        InputStreamReader worldCitiesPopulation = new InputStreamReader(new FileInputStream(WORLDS_CITIES_POP.toFile()), StandardCharsets.UTF_8);
 
-        Map<Integer, Long> countByColumns = toCsvStream(worldCitiesPopulation).separatedBy(',').laxMode().treatEmptyAsNull().build().collect(Collectors.groupingBy(row -> row.getLength(), Collectors.counting()));
+        long start = System.currentTimeMillis();
+        long count = toCsvStream(worldCitiesPopulation).separatedBy(',').laxMode().build().count();
+        long time = (System.currentTimeMillis() - start);
+        System.out.println("took " + time + " ms to read " + count + " rows. ");
+        assertThat(count, greaterThan(3000000L));
+    }
 
-        assertThat(countByColumns.size(), is(1));
-        assertThat(countByColumns.get(7), greaterThan(3000000L));
+    @BeforeClass
+    public static void cacheFilesLocally() throws IOException {
+        WORLDS_CITIES_POP = Files.createTempFile("worldcitiespop", "txt");
+        Files.copy(new GZIPInputStream(new URL(MAXMIND_WORLD_CITIES_POP).openStream()), WORLDS_CITIES_POP, REPLACE_EXISTING);
+
+        UNIVOCITY_CORRECTNESS = Files.createTempFile("correctness", "csv");
+        Files.copy(new URL(UNI_VELOCITY_CORRECTNESS).openStream(), UNIVOCITY_CORRECTNESS, REPLACE_EXISTING);
     }
 }
