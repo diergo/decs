@@ -35,7 +35,7 @@ public class CsvReaderCompatibilityIntegrationTest {
     public void readerIsCompatibleToUniVocityData() throws IOException {
         InputStreamReader csv = new InputStreamReader(new FileInputStream(UNIVOCITY_CORRECTNESS.toFile()), StandardCharsets.ISO_8859_1);
 
-        List<Row> rows = toCsvStream(csv).separatedBy(',').treatEmptyAsNull().build().collect(toList());
+        List<Row> rows = toCsvStream(csv).separatedBy(',').build().map(Rows::replaceEmptyWithNull).collect(toList());
 
         assertThat(rows.size(), is(6));
         assertThat(rows, is(asList(

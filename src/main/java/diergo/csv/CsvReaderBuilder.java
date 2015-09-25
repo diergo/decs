@@ -27,9 +27,6 @@ public class CsvReaderBuilder {
     private char quote = DEFAULT_QUOTE;
     private String commentStart = DEFAULT_COMMENT_START;
     private boolean laxMode = false;
-    private boolean skipComments = false;
-    private boolean trimValues = false;
-    private boolean treatEmptyAsNull = false;
     private AutoCloseable toClose = null;
 
     private CsvReaderBuilder(Stream<String> in) {
@@ -49,21 +46,6 @@ public class CsvReaderBuilder {
 
     public CsvReaderBuilder laxMode() {
         this.laxMode = true;
-        return this;
-    }
-
-    public CsvReaderBuilder skipComments() {
-        skipComments = true;
-        return this;
-    }
-
-    public CsvReaderBuilder trimValues() {
-        trimValues = true;
-        return this;
-    }
-
-    public CsvReaderBuilder treatEmptyAsNull() {
-        treatEmptyAsNull = true;
         return this;
     }
 
@@ -88,17 +70,7 @@ public class CsvReaderBuilder {
     }
 
     public Stream<Row> build() {
-        Stream<String> lines = in;
-        Stream<Row> csv = lines.map(parserFactory.apply(CsvReaderBuilder.this)).filter(fields -> fields != null);
-        if (skipComments) {
-            csv = csv.filter(row -> !row.isComment());
-        }
-        if (trimValues) {
-            csv = csv.map(Rows::trim);
-        }
-        if (treatEmptyAsNull) {
-            csv = csv.map(Rows::replaceEmptyWithNull);
-        }
+        Stream<Row> csv = in.map(parserFactory.apply(CsvReaderBuilder.this)).filter(fields -> fields != null);
         if (toClose != null) {
             csv.onClose(() -> {
                     try {

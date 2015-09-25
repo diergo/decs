@@ -5,14 +5,10 @@ import org.junit.Test;
 
 import java.io.StringReader;
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static diergo.csv.CsvReaderBuilder.toCsvStream;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -62,19 +58,17 @@ public class CsvReaderBuilderTest {
     }
 
     @Test
-    public void commentsAreSkippedOptionally() {
-        Stream<Row> rows = builderWithMockReader("#comment;no columns")
-            .skipComments().build();
+    public void commentsAreStartWithHashPerDefault() {
+        Stream<Row> rows = builderWithMockReader("#comment;no columns").build();
 
-        assertThat(rows.count(), is(0L));
+        assertThat(rows.findFirst().get().isComment(), is(true));
     }
 
     @Test
     public void commentsStartCanBeConfigured() {
-        Stream<Row> rows = builderWithMockReader("//omment;no columns")
-            .skipComments().commentsStartWith("//").build();
+        Stream<Row> rows = builderWithMockReader("//comment;no columns").commentsStartWith("//").build();
 
-        assertThat(rows.count(), is(0L));
+        assertThat(rows.findFirst().get().isComment(), is(true));
     }
 
     @Test
@@ -88,37 +82,7 @@ public class CsvReaderBuilderTest {
         verify(reader).apply(eq("line;1"));
         verify(reader).apply(eq("line;2"));
     }
-
-    @Test
-    public void valuesAreTrimmedOptional() {
-        Stream<Row> rows = builderWithMockReader("line \n line").trimValues().build();
-        when(reader.apply(anyString()))
-            .thenAnswer(invocation -> new Columns(" line "));
-
-        List<Row> result = rows.collect(toList());
-        assertThat(result, everyItem(is(new Columns("line"))));
-    }
-
-    @Test
-    public void emptyValuesAreReplacesByNull() {
-        Stream<Row> rows = builderWithMockReader("\n").treatEmptyAsNull().build();
-        when(reader.apply(anyString()))
-            .thenAnswer(invocation -> new Columns(""));
-
-        List<Row> result = rows.collect(toList());
-        assertThat(result, everyItem(is(new Columns(singletonList(null)))));
-    }
-
-    @Test
-    public void trimIsDoneBeforeNullReplacement() {
-        Stream<Row> rows = builderWithMockReader("  \n ").treatEmptyAsNull().trimValues().build();
-        when(reader.apply(anyString()))
-            .thenAnswer(invocation -> new Columns(""));
-
-        List<Row> result = rows.collect(toList());
-        assertThat(result, everyItem(is(new Columns(singletonList(null)))));
-    }
-
+    
     @Before
     @SuppressWarnings("unchecked")
     public void createReaderMock() {
