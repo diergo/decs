@@ -5,10 +5,11 @@ import java.io.Reader;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static diergo.csv.Row.DEFAULT_COMMENT_START;
+import static diergo.csv.Row.DEFAULT_QUOTE;
+
 public class CsvReaderBuilder {
 
-    public static final char DEFAULT_QUOTE = '"';
-    public static final String DEFAULT_COMMENT_START = "#";
     public static final String DEFAULT_SEPARATORS = ",;\t";
 
     public static CsvReaderBuilder toCsvStream(Stream<String> lines) {
