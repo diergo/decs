@@ -2,12 +2,13 @@ package diergo.csv;
 
 import java.io.BufferedReader;
 import java.io.Reader;
-import java.util.Iterator;
-import java.util.Spliterators;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-public class CsvReaderBuilder implements Iterable<String[]> {
+import static java.util.stream.Collectors.toList;
+
+public class CsvReaderBuilder {
 
     public static final char DEFAULT_QUOTE = '"';
     public static final String DEFAULT_COMMENT_START = "#";
@@ -23,7 +24,7 @@ public class CsvReaderBuilder implements Iterable<String[]> {
     }
 
     private final Stream<String> in;
-    private Function<CsvReaderBuilder, Function<String, String[]>> parserFactory;
+    private Function<CsvReaderBuilder, Function<String, Row>> parserFactory;
     private CharSequence separators = DEFAULT_SEPARATORS;
     private char quote = DEFAULT_QUOTE;
     private String commentStart = DEFAULT_COMMENT_START;
@@ -71,22 +72,17 @@ public class CsvReaderBuilder implements Iterable<String[]> {
         return this;
     }
     
-    CsvReaderBuilder usingParser(Function<CsvReaderBuilder, Function<String, String[]>> parserFactory) {
+    CsvReaderBuilder usingParser(Function<CsvReaderBuilder, Function<String, Row>> parserFactory) {
         this.parserFactory = parserFactory;
         return this;
     }
 
-    @Override
-    public Iterator<String[]> iterator() {
-        return Spliterators.iterator(build().spliterator());
-    }
-
-    public Stream<String[]> build() {
+    public Stream<Row> build() {
         Stream<String> lines = in;
+        Stream<Row> csv = lines.map(parserFactory.apply(CsvReaderBuilder.this)).filter(fields -> fields != null);
         if (skipComments) {
-            lines = lines.filter(line -> !line.startsWith(commentStart));
+            csv = csv.filter(row -> !row.isComment());
         }
-        Stream<String[]> csv = lines.map(parserFactory.apply(CsvReaderBuilder.this)).filter(fields -> fields != null);
         if (trimValues) {
             csv = csv.map(CsvReaderBuilder::trimValues);
         }
@@ -96,23 +92,23 @@ public class CsvReaderBuilder implements Iterable<String[]> {
         return csv;
     }
 
-    private Function<String, String[]> createParser() {
-        return new CsvLineParser(separators, quote, commentStart);
+    private Function<String, Row> createParser() {
+        return new RowParser(separators, quote, commentStart);
     }
 
-    private static String[] trimValues(String[] values) {
-        for (int i = 0; i < values.length; ++i) {
-            values[i] = values[i].trim();
+    private static Row trimValues(Row values) {
+        if (values.isComment()) {
+            return values;
         }
-        return values;
+        return new Columns(StreamSupport.stream(values.spliterator(), false)
+            .map(column -> column == null ? null : column.trim()).collect(toList()));
     }
 
-    private static String[] replaceEmptyAsNull(String[] values) {
-        for (int i = 0; i < values.length; ++i) {
-            if (values[i].length() == 0) {
-                values[i] = null;
-            }
+    private static Row replaceEmptyAsNull(Row values) {
+        if (values.isComment()) {
+            return values;
         }
-        return values;
+        return new Columns(StreamSupport.stream(values.spliterator(), false)
+            .map(column -> (column == null || column.length() == 0) ? null : column).collect(toList()));
     }
 }

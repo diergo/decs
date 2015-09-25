@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static diergo.csv.CsvReaderBuilder.toCsvStream;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.is;
@@ -23,12 +24,12 @@ import static org.mockito.Mockito.when;
 
 public class CsvReaderBuilderTest {
 
-    private Function<String, String[]> reader;
+    private Function<String, Row> reader;
     
     @Test
     public void byDefaultALineParserIsCreated() throws ReflectiveOperationException {
         CsvReaderBuilder builder = toCsvStream(new StringReader(""));
-        CsvLineParser parser = getLineParser(builder);
+        RowParser parser = getLineParser(builder);
 
         assertThat(parser.quote, is('"'));
         assertThat(parser.commentStart, is("#"));
@@ -37,14 +38,14 @@ public class CsvReaderBuilderTest {
     @Test(expected = IllegalStateException.class)
     public void byDefaultAnAutoSeparatorDeterminerIsConfiguredWhichCannotHandleAnEmptyLine() throws ReflectiveOperationException {
         CsvReaderBuilder builder = toCsvStream(new StringReader(""));
-        CsvLineParser parser = getLineParser(builder);
+        RowParser parser = getLineParser(builder);
         parser.determiner.apply("");
     }
 
     @Test
     public void allConfigurationsArePassedToParser() throws ReflectiveOperationException {
         CsvReaderBuilder builder = toCsvStream(new StringReader("")).commentsStartWith("//").quotedWith('\'').separatedBy(',');
-        CsvLineParser parser = getLineParser(builder);
+        RowParser parser = getLineParser(builder);
 
         assertThat(parser.quote, is('\''));
         assertThat(parser.commentStart, is("//"));
@@ -53,7 +54,7 @@ public class CsvReaderBuilderTest {
 
     @Test
     public void anEmptyReaderCreatesAnEmptyStream() {
-        Stream<String[]> rows = builderWithMockReader("").build();
+        Stream<Row> rows = builderWithMockReader("").build();
 
         assertThat(rows.count(), is(0L));
         
@@ -62,29 +63,25 @@ public class CsvReaderBuilderTest {
 
     @Test
     public void commentsAreSkippedOptionally() {
-        Stream<String[]> rows = builderWithMockReader("#comment;no columns")
+        Stream<Row> rows = builderWithMockReader("#comment;no columns")
             .skipComments().build();
 
         assertThat(rows.count(), is(0L));
-
-        verify(reader, never()).apply(anyString());
     }
 
     @Test
     public void commentsStartCanBeConfigured() {
-        Stream<String[]> rows = builderWithMockReader("//omment;no columns")
+        Stream<Row> rows = builderWithMockReader("//omment;no columns")
             .skipComments().commentsStartWith("//").build();
 
         assertThat(rows.count(), is(0L));
-
-        verify(reader, never()).apply(anyString());
     }
 
     @Test
     public void theParserIsCalledForEveryLine() {
-        Stream<String[]> rows = builderWithMockReader("line;1\nline;2").build();
+        Stream<Row> rows = builderWithMockReader("line;1\nline;2").build();
         when(reader.apply(anyString()))
-            .thenAnswer(invocation -> new String[] {"line", "n"});
+            .thenAnswer(invocation -> new Columns("line", "n"));
 
         assertThat(rows.count(), is(2L));
 
@@ -94,32 +91,32 @@ public class CsvReaderBuilderTest {
 
     @Test
     public void valuesAreTrimmedOptional() {
-        Stream<String[]> rows = builderWithMockReader("line \n line").trimValues().build();
+        Stream<Row> rows = builderWithMockReader("line \n line").trimValues().build();
         when(reader.apply(anyString()))
-            .thenAnswer(invocation -> new String[] {" line "});
+            .thenAnswer(invocation -> new Columns(" line "));
 
-        List<String[]> result = rows.collect(toList());
-        assertThat(result, everyItem(is(new String[] {"line"})));
+        List<Row> result = rows.collect(toList());
+        assertThat(result, everyItem(is(new Columns("line"))));
     }
 
     @Test
     public void emptyValuesAreReplacesByNull() {
-        Stream<String[]> rows = builderWithMockReader("\n").treatEmptyAsNull().build();
+        Stream<Row> rows = builderWithMockReader("\n").treatEmptyAsNull().build();
         when(reader.apply(anyString()))
-            .thenAnswer(invocation -> new String[] {""});
+            .thenAnswer(invocation -> new Columns(""));
 
-        List<String[]> result = rows.collect(toList());
-        assertThat(result, everyItem(is(new String[] {null})));
+        List<Row> result = rows.collect(toList());
+        assertThat(result, everyItem(is(new Columns(singletonList(null)))));
     }
 
     @Test
     public void trimIsDoneBeforeNullReplacement() {
-        Stream<String[]> rows = builderWithMockReader("  \n ").treatEmptyAsNull().trimValues().build();
+        Stream<Row> rows = builderWithMockReader("  \n ").treatEmptyAsNull().trimValues().build();
         when(reader.apply(anyString()))
-            .thenAnswer(invocation -> new String[] {""});
+            .thenAnswer(invocation -> new Columns(""));
 
-        List<String[]> result = rows.collect(toList());
-        assertThat(result, everyItem(is(new String[] {null})));
+        List<Row> result = rows.collect(toList());
+        assertThat(result, everyItem(is(new Columns(singletonList(null)))));
     }
 
     @Before
@@ -133,10 +130,10 @@ public class CsvReaderBuilderTest {
     }
 
     @SuppressWarnings("unchecked")
-    private CsvLineParser getLineParser(CsvReaderBuilder builder) throws ReflectiveOperationException {
+    private RowParser getLineParser(CsvReaderBuilder builder) throws ReflectiveOperationException {
         Field parserFactoryField = CsvReaderBuilder.class.getDeclaredField("parserFactory");
         parserFactoryField.setAccessible(true);
-        Function<CsvReaderBuilder, Function<String, String[]>> parserFactory = (Function<CsvReaderBuilder, Function<String, String[]>>) parserFactoryField.get(builder);
-        return (CsvLineParser) parserFactory.apply(builder);
+        Function<CsvReaderBuilder, Function<String, Row>> parserFactory = (Function<CsvReaderBuilder, Function<String, Row>>) parserFactoryField.get(builder);
+        return (RowParser) parserFactory.apply(builder);
     }
 }

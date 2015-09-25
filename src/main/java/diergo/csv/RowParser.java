@@ -7,28 +7,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-class CsvLineParser implements Function<String,String[]> {
+class RowParser implements Function<String,Row> {
 
-    private static final String[] EMPTY_LINE = new String[0];
+    private static final Row EMPTY_LINE = new Columns();
 
     final Function<String,Character> determiner;
     final char quote;
     final String commentStart;
     final StringBuffer formerLine = new StringBuffer();
 
-    CsvLineParser(CharSequence separators, char quote, String commentStart) {
+    RowParser(CharSequence separators, char quote, String commentStart) {
         this.determiner = separators.length() == 1 ? line -> separators.charAt(0) : new AutoSeparatorDeterminer(separators);
         this.quote = quote;
         this.commentStart = commentStart;
     }
 
     @Override
-    public String[] apply(String line) {
+    public Row apply(String line) {
         line = recoverFormerIncompleteLine(line);
         if (isEmpty(line)) {
             return EMPTY_LINE;
         }
-        String[] values = parseLine(line, determiner.apply(line));
+        Row values = parseLine(line, determiner.apply(line));
         if (values == null) {
             formerLine.append(line);
             formerLine.append('\n');
@@ -36,9 +36,9 @@ class CsvLineParser implements Function<String,String[]> {
         return values;
     }
 
-    private String[] parseLine(String line, char separator) {
+    private Row parseLine(String line, char separator) {
         if (line.startsWith(commentStart)) {
-            return new String[]{line};
+            return new Comment(line.substring(commentStart.length()));
         }
         CharBuffer column = CharBuffer.allocate(line.length());
         List<String> columns = new ArrayList<>();
@@ -70,7 +70,7 @@ class CsvLineParser implements Function<String,String[]> {
             return null;
         }
         columns.add(getValue(column));
-        return columns.toArray(new String[columns.size()]);
+        return new Columns(columns);
     }
 
     private String recoverFormerIncompleteLine(String line) {
@@ -135,8 +135,8 @@ class CsvLineParser implements Function<String,String[]> {
         }
 
         private int getFieldCountFromLineParsed(String line, char separator) {
-            String[] values = CsvLineParser.this.parseLine(line, separator);
-            return values == null ? 0 : values.length;
+            Row values = RowParser.this.parseLine(line, separator);
+            return values == null ? 0 : values.getLength();
         }
     }
 }
