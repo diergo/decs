@@ -15,16 +15,18 @@ import java.util.stream.Collector;
 
 import static java.util.stream.Collector.Characteristics.IDENTITY_FINISH;
 
-class CsvWriterCollector implements Collector<Row, Writer, Writer> {
+public class CsvWriterCollector implements Collector<String, Writer, Writer> {
+    
+    public static Collector<String, Writer, Writer> toWriter(Writer out) {
+        return new CsvWriterCollector(out);
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(CsvWriterCollector.class);
-
+    
     private final Writer out;
-    private final Function<Row, String> printer;
 
-    CsvWriterCollector(Writer out, Function<Row, String> printer) {
+    private CsvWriterCollector(Writer out) {
         this.out = out;
-        this.printer = printer;
     }
 
     @Override
@@ -33,7 +35,7 @@ class CsvWriterCollector implements Collector<Row, Writer, Writer> {
     }
 
     @Override
-    public BiConsumer<Writer, Row> accumulator() {
+    public BiConsumer<Writer, String> accumulator() {
         return (out, line) -> appendLine(line, out);
     }
 
@@ -52,11 +54,12 @@ class CsvWriterCollector implements Collector<Row, Writer, Writer> {
         return EnumSet.of(IDENTITY_FINISH);
     }
 
-    private void appendLine(Row row, Writer out) {
+    private void appendLine(String line, Writer out) {
         try {
-            out.append(printer.apply(row));
+            out.append(line);
+            out.append('\n');
         } catch (IOException e) {
-            LOG.error("Cannot write line '{}'", row, e);
+            LOG.error("Cannot write line '{}'", line, e);
         }
     }
 }

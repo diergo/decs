@@ -35,7 +35,6 @@ class RowPrinter implements Function<Row,String> {
                 first = false;
             }
         }
-        line.append('\n');
         return line.toString();
     }
 

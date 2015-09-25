@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static diergo.csv.CsvReaderBuilder.toCsvStream;
+import static diergo.csv.CsvParserBuilder.buildCsvParser;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -18,13 +18,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class CsvReaderBuilderTest {
+public class CsvParserBuilderTest {
 
     private Function<String, Row> reader;
     
     @Test
     public void byDefaultALineParserIsCreated() throws ReflectiveOperationException {
-        CsvReaderBuilder builder = toCsvStream(new StringReader(""));
+        CsvParserBuilder builder = buildCsvParser(new StringReader(""));
         RowParser parser = getLineParser(builder);
 
         assertThat(parser.quote, is('"'));
@@ -33,14 +33,14 @@ public class CsvReaderBuilderTest {
 
     @Test(expected = IllegalStateException.class)
     public void byDefaultAnAutoSeparatorDeterminerIsConfiguredWhichCannotHandleAnEmptyLine() throws ReflectiveOperationException {
-        CsvReaderBuilder builder = toCsvStream(new StringReader(""));
+        CsvParserBuilder builder = buildCsvParser(new StringReader(""));
         RowParser parser = getLineParser(builder);
         parser.determiner.apply("");
     }
 
     @Test
     public void allConfigurationsArePassedToParser() throws ReflectiveOperationException {
-        CsvReaderBuilder builder = toCsvStream(new StringReader("")).commentsStartWith("//").quotedWith('\'').separatedBy(',');
+        CsvParserBuilder builder = buildCsvParser(new StringReader("")).commentsStartWith("//").quotedWith('\'').separatedBy(',');
         RowParser parser = getLineParser(builder);
 
         assertThat(parser.quote, is('\''));
@@ -55,20 +55,6 @@ public class CsvReaderBuilderTest {
         assertThat(rows.count(), is(0L));
         
         verify(reader, never()).apply(anyString());
-    }
-
-    @Test
-    public void commentsAreStartWithHashPerDefault() {
-        Stream<Row> rows = builderWithMockReader("#comment;no columns").build();
-
-        assertThat(rows.findFirst().get().isComment(), is(true));
-    }
-
-    @Test
-    public void commentsStartCanBeConfigured() {
-        Stream<Row> rows = builderWithMockReader("//comment;no columns").commentsStartWith("//").build();
-
-        assertThat(rows.findFirst().get().isComment(), is(true));
     }
 
     @Test
@@ -89,15 +75,15 @@ public class CsvReaderBuilderTest {
         reader = mock(Function.class); 
     }
     
-    private CsvReaderBuilder builderWithMockReader(String csv) {
-        return toCsvStream(new StringReader(csv)).usingParser(builder -> reader);
+    private CsvParserBuilder builderWithMockReader(String csv) {
+        return buildCsvParser(new StringReader(csv)).creatingParser(builder -> reader);
     }
 
     @SuppressWarnings("unchecked")
-    private RowParser getLineParser(CsvReaderBuilder builder) throws ReflectiveOperationException {
-        Field parserFactoryField = CsvReaderBuilder.class.getDeclaredField("parserFactory");
+    private RowParser getLineParser(CsvParserBuilder builder) throws ReflectiveOperationException {
+        Field parserFactoryField = CsvParserBuilder.class.getDeclaredField("parserFactory");
         parserFactoryField.setAccessible(true);
-        Function<CsvReaderBuilder, Function<String, Row>> parserFactory = (Function<CsvReaderBuilder, Function<String, Row>>) parserFactoryField.get(builder);
+        Function<CsvParserBuilder, Function<String, Row>> parserFactory = (Function<CsvParserBuilder, Function<String, Row>>) parserFactoryField.get(builder);
         return (RowParser) parserFactory.apply(builder);
     }
 }

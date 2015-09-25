@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import static diergo.csv.CsvReaderBuilder.toCsvStream;
+import static diergo.csv.CsvParserBuilder.buildCsvParser;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -35,7 +35,7 @@ public class CsvReaderCompatibilityIntegrationTest {
     public void readerIsCompatibleToUniVocityData() throws IOException {
         InputStreamReader csv = new InputStreamReader(new FileInputStream(UNIVOCITY_CORRECTNESS.toFile()), StandardCharsets.ISO_8859_1);
 
-        List<Row> rows = toCsvStream(csv).separatedBy(',').build().map(Rows::replaceEmptyWithNull).collect(toList());
+        List<Row> rows = buildCsvParser(csv).separatedBy(',').build().map(Rows::replaceEmptyWithNull).collect(toList());
 
         assertThat(rows.size(), is(6));
         assertThat(rows, is(asList(
@@ -53,7 +53,7 @@ public class CsvReaderCompatibilityIntegrationTest {
         InputStreamReader worldCitiesPopulation = new InputStreamReader(new FileInputStream(WORLDS_CITIES_POP.toFile()), StandardCharsets.UTF_8);
 
         long start = System.currentTimeMillis();
-        long count = toCsvStream(worldCitiesPopulation).separatedBy(',').laxMode().build().count();
+        long count = buildCsvParser(worldCitiesPopulation).separatedBy(',').laxMode().build().count();
         long time = (System.currentTimeMillis() - start);
         System.out.println("took " + time + " ms to read " + count + " rows. ");
         assertThat(count, greaterThan(3000000L));
