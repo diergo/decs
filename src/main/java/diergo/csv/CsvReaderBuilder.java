@@ -28,9 +28,10 @@ public class CsvReaderBuilder {
     private CharSequence separators = DEFAULT_SEPARATORS;
     private char quote = DEFAULT_QUOTE;
     private String commentStart = DEFAULT_COMMENT_START;
-    private boolean skipComments;
-    private boolean trimValues;
-    private boolean treatEmptyAsNull;
+    private boolean laxMode = false;
+    private boolean skipComments = false;
+    private boolean trimValues = false;
+    private boolean treatEmptyAsNull = false;
 
     private CsvReaderBuilder(Stream<String> in) {
         this.in = in;
@@ -44,6 +45,11 @@ public class CsvReaderBuilder {
 
     public CsvReaderBuilder commentsStartWith(String commentStart) {
         this.commentStart = commentStart;
+        return this;
+    }
+
+    public CsvReaderBuilder laxMode() {
+        this.laxMode = true;
         return this;
     }
 
@@ -93,7 +99,7 @@ public class CsvReaderBuilder {
     }
 
     private Function<String, Row> createParser() {
-        return new RowParser(separators, quote, commentStart);
+        return new RowParser(separators, quote, commentStart, laxMode);
     }
 
     private static Row trimValues(Row values) {

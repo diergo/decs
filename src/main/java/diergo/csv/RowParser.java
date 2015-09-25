@@ -1,5 +1,8 @@
 package diergo.csv;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,20 +13,26 @@ import java.util.function.Function;
 class RowParser implements Function<String,Row> {
 
     private static final Row EMPTY_LINE = new Columns();
+    private static final Logger LOG = LoggerFactory.getLogger(RowParser.class);
 
     final Function<String,Character> determiner;
     final char quote;
     final String commentStart;
+    final boolean laxMode;
     final StringBuffer formerLine = new StringBuffer();
+    private int lineNo;
 
-    RowParser(CharSequence separators, char quote, String commentStart) {
+    RowParser(CharSequence separators, char quote, String commentStart, boolean laxMode) {
         this.determiner = separators.length() == 1 ? line -> separators.charAt(0) : new AutoSeparatorDeterminer(separators);
         this.quote = quote;
         this.commentStart = commentStart;
+        this.laxMode = laxMode;
+        lineNo = 0;
     }
 
     @Override
     public Row apply(String line) {
+        ++lineNo;
         line = recoverFormerIncompleteLine(line);
         if (isEmpty(line)) {
             return EMPTY_LINE;
@@ -49,6 +58,7 @@ class RowParser implements Function<String,Row> {
             if (c == separator && (!quoted || isQuote)) {
                 columns.add(getValue(column));
                 isQuote = false;
+                quoted = false;
             } else if (c == quote) {
                 if (isQuote) {
                     column.append(c);
@@ -57,8 +67,11 @@ class RowParser implements Function<String,Row> {
                     isQuote = true;
                 } else if (column.position() == 0) {
                     quoted = true;
+                } else if (laxMode) {
+                    column.append(c);
                 } else {
-                    throw new IllegalArgumentException("CSV need quoting when containing quote at " + i + ": " + line);
+                    LOG.warn("CSV need quoting when containing quote at {}:{}, line skipped: {}", lineNo, i, line);
+                    return EMPTY_LINE;
                 }
             } else {
                 column.append(c);

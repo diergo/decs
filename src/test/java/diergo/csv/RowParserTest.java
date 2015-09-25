@@ -37,12 +37,17 @@ public class RowParserTest {
 
     @Test
     public void quotedFieldWithQuotesIsUnquoted() {
-        assertThat(parse("\"\"\"hi\"\"ho\"\"\""), is(new Columns("\"hi\"ho\"")));
+        assertThat(parse("\"\"\"hi\"\"ho\"\"\";x"), is(new Columns("\"hi\"ho\"", "x")));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void unquotedFieldWithQuotesIsIllegal() {
-        parse("hi\"ho");
+    @Test
+    public void lineWithUnquotedFieldWithQuotesIsIllegalAndSkipped() {
+        assertThat(parse("hi\"ho"), is(new Columns()));
+    }
+
+    @Test
+    public void lineWithUnquotedFieldWithQuotesIsToleratedInLaxMode() {
+        assertThat(parse(";", '"', "#", true, "hi\"ho"), is(new Columns("hi\"ho")));
     }
 
     @Test
@@ -55,16 +60,16 @@ public class RowParserTest {
     public void theAutoSeparatorDeterminerCanBeConfigured() {
         String separators = ";: ,|";
         for (char separator : separators.toCharArray()) {
-            assertThat(parse(separators, '"', "#", "a" + separator + "b"), is(new Columns("a", "b")));
+            assertThat(parse(separators, '"', "#", false, "a" + separator + "b"), is(new Columns("a", "b")));
         }
     }
 
     private Row parse(String line) {
-        return parse(";", '"', "#", line);
+        return parse(";", '"', "#", false, line);
     }
 
-    private Row parse(CharSequence separators, char quote, String commentStart, String line) {
-        parser = new RowParser(separators, quote, commentStart);
+    private Row parse(CharSequence separators, char quote, String commentStart, boolean laxMode, String line) {
+        parser = new RowParser(separators, quote, commentStart, laxMode);
         return parser.apply(line);
     }
 }
