@@ -5,9 +5,9 @@ import java.util.regex.Pattern;
 
 class RowPrinter implements Function<Row,String> {
 
-    private final char separator;
-    private final char quote;
-    private final String commentStart;
+    final char separator;
+    final char quote;
+    final String commentStart;
     private final Pattern quotePattern;
     private final String quoteReplacement;
 
