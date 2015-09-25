@@ -4,9 +4,6 @@ import java.io.BufferedReader;
 import java.io.Reader;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import static java.util.stream.Collectors.toList;
 
 public class CsvReaderBuilder {
 
@@ -20,7 +17,7 @@ public class CsvReaderBuilder {
 
     public static CsvReaderBuilder toCsvStream(Reader in) {
         BufferedReader reader = BufferedReader.class.isInstance(in) ? BufferedReader.class.cast(in) : new BufferedReader(in);
-        return toCsvStream(reader.lines());
+        return toCsvStream(reader.lines()).closing(reader);
     }
 
     private final Stream<String> in;
@@ -32,6 +29,7 @@ public class CsvReaderBuilder {
     private boolean skipComments = false;
     private boolean trimValues = false;
     private boolean treatEmptyAsNull = false;
+    private AutoCloseable toClose = null;
 
     private CsvReaderBuilder(Stream<String> in) {
         this.in = in;
@@ -77,7 +75,12 @@ public class CsvReaderBuilder {
         this.separators = possibleSeparators;
         return this;
     }
-    
+
+    public CsvReaderBuilder closing(AutoCloseable toClose) {
+        this.toClose = toClose;
+        return this;
+    }
+
     CsvReaderBuilder usingParser(Function<CsvReaderBuilder, Function<String, Row>> parserFactory) {
         this.parserFactory = parserFactory;
         return this;
@@ -90,31 +93,25 @@ public class CsvReaderBuilder {
             csv = csv.filter(row -> !row.isComment());
         }
         if (trimValues) {
-            csv = csv.map(CsvReaderBuilder::trimValues);
+            csv = csv.map(Rows::trim);
         }
         if (treatEmptyAsNull) {
-            csv = csv.map(CsvReaderBuilder::replaceEmptyAsNull);
+            csv = csv.map(Rows::replaceEmptyWithNull);
+        }
+        if (toClose != null) {
+            csv.onClose(() -> {
+                    try {
+                        toClose.close();
+                    } catch (Exception e) {
+                        throw new IllegalStateException("Cannot close underlying stream", e);
+                    }
+                }
+            );
         }
         return csv;
     }
 
     private Function<String, Row> createParser() {
         return new RowParser(separators, quote, commentStart, laxMode);
-    }
-
-    private static Row trimValues(Row values) {
-        if (values.isComment()) {
-            return values;
-        }
-        return new Columns(StreamSupport.stream(values.spliterator(), false)
-            .map(column -> column == null ? null : column.trim()).collect(toList()));
-    }
-
-    private static Row replaceEmptyAsNull(Row values) {
-        if (values.isComment()) {
-            return values;
-        }
-        return new Columns(StreamSupport.stream(values.spliterator(), false)
-            .map(column -> (column == null || column.length() == 0) ? null : column).collect(toList()));
     }
 }
