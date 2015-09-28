@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import static java.util.Arrays.asList;
@@ -19,28 +21,26 @@ class RowParser implements Function<String,List<Row>> {
     final char quote;
     final String commentStart;
     final boolean laxMode;
-    final StringBuffer formerLine = new StringBuffer();
-    private int lineNo;
+    private final AtomicReference<String> formerLine = new AtomicReference<>();
+    private final AtomicInteger lineNo = new AtomicInteger(0);
 
     RowParser(CharSequence separators, char quote, String commentStart, boolean laxMode) {
         this.determiner = separators.length() == 1 ? line -> separators.charAt(0) : new AutoSeparatorDeterminer(separators);
         this.quote = quote;
         this.commentStart = commentStart;
         this.laxMode = laxMode;
-        lineNo = 0;
     }
 
     @Override
     public List<Row> apply(String line) {
-        ++lineNo;
+        lineNo.incrementAndGet();
         line = recoverFormerIncompleteLine(line);
         if (isEmpty(line)) {
             return singletonList(EMPTY_LINE);
         }
         List<Row> rows = parseLine(line, determiner.apply(line));
         if (rows.isEmpty()) {
-            formerLine.append(line);
-            formerLine.append('\n');
+            formerLine.compareAndSet(null, line + '\n');
         }
         return rows;
     }
@@ -70,7 +70,7 @@ class RowParser implements Function<String,List<Row>> {
                 } else if (laxMode) {
                     column.append(c);
                 } else {
-                    return asList(new Comment(String.format("columns with quote (%c) needs to be quoted: position %d:%d, the following line was skipped", quote, lineNo, i)), new Comment(line));
+                    return asList(new Comment(String.format("columns with quote (%c) need to be quoted: position %d:%d, the following line was skipped", quote, lineNo.get(), i)), new Comment(line));
                 }
             } else {
                 column.append(c);
@@ -86,11 +86,8 @@ class RowParser implements Function<String,List<Row>> {
     }
 
     private String recoverFormerIncompleteLine(String line) {
-        if (formerLine.length() > 0) {
-            line = formerLine.append(line).toString();
-            formerLine.delete(0, formerLine.length());
-        }
-        return line;
+        String prefix = formerLine.getAndSet(null);
+        return prefix == null ? line : prefix + line;
     }
 
     private boolean isEmpty(String line) {
