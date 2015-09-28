@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static diergo.csv.Row.DEFAULT_COMMENT_START;
 import static diergo.csv.Row.DEFAULT_QUOTE;
 
 public class CsvParserBuilder {

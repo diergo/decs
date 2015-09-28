@@ -3,7 +3,6 @@ package diergo.csv;
 import java.text.DecimalFormatSymbols;
 import java.util.function.Function;
 
-import static diergo.csv.Row.DEFAULT_COMMENT_START;
 import static diergo.csv.Row.DEFAULT_QUOTE;
 
 public class CsvPrinterBuilder {
@@ -14,7 +13,7 @@ public class CsvPrinterBuilder {
 
     private char separator = DecimalFormatSymbols.getInstance().getPatternSeparator();
     private char quote = DEFAULT_QUOTE;
-    private String commentStart = DEFAULT_COMMENT_START;
+    private String commentStart = null;
 
     public CsvPrinterBuilder separatedBy(char separator) {
         this.separator = separator;

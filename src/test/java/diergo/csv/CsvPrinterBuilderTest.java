@@ -6,15 +6,16 @@ import java.text.DecimalFormatSymbols;
 
 import static diergo.csv.CsvPrinterBuilder.buildCsvPrinter;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 public class CsvPrinterBuilderTest {
 
     @Test
-    public void commentStartIdHashPerDefault() {
+    public void noCommentStartIdPerDefault() {
         RowPrinter printer = (RowPrinter) buildCsvPrinter().build();
         
-        assertThat(printer.commentStart, is("#"));
+        assertThat(printer.commentStart, nullValue());
     }
 
     @Test
