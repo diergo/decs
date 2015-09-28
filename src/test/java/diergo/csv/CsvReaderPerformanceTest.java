@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,7 +43,10 @@ public class CsvReaderPerformanceTest {
         WORLDS_CITIES_POP = Files.createTempFile("worldcitiespop", "txt");
         URL url = new URL(MAXMIND_WORLD_CITIES_POP);
         try {
-            Files.copy(new GZIPInputStream(url.openStream()), WORLDS_CITIES_POP, REPLACE_EXISTING);
+            URLConnection connection = url.openConnection();
+            connection.setConnectTimeout(500);
+            connection.setReadTimeout(1000);
+            Files.copy(new GZIPInputStream(connection.getInputStream()), WORLDS_CITIES_POP, REPLACE_EXISTING);
         } catch (IOException error) {
             System.out.print("cannot read " + MAXMIND_WORLD_CITIES_POP + ", performance test skipped");
             assumeNoException(error); 
