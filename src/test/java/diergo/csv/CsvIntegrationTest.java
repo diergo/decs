@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import static diergo.csv.CsvParserBuilder.buildCsvParser;
+import static diergo.csv.Maps.toMaps;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
@@ -22,7 +23,7 @@ public class CsvIntegrationTest {
         InputStreamReader csv = new InputStreamReader(getClass().getResourceAsStream("/correctness.csv"), StandardCharsets.ISO_8859_1);
 
         List<Map<String,String>> rows = buildCsvParser(csv).separatedBy(',').build()
-            .map(Rows::replaceEmptyWithNull).map(Maps.toMaps()).flatMap(Collection::stream).collect(toList());
+            .map(Rows::replaceEmptyWithNull).map(toMaps()).flatMap(Collection::stream).collect(toList());
 
         assertThat(rows.size(), is(5));
         for (Map<String,String> row : rows) {
