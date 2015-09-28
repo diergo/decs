@@ -5,10 +5,12 @@ import org.junit.Test;
 
 import java.io.StringReader;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static diergo.csv.CsvParserBuilder.buildCsvParser;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -20,7 +22,7 @@ import static org.mockito.Mockito.when;
 
 public class CsvParserBuilderTest {
 
-    private Function<String, Row> reader;
+    private Function<String, List<Row>> reader;
     
     @Test
     public void byDefaultALineParserIsCreated() throws ReflectiveOperationException {
@@ -61,7 +63,7 @@ public class CsvParserBuilderTest {
     public void theParserIsCalledForEveryLine() {
         Stream<Row> rows = builderWithMockReader("line;1\nline;2").build();
         when(reader.apply(anyString()))
-            .thenAnswer(invocation -> new Columns("line", "n"));
+            .thenAnswer(invocation -> singletonList(new Columns("line", "n")));
 
         assertThat(rows.count(), is(2L));
 
@@ -83,7 +85,7 @@ public class CsvParserBuilderTest {
     private RowParser getLineParser(CsvParserBuilder builder) throws ReflectiveOperationException {
         Field parserFactoryField = CsvParserBuilder.class.getDeclaredField("parserFactory");
         parserFactoryField.setAccessible(true);
-        Function<CsvParserBuilder, Function<String, Row>> parserFactory = (Function<CsvParserBuilder, Function<String, Row>>) parserFactoryField.get(builder);
+        Function<CsvParserBuilder, Function<String, List<Row>>> parserFactory = (Function<CsvParserBuilder, Function<String, List<Row>>>) parserFactoryField.get(builder);
         return (RowParser) parserFactory.apply(builder);
     }
 }

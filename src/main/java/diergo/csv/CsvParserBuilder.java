@@ -2,6 +2,8 @@ package diergo.csv;
 
 import java.io.BufferedReader;
 import java.io.Reader;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -22,7 +24,7 @@ public class CsvParserBuilder {
     }
 
     private final Stream<String> in;
-    private Function<CsvParserBuilder, Function<String, Row>> parserFactory;
+    private Function<CsvParserBuilder, Function<String, List<Row>>> parserFactory;
     private CharSequence separators = DEFAULT_SEPARATORS;
     private char quote = DEFAULT_QUOTE;
     private String commentStart = DEFAULT_COMMENT_START;
@@ -64,13 +66,13 @@ public class CsvParserBuilder {
         return this;
     }
 
-    CsvParserBuilder creatingParser(Function<CsvParserBuilder, Function<String, Row>> parserFactory) {
+    CsvParserBuilder creatingParser(Function<CsvParserBuilder, Function<String, List<Row>>> parserFactory) {
         this.parserFactory = parserFactory;
         return this;
     }
 
     public Stream<Row> build() {
-        Stream<Row> csv = in.map(parserFactory.apply(CsvParserBuilder.this)).filter(fields -> fields != null);
+        Stream<Row> csv = in.map(parserFactory.apply(CsvParserBuilder.this)).flatMap(Collection::stream);
         if (toClose != null) {
             csv.onClose(() -> {
                     try {
@@ -84,7 +86,7 @@ public class CsvParserBuilder {
         return csv;
     }
 
-    private Function<String, Row> createParser() {
+    private Function<String, List<Row>> createParser() {
         return new RowParser(separators, quote, commentStart, laxMode);
     }
 }

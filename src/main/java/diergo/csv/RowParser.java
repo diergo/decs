@@ -1,8 +1,5 @@
 package diergo.csv;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,10 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-class RowParser implements Function<String,Row> {
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+
+class RowParser implements Function<String,List<Row>> {
 
     private static final Row EMPTY_LINE = new Columns();
-    private static final Logger LOG = LoggerFactory.getLogger(RowParser.class);
 
     final Function<String,Character> determiner;
     final char quote;
@@ -31,23 +31,23 @@ class RowParser implements Function<String,Row> {
     }
 
     @Override
-    public Row apply(String line) {
+    public List<Row> apply(String line) {
         ++lineNo;
         line = recoverFormerIncompleteLine(line);
         if (isEmpty(line)) {
-            return EMPTY_LINE;
+            return singletonList(EMPTY_LINE);
         }
-        Row values = parseLine(line, determiner.apply(line));
-        if (values == null) {
+        List<Row> rows = parseLine(line, determiner.apply(line));
+        if (rows.isEmpty()) {
             formerLine.append(line);
             formerLine.append('\n');
         }
-        return values;
+        return rows;
     }
 
-    private Row parseLine(String line, char separator) {
+    private List<Row> parseLine(String line, char separator) {
         if (line.startsWith(commentStart)) {
-            return new Comment(line.substring(commentStart.length()));
+            return singletonList(new Comment(line.substring(commentStart.length())));
         }
         CharBuffer column = CharBuffer.allocate(line.length());
         List<String> columns = new ArrayList<>();
@@ -70,8 +70,7 @@ class RowParser implements Function<String,Row> {
                 } else if (laxMode) {
                     column.append(c);
                 } else {
-                    LOG.warn("CSV need quoting when containing quote at {}:{}, line skipped: {}", lineNo, i, line);
-                    return EMPTY_LINE;
+                    return asList(new Comment(String.format("columns with quote (%c) needs to be quoted: position %d:%d, the following line was skipped", quote, lineNo, i)), new Comment(line));
                 }
             } else {
                 column.append(c);
@@ -80,10 +79,10 @@ class RowParser implements Function<String,Row> {
             ++i;
         }
         if (quoted && !isQuote) {
-            return null;
+            return emptyList();
         }
         columns.add(getValue(column));
-        return new Columns(columns);
+        return singletonList(new Columns(columns));
     }
 
     private String recoverFormerIncompleteLine(String line) {
@@ -148,8 +147,8 @@ class RowParser implements Function<String,Row> {
         }
 
         private int getFieldCountFromLineParsed(String line, char separator) {
-            Row values = RowParser.this.parseLine(line, separator);
-            return values == null ? 0 : values.getLength();
+            List<Row> values = RowParser.this.parseLine(line, separator);
+            return values.isEmpty() ? 0 : values.get(0).getLength();
         }
     }
 }

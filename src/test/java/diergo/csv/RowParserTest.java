@@ -2,6 +2,9 @@ package diergo.csv;
 
 import org.junit.Test;
 
+import java.util.List;
+
+import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -41,8 +44,8 @@ public class RowParserTest {
     }
 
     @Test
-    public void lineWithUnquotedFieldWithQuotesIsIllegalAndSkipped() {
-        assertThat(parse("hi\"ho"), is(new Columns()));
+    public void lineWithUnquotedFieldWithQuotesIsIllegalAndReturnedAsTwoCommentsContainingTheLineAsSecondOne() {
+        assertThat(parse("hi\"ho"), is(new Comment("hi\"ho")));
     }
 
     @Test
@@ -53,7 +56,7 @@ public class RowParserTest {
     @Test
     public void quotedFieldWithMissingEndQuoteReturnsNullAndIsStoredInternallyAsAdditionalLine() {
         assertThat(parse("\"hi;"), nullValue());
-        assertThat(parser.apply("ho\""), is(new Columns("hi;\nho")));
+        assertThat(parser.apply("ho\""), is(singletonList(new Columns("hi;\nho"))));
     }
 
     @Test
@@ -70,6 +73,7 @@ public class RowParserTest {
 
     private Row parse(CharSequence separators, char quote, String commentStart, boolean laxMode, String line) {
         parser = new RowParser(separators, quote, commentStart, laxMode);
-        return parser.apply(line);
+        List<Row> rows = parser.apply(line);
+        return rows.isEmpty() ? null : rows.get(rows.size() - 1);
     }
 }
