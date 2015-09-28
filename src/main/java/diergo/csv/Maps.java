@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -21,15 +22,15 @@ public class Maps {
     }
 
     public static Function<Row,List<Map<String,String>>> toMaps() {
-        return new Row2MapFunction(null);
+        return toMaps(null);
     }
 
-    public static Function<Map<String,String>, List<Row>> toRows(List<String> header) {
-        return new Map2RowFunction(header);
+    public static Function<Map<String,String>, List<Row>> toRows(boolean includeHeader, List<String> header) {
+        return new Map2RowFunction(includeHeader, header);
     }
 
-    public static Function<Map<String,String>, List<Row>> toRows() {
-        return new Map2RowFunction(null);
+    public static Function<Map<String,String>, List<Row>> toRows(boolean includeHeader) {
+        return toRows(includeHeader, null);
     }
 
 
@@ -63,19 +64,25 @@ public class Maps {
     private static class Map2RowFunction implements Function<Map<String, String>, List<Row>> {
 
         private final AtomicReference<List<String>> header;
+        private final AtomicBoolean headerNeeded;
 
-        public Map2RowFunction(List<String> header) {
+        public Map2RowFunction(boolean includeHeader, List<String> header) {
             this.header = new AtomicReference<>(header);
+            this.headerNeeded = new AtomicBoolean(includeHeader);
         }
 
         @Override
         public List<Row> apply(Map<String, String> values) {
             List<Row> result = new ArrayList<>();
-            if (header.get() == null && header.compareAndSet(null, values.keySet().stream().collect(toList()))) {
-                result.add(new Columns(header.get()));
+            List<String> headers = header.get();
+            if (headers == null && header.compareAndSet(null, values.keySet().stream().collect(toList()))) {
+                headers = header.get();
+            }
+            if (headerNeeded.compareAndSet(true, false)) {
+                result.add(new Columns(headers));
             }
             List<String> columns = new ArrayList<>();
-            for (String key : header.get()) {
+            for (String key : headers) {
                 columns.add(values.get(key));
             }
             result.add(new Columns(columns));

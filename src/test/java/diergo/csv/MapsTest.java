@@ -2,6 +2,8 @@ package diergo.csv;
 
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -37,5 +39,39 @@ public class MapsTest {
     @Test
     public void commentIsIgnoredAsMap() {
         assertThat(Maps.toMaps(singletonList("one")).apply(new Comment("what?")), is(emptyList()));
+    }
+
+    @Test
+    public void rowContainsOnlyColumnsOfPredefinedHeader() {
+        Map<String, String> values = new HashMap<>();
+        values.put("zero", "0");
+        values.put("one", "1");
+        values.put("two", "2");
+        values.put("three", "3");
+        List<Row> result = Maps.toRows(false, asList("one", "two")).apply(values);
+        assertThat(result.size(), is(1));
+        assertThat(result.get(0), is(new Columns("1", "2")));
+    }
+
+    @Test
+    public void headerCanBeAdded() {
+        Map<String, String> values = new HashMap<>();
+        values.put("one", "1");
+        values.put("two", "2");
+        List<Row> result = Maps.toRows(true, asList("one", "two")).apply(values);
+        assertThat(result.size(), is(2));
+        assertThat(result.get(0), is(new Columns("one", "two")));
+        assertThat(result.get(1), is(new Columns("1", "2")));
+    }
+
+    @Test
+    public void headerCanBeExtractedFromValuee() {
+        Map<String, String> values = new LinkedHashMap<>();
+        values.put("one", "1");
+        values.put("two", "2");
+        List<Row> result = Maps.toRows(true).apply(values);
+        assertThat(result.size(), is(2));
+        assertThat(result.get(0), is(new Columns("one", "two")));
+        assertThat(result.get(1), is(new Columns("1", "2")));
     }
 }
