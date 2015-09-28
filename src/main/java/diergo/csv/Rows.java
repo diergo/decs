@@ -5,10 +5,6 @@ import static java.util.stream.StreamSupport.stream;
 
 public class Rows {
 
-    public static boolean noComment(Row row) {
-        return !row.isComment();
-    }
-
     public static Row trim(Row row) {
         return row.isComment() ? row : new Columns(stream(row.spliterator(), false)
             .map(column -> column == null ? null : column.trim()).collect(toList()));
