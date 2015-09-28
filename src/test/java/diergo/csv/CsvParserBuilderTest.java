@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import static diergo.csv.CsvParserBuilder.buildCsvParser;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -30,7 +31,7 @@ public class CsvParserBuilderTest {
         RowParser parser = getLineParser(builder);
 
         assertThat(parser.quote, is('"'));
-        assertThat(parser.commentStart, is("#"));
+        assertThat(parser.commentStart, nullValue());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -42,11 +43,11 @@ public class CsvParserBuilderTest {
 
     @Test
     public void allConfigurationsArePassedToParser() throws ReflectiveOperationException {
-        CsvParserBuilder builder = buildCsvParser(new StringReader("")).commentsStartWith("//").quotedWith('\'').separatedBy(',');
+        CsvParserBuilder builder = buildCsvParser(new StringReader("")).commentsStartWith("#").quotedWith('\'').separatedBy(',');
         RowParser parser = getLineParser(builder);
 
         assertThat(parser.quote, is('\''));
-        assertThat(parser.commentStart, is("//"));
+        assertThat(parser.commentStart, is("#"));
         assertThat(parser.determiner.apply(""), is(','));
     }
 

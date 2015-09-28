@@ -46,7 +46,7 @@ class RowParser implements Function<String,List<Row>> {
     }
 
     private List<Row> parseLine(String line, char separator) {
-        if (line.startsWith(commentStart)) {
+        if (commentStart != null && line.startsWith(commentStart)) {
             return singletonList(new Comment(line.substring(commentStart.length())));
         }
         CharBuffer column = CharBuffer.allocate(line.length());

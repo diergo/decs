@@ -27,7 +27,7 @@ public class CsvParserBuilder {
     private Function<CsvParserBuilder, Function<String, List<Row>>> parserFactory;
     private CharSequence separators = DEFAULT_SEPARATORS;
     private char quote = DEFAULT_QUOTE;
-    private String commentStart = DEFAULT_COMMENT_START;
+    private String commentStart = null;
     private boolean laxMode = false;
     private AutoCloseable toClose = null;
 

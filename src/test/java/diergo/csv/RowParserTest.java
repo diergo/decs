@@ -19,6 +19,11 @@ public class RowParserTest {
     }
 
     @Test
+    public void thereAreNoCommentsByDefault() {
+        assertThat(parse(";", '"', null, false, "#comment;no columns"), is(new Columns("#comment", "no columns")));
+    }
+
+    @Test
     public void commentsAreReadAsSingleColumns() {
         assertThat(parse("#comment;no columns"), is(new Comment("comment;no columns")));
     }
