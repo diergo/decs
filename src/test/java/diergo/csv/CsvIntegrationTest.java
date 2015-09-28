@@ -66,6 +66,9 @@ public class CsvIntegrationTest {
     }
     
     @Before
+    /**
+     * Prepares a reader to get data from https://raw.githubusercontent.com/uniVocity/csv-parsers-comparison/master/src/main/resources/correctness.csv
+     */
     public void preareCsvResource() {
         csv = new InputStreamReader(getClass().getResourceAsStream("/correctness.csv"), StandardCharsets.ISO_8859_1);
     }

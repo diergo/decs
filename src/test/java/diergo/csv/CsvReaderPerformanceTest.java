@@ -1,0 +1,51 @@
+package diergo.csv;
+
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.zip.GZIPInputStream;
+
+import static diergo.csv.CsvParserBuilder.buildCsvParser;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeNoException;
+
+public class CsvReaderPerformanceTest {
+
+    public static final String MAXMIND_WORLD_CITIES_POP =
+        "http://www.maxmind.com/download/worldcities/worldcitiespop.txt.gz";
+
+    private static Path WORLDS_CITIES_POP;
+
+    @Test
+    public void readerHandlesHugeAmountOfData() throws IOException {
+        InputStreamReader worldCitiesPopulation = new InputStreamReader(new FileInputStream(WORLDS_CITIES_POP.toFile()), StandardCharsets.UTF_8);
+
+        long start = System.currentTimeMillis();
+        long count = buildCsvParser(worldCitiesPopulation).separatedBy(',').laxMode().build().count();
+        long time = (System.currentTimeMillis() - start);
+        System.out.println("took " + time + " ms to read " + count + " rows. ");
+        assertThat(count, greaterThan(3000000L));
+    }
+
+    @BeforeClass
+    public static void cacheFilesLocally() throws IOException {
+        WORLDS_CITIES_POP = Files.createTempFile("worldcitiespop", "txt");
+        URL url = new URL(MAXMIND_WORLD_CITIES_POP);
+        try {
+            Files.copy(new GZIPInputStream(url.openStream()), WORLDS_CITIES_POP, REPLACE_EXISTING);
+        } catch (IOException error) {
+            System.out.print("cannot read " + MAXMIND_WORLD_CITIES_POP + ", performance test skipped");
+            assumeNoException(error); 
+        }
+    }
+}
