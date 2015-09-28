@@ -22,7 +22,7 @@ class RowPrinter implements Function<Row,String> {
     @Override
     public String apply(Row row) {
         StringBuilder line = new StringBuilder();
-        if (row.isComment()) {
+        if (commentStart != null && row.isComment()) {
             line.append(commentStart);
             line.append(row.iterator().next());
         } else {
@@ -31,7 +31,9 @@ class RowPrinter implements Function<Row,String> {
                 if (!first) {
                     line.append(separator);
                 }
-                line.append(printValue(field));
+                if (field != null) {
+                    line.append(printValue(field));
+                }
                 first = false;
             }
         }

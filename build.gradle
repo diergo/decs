@@ -5,6 +5,7 @@ apply plugin: 'jacoco'
 
 ext {
     slf4jVersion = '1.7.12'
+    findbugsVersion = '3.0.0'
     branch = getBranch()
     buildType = getBuildType(branch)
 }
@@ -28,7 +29,8 @@ buildscript {
 
 dependencies {
 
-    compile "org.slf4j:slf4j-api:${slf4jVersion}"
+    compile "org.slf4j:slf4j-api:${slf4jVersion}",
+        "com.google.code.findbugs:annotations:${findbugsVersion}"
 
     testCompile 'junit:junit:4.12',
         'com.tngtech.java:junit-dataprovider:1.10.1',

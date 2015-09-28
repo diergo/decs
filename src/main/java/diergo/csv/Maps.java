@@ -1,5 +1,7 @@
 package diergo.csv;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,15 +27,22 @@ public class Maps {
         return toMaps(null);
     }
 
-    public static Function<Map<String,String>, List<Row>> toRows(boolean includeHeader, List<String> header) {
-        return new Map2RowFunction(includeHeader, header);
+    public static Function<Map<String,Object>, List<Row>> toRows(List<String> header) {
+        return new Map2RowFunction(false, header);
     }
 
-    public static Function<Map<String,String>, List<Row>> toRows(boolean includeHeader) {
-        return toRows(includeHeader, null);
+    public static Function<Map<String,Object>, List<Row>> toRowsWithHeader(List<String> header) {
+        return new Map2RowFunction(true, header);
     }
 
+    public static Function<Map<String,Object>, List<Row>> toRows() {
+        return new Map2RowFunction(false, null);
+    }
 
+    public static Function<Map<String,Object>, List<Row>> toRowsWithHeader() {
+        return new Map2RowFunction(true, null);
+    }
+    
     private static class Row2MapFunction implements Function<Row, List<Map<String,String>>> {
 
         private final AtomicReference<List<String>> header;
@@ -61,7 +70,7 @@ public class Maps {
         }
     }
 
-    private static class Map2RowFunction implements Function<Map<String, String>, List<Row>> {
+    private static class Map2RowFunction implements Function<Map<String, Object>, List<Row>> {
 
         private final AtomicReference<List<String>> header;
         private final AtomicBoolean headerNeeded;
@@ -72,10 +81,12 @@ public class Maps {
         }
 
         @Override
-        public List<Row> apply(Map<String, String> values) {
+        @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
+        public List<Row> apply(Map<String, Object> values) {
             List<Row> result = new ArrayList<>();
             List<String> headers = header.get();
             if (headers == null && header.compareAndSet(null, values.keySet().stream().collect(toList()))) {
+                // after compareAndSet header is set in any case, so header will never be null
                 headers = header.get();
             }
             if (headerNeeded.compareAndSet(true, false)) {
@@ -83,7 +94,8 @@ public class Maps {
             }
             List<String> columns = new ArrayList<>();
             for (String key : headers) {
-                columns.add(values.get(key));
+                Object value = values.get(key);
+                columns.add(value == null ? null : String.valueOf(value));
             }
             result.add(new Columns(columns));
             return result;
