@@ -16,6 +16,7 @@ import static diergo.csv.CsvPrinterBuilder.csvPrinter;
 import static diergo.csv.CsvWriterCollector.toWriter;
 import static diergo.csv.Maps.toMaps;
 import static diergo.csv.Maps.toRowsWithHeader;
+import static diergo.csv.Maps.withValuesMapped;
 import static diergo.csv.Readers.asLines;
 import static java.math.BigDecimal.ROUND_UNNECESSARY;
 import static java.util.stream.Collectors.toList;
@@ -54,6 +55,7 @@ public class CsvIntegrationTest {
                 .add(createValues(1999, "Chevy", "Venture \"Extended Edition, Very Large\"", null, 5000.0))
                 .add(createValues(null, null, "Venture \"Extended Edition\"", null, 4900.0))
                 .build()
+                .map(withValuesMapped(value -> value == null ? null : String.valueOf(value)))
                 .map(toRowsWithHeader())
                 .flatMap(Collection::stream)
                 .map(csvPrinter().separatedBy(',').build())

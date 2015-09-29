@@ -4,7 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,20 +27,24 @@ public class Maps {
         return toMaps(null);
     }
 
-    public static Function<Map<String,Object>, List<Row>> toRows(List<String> header) {
+    public static Function<Map<String,String>, List<Row>> toRows(List<String> header) {
         return new Map2RowFunction(false, header);
     }
 
-    public static Function<Map<String,Object>, List<Row>> toRowsWithHeader(List<String> header) {
+    public static Function<Map<String,String>, List<Row>> toRowsWithHeader(List<String> header) {
         return new Map2RowFunction(true, header);
     }
 
-    public static Function<Map<String,Object>, List<Row>> toRows() {
+    public static Function<Map<String,String>, List<Row>> toRows() {
         return new Map2RowFunction(false, null);
     }
 
-    public static Function<Map<String,Object>, List<Row>> toRowsWithHeader() {
+    public static Function<Map<String,String>, List<Row>> toRowsWithHeader() {
         return new Map2RowFunction(true, null);
+    }
+
+    public static <S,T> Function<Map<String,S>, Map<String,T>> withValuesMapped(Function<S,T> valueMapper) {
+        return new ValueMapperFunction(valueMapper);
     }
 
     private Maps() {
@@ -65,7 +69,7 @@ public class Maps {
             }
             List<String> keys = header.get();
             int i = 0;
-            Map<String, String> result = new HashMap<>();
+            Map<String, String> result = new LinkedHashMap<>();
             for (String value : values) {
                 result.put(keys.get(i++), value);
             }
@@ -73,7 +77,7 @@ public class Maps {
         }
     }
 
-    private static class Map2RowFunction implements Function<Map<String, Object>, List<Row>> {
+    private static class Map2RowFunction implements Function<Map<String, String>, List<Row>> {
 
         private final AtomicReference<List<String>> header;
         private final AtomicBoolean headerNeeded;
@@ -85,7 +89,7 @@ public class Maps {
 
         @Override
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
-        public List<Row> apply(Map<String, Object> values) {
+        public List<Row> apply(Map<String, String> values) {
             List<Row> result = new ArrayList<>();
             List<String> headers = header.get();
             if (headers == null && header.compareAndSet(null, values.keySet().stream().collect(toList()))) {
@@ -97,10 +101,28 @@ public class Maps {
             }
             List<String> columns = new ArrayList<>();
             for (String key : headers) {
-                Object value = values.get(key);
-                columns.add(value == null ? null : String.valueOf(value));
+                String value = values.get(key);
+                columns.add(value == null ? null : value);
             }
             result.add(new Columns(columns));
+            return result;
+        }
+    }
+
+    private static class ValueMapperFunction<S,T> implements Function<Map<String, S>, Map<String, T>> {
+
+        private final Function<S, T> valueMapper;
+
+        public ValueMapperFunction(Function<S, T> valueMapper) {
+            this.valueMapper = valueMapper;
+        }
+
+        @Override
+        public Map<String, T> apply(Map<String, S> source) {
+            Map<String, T> result = new LinkedHashMap<>();
+            for (Map.Entry<String,S> entry : source.entrySet()) {
+                result.put(entry.getKey(), valueMapper.apply(entry.getValue()));
+            }
             return result;
         }
     }
