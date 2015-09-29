@@ -42,6 +42,9 @@ public class Maps {
     public static Function<Map<String,Object>, List<Row>> toRowsWithHeader() {
         return new Map2RowFunction(true, null);
     }
+
+    private Maps() {
+    }
     
     private static class Row2MapFunction implements Function<Row, List<Map<String,String>>> {
 

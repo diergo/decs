@@ -19,4 +19,7 @@ public class Rows {
         return row.isComment() ? row : new Columns(stream(row.spliterator(), false)
             .map(column -> column == null ? "" : column).collect(toList()));
     }
+
+    private Rows() {
+    }
 }

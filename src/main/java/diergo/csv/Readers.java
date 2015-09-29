@@ -20,4 +20,7 @@ public class Readers {
             }
         };
     }
+
+    private Readers() {
+    }
 }
