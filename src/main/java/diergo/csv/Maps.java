@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
@@ -43,8 +44,8 @@ public class Maps {
         return new Map2RowFunction(true, null);
     }
 
-    public static <S,T> Function<Map<String,S>, Map<String,T>> withValuesMapped(Function<S,T> valueMapper) {
-        return new ValueMapperFunction(valueMapper);
+    public static <S,T> Function<Map<String,S>, Map<String,T>> withValuesMapped(BiFunction<Map<String,S>,String,T> valueMapper) {
+        return new ValueMapperFunction<>(valueMapper);
     }
 
     private Maps() {
@@ -111,9 +112,9 @@ public class Maps {
 
     private static class ValueMapperFunction<S,T> implements Function<Map<String, S>, Map<String, T>> {
 
-        private final Function<S, T> valueMapper;
+        private final BiFunction<Map<String,S>,String,T> valueMapper;
 
-        public ValueMapperFunction(Function<S, T> valueMapper) {
+        public ValueMapperFunction(BiFunction<Map<String,S>,String,T> valueMapper) {
             this.valueMapper = valueMapper;
         }
 
@@ -121,7 +122,7 @@ public class Maps {
         public Map<String, T> apply(Map<String, S> source) {
             Map<String, T> result = new LinkedHashMap<>();
             for (Map.Entry<String,S> entry : source.entrySet()) {
-                result.put(entry.getKey(), valueMapper.apply(entry.getValue()));
+                result.put(entry.getKey(), valueMapper.apply(source, entry.getKey()));
             }
             return result;
         }

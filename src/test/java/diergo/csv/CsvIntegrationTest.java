@@ -18,6 +18,7 @@ import static diergo.csv.Maps.toMaps;
 import static diergo.csv.Maps.toRowsWithHeader;
 import static diergo.csv.Maps.withValuesMapped;
 import static diergo.csv.Readers.asLines;
+import static diergo.csv.Values.parsedValue;
 import static java.math.BigDecimal.ROUND_UNNECESSARY;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.hasItems;
@@ -30,19 +31,22 @@ public class CsvIntegrationTest {
 
     @Test
     public void csvCanBeReadAndMapped() throws IOException {
-        List<Map<String, String>> rows = asLines(csv).map(csvParser().separatedBy(',').build()).flatMap(Collection::stream)
-                .map(Rows::replaceEmptyWithNull).map(toMaps()).flatMap(Collection::stream).collect(toList());
+        Map<String, Class<?>> valueTypes = new HashMap<>();
+        valueTypes.put("Year", Integer.class);
+        valueTypes.put("Price", Double.class);
+        List<Map<String, Object>> rows = asLines(csv).map(csvParser().separatedBy(',').build()).flatMap(Collection::stream)
+                .map(Rows::replaceEmptyWithNull).map(toMaps()).flatMap(Collection::stream).map(withValuesMapped(parsedValue(valueTypes))).collect(toList());
 
         assertThat(rows.size(), is(5));
-        for (Map<String, String> row : rows) {
+        for (Map<String, Object> row : rows) {
             assertThat(row.keySet(), hasItems("Year", "Make", "Model", "Description", "Price"));
         }
         assertThat(rows.stream().map(Map::values).collect(toList()), hasItems(
-                hasItems("1997", "Ford", "E350", "ac, abs, moon", "3000.00"),
-                hasItems("1999", "Chevy", "Venture \"Extended Edition\"", null, "4900.00"),
-                hasItems("1996", "Jeep", "Grand Cherokee", "MUST SELL!\nair, moon roof, loaded", "4799.00"),
-                hasItems("1999", "Chevy", "Venture \"Extended Edition, Very Large\"", null, "5000.00"),
-                hasItems(null, null, "Venture \"Extended Edition\"", null, "4900.00")
+                hasItems(1997, "Ford", "E350", "ac, abs, moon", 3000.0),
+                hasItems(1999, "Chevy", "Venture \"Extended Edition\"", null, 4900.0),
+                hasItems(1996, "Jeep", "Grand Cherokee", "MUST SELL!\nair, moon roof, loaded", 4799.0),
+                hasItems(1999, "Chevy", "Venture \"Extended Edition, Very Large\"", null, 5000.0),
+                hasItems(null, null, "Venture \"Extended Edition\"", null, 4900.0)
         ));
     }
 
@@ -55,7 +59,7 @@ public class CsvIntegrationTest {
                 .add(createValues(1999, "Chevy", "Venture \"Extended Edition, Very Large\"", null, 5000.0))
                 .add(createValues(null, null, "Venture \"Extended Edition\"", null, 4900.0))
                 .build()
-                .map(withValuesMapped(value -> value == null ? null : String.valueOf(value)))
+                .map(withValuesMapped(Values::valueAsString))
                 .map(toRowsWithHeader())
                 .flatMap(Collection::stream)
                 .map(csvPrinter().separatedBy(',').build())
