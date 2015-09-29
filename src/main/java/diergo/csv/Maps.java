@@ -77,6 +77,8 @@ public class Maps {
 
     /**
      * A mapper for data maps by converting all values using a function.
+     * @param <S> the source value type
+     * @param <T> the target value type
      * @see java.util.stream.Stream#map(Function)
      * @see Values
      */

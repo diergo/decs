@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.EnumSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -19,21 +18,23 @@ import static java.util.EnumSet.noneOf;
  * Collect lines to a specific writer.
  *
  * lines.{@link java.util.stream.Stream#collect(Collector) collect}({@link #toWriter(Writer) toWriter(out)})
+ *
+ * @param <R> the result type of the reduction operation, any {@link Writer}
  */
-public class CsvWriterCollector<O extends Writer> implements Collector<String, O, O> {
+public class CsvWriterCollector<R extends Writer> implements Collector<String, R, R> {
 
     /**
      * Creates a new collector using the writer and returning it
      */
-    public static <O extends Writer> Collector<String, O, O> toWriter(O out) {
+    public static <R extends Writer> Collector<String, R, R> toWriter(R out) {
         return new CsvWriterCollector<>(out);
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(CsvWriterCollector.class);
     
-    private final O out;
+    private final R out;
 
-    private CsvWriterCollector(O out) {
+    private CsvWriterCollector(R out) {
         this.out = out;
     }
 
@@ -42,7 +43,7 @@ public class CsvWriterCollector<O extends Writer> implements Collector<String, O
      * @see #toWriter(Writer)
      */
     @Override
-    public Supplier<O> supplier() {
+    public Supplier<R> supplier() {
         return () -> out;
     }
 
@@ -50,17 +51,17 @@ public class CsvWriterCollector<O extends Writer> implements Collector<String, O
      * Returns a consumer appending the line and a newline to the writer.
      */
     @Override
-    public BiConsumer<O, String> accumulator() {
+    public BiConsumer<R, String> accumulator() {
         return (out, line) -> appendLine(line, out);
     }
 
     @Override
-    public BinaryOperator<O> combiner() {
+    public BinaryOperator<R> combiner() {
         return (o1, o2) -> o1;
     }
 
     @Override
-    public Function<O, O> finisher() {
+    public Function<R, R> finisher() {
         return (o) -> out;
     }
 
@@ -72,7 +73,7 @@ public class CsvWriterCollector<O extends Writer> implements Collector<String, O
         return noneOf(Characteristics.class);
     }
 
-    private void appendLine(String line, O out) {
+    private void appendLine(String line, R out) {
         try {
             out.append(line);
             out.append('\n');
