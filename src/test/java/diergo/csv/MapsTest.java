@@ -2,6 +2,7 @@ package diergo.csv;
 
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,9 +11,11 @@ import java.util.function.Function;
 import static diergo.csv.Maps.toMaps;
 import static diergo.csv.Maps.toRows;
 import static diergo.csv.Maps.toRowsWithHeader;
+import static diergo.csv.Maps.withValuesMapped;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -67,7 +70,7 @@ public class MapsTest {
     }
 
     @Test
-    public void headerCanBeExtractedFromValuee() {
+    public void headerCanBeExtractedFromValue() {
         Map<String, String> values = new LinkedHashMap<>();
         values.put("one", "1");
         values.put("two", "2");
@@ -75,5 +78,12 @@ public class MapsTest {
         assertThat(result.size(), is(2));
         assertThat(result.get(0), is(new Columns("one", "two")));
         assertThat(result.get(1), is(new Columns("1", "2")));
+    }
+    
+    @Test
+    public void valuesAreMapped() {
+        Object mapped = new Object();
+        assertThat(withValuesMapped((values, name) -> mapped).apply(singletonMap("test", "x")),
+            is(singletonMap("test", mapped)));
     }
 }
