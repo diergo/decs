@@ -1,12 +1,12 @@
 package diergo.csv;
 
-import java.io.BufferedReader;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static diergo.csv.Readers.asLines;
 import static diergo.csv.Row.DEFAULT_QUOTE;
 
 public class CsvParserBuilder {
@@ -18,8 +18,7 @@ public class CsvParserBuilder {
     }
 
     public static CsvParserBuilder buildCsvParser(Reader in) {
-        BufferedReader reader = BufferedReader.class.isInstance(in) ? BufferedReader.class.cast(in) : new BufferedReader(in);
-        return buildCsvParser(reader.lines()).closing(reader);
+        return buildCsvParser(asLines(in));
     }
 
     private final Stream<String> in;
@@ -28,7 +27,6 @@ public class CsvParserBuilder {
     private char quote = DEFAULT_QUOTE;
     private String commentStart = null;
     private boolean laxMode = false;
-    private AutoCloseable toClose = null;
 
     private CsvParserBuilder(Stream<String> in) {
         this.in = in;
@@ -60,29 +58,13 @@ public class CsvParserBuilder {
         return this;
     }
 
-    public CsvParserBuilder closing(AutoCloseable toClose) {
-        this.toClose = toClose;
-        return this;
-    }
-
     CsvParserBuilder creatingParser(Function<CsvParserBuilder, Function<String, List<Row>>> parserFactory) {
         this.parserFactory = parserFactory;
         return this;
     }
 
     public Stream<Row> build() {
-        Stream<Row> csv = in.map(parserFactory.apply(CsvParserBuilder.this)).flatMap(Collection::stream);
-        if (toClose != null) {
-            csv.onClose(() -> {
-                    try {
-                        toClose.close();
-                    } catch (Exception e) {
-                        throw new IllegalStateException("Cannot close underlying stream", e);
-                    }
-                }
-            );
-        }
-        return csv;
+        return in.map(parserFactory.apply(this)).flatMap(Collection::stream);
     }
 
     private Function<String, List<Row>> createParser() {
