@@ -5,8 +5,16 @@ import java.util.function.BiFunction;
 
 import static java.util.Arrays.asList;
 
+/**
+ * Handles parser errors by turning them into comments.
+ */
 public class CommentingCsvParserErrorHandler implements BiFunction<RuntimeException, String, List<Row>> {
 
+    /**
+     * Creates a new error handler.
+     * 
+     * @see CsvParserBuilder#handlingErrors(BiFunction) 
+     */
     public static BiFunction<RuntimeException, String, List<Row>> commentingErrors() {
         return new CommentingCsvParserErrorHandler();
     }
