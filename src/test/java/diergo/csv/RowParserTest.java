@@ -1,18 +1,22 @@
 package diergo.csv;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 import java.util.function.BiFunction;
 
 import static java.util.Collections.singletonList;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class RowParserTest {
@@ -61,6 +65,13 @@ public class RowParserTest {
         when(errorHandler.apply(any(IllegalArgumentException.class), anyString()))
             .thenReturn(singletonList(handled));
         assertThat(parse("hi\"ho"), is(handled));
+
+        ArgumentCaptor<RuntimeException> error = ArgumentCaptor.forClass(RuntimeException.class);
+        ArgumentCaptor<String> line = ArgumentCaptor.forClass(String.class);
+        verify(errorHandler).apply(error.capture(), line.capture());
+        assertThat(error.getValue(), instanceOf(IllegalArgumentException.class));
+        assertThat(error.getValue().getMessage(), Matchers.containsString("0:2"));
+        assertThat(line.getValue(), is("hi\"ho"));
     }
 
     @Test

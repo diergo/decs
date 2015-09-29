@@ -35,7 +35,6 @@ class RowParser implements Function<String,List<Row>> {
 
     @Override
     public List<Row> apply(String line) {
-        lineNo.incrementAndGet();
         line = recoverFormerIncompleteLine(line);
         if (isEmpty(line)) {
             return singletonList(EMPTY_LINE);
@@ -44,6 +43,7 @@ class RowParser implements Function<String,List<Row>> {
         if (rows.isEmpty()) {
             formerLine.compareAndSet(null, line + '\n');
         }
+        lineNo.incrementAndGet();
         return rows;
     }
 
@@ -72,7 +72,7 @@ class RowParser implements Function<String,List<Row>> {
                 } else if (laxMode) {
                     column.append(c);
                 } else {
-                    return errorHandler.apply(new IllegalArgumentException(String.format("columns with quote (%c) need to be quoted: position %d:%d", quote, lineNo.get(), i)), line);
+                    return errorHandler.apply(new IllegalArgumentException(String.format("columns with quote (%c) need to be quoted: error at position %d:%d", quote, lineNo.get(), i)), line);
                 }
             } else {
                 column.append(c);

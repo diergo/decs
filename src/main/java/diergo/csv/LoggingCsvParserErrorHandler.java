@@ -18,7 +18,7 @@ public class LoggingCsvParserErrorHandler implements BiFunction<RuntimeException
 
     @Override
     public List<Row> apply(RuntimeException error, String line) {
-        LOG.warn("{}, : {}", error.getMessage(), line);
+        LOG.warn("{}, the following line is skipped: {}", error.getMessage(), line);
         return emptyList();
     }
 }
