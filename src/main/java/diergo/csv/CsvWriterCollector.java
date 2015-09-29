@@ -13,38 +13,38 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-public class CsvWriterCollector implements Collector<String, Writer, Void> {
+public class CsvWriterCollector<O extends Writer> implements Collector<String, O, O> {
     
-    public static Collector<String, Writer, Void> toWriter(Writer out) {
-        return new CsvWriterCollector(out);
+    public static <O extends Writer> Collector<String, O, O> toWriter(O out) {
+        return new CsvWriterCollector<>(out);
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(CsvWriterCollector.class);
     
-    private final Writer out;
+    private final O out;
 
-    private CsvWriterCollector(Writer out) {
+    private CsvWriterCollector(O out) {
         this.out = out;
     }
 
     @Override
-    public Supplier<Writer> supplier() {
+    public Supplier<O> supplier() {
         return () -> out;
     }
 
     @Override
-    public BiConsumer<Writer, String> accumulator() {
+    public BiConsumer<O, String> accumulator() {
         return (out, line) -> appendLine(line, out);
     }
 
     @Override
-    public BinaryOperator<Writer> combiner() {
+    public BinaryOperator<O> combiner() {
         return (o1, o2) -> o1;
     }
 
     @Override
-    public Function<Writer, Void> finisher() {
-        return (o) -> null;
+    public Function<O, O> finisher() {
+        return (o) -> out;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class CsvWriterCollector implements Collector<String, Writer, Void> {
         return EnumSet.noneOf(Characteristics.class);
     }
 
-    private void appendLine(String line, Writer out) {
+    private void appendLine(String line, O out) {
         try {
             out.append(line);
             out.append('\n');
