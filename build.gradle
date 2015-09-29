@@ -73,6 +73,21 @@ findbugs {
     sourceSets = [sourceSets.main]
 }
 
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+    classifier = "javadoc"
+    from javadoc
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
 build.dependsOn javadoc, jacocoTestReport
 
 def getBranch() {
