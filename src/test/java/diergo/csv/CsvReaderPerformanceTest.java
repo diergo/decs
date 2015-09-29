@@ -1,6 +1,5 @@
 package diergo.csv;
 
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -12,9 +11,11 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.zip.GZIPInputStream;
 
-import static diergo.csv.CsvParserBuilder.buildCsvParser;
+import static diergo.csv.CsvParserBuilder.csvParser;
+import static diergo.csv.Readers.asLines;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertThat;
@@ -32,7 +33,7 @@ public class CsvReaderPerformanceTest {
         InputStreamReader worldCitiesPopulation = new InputStreamReader(new FileInputStream(WORLDS_CITIES_POP.toFile()), StandardCharsets.UTF_8);
 
         long start = System.currentTimeMillis();
-        long count = buildCsvParser(worldCitiesPopulation).separatedBy(',').laxMode().build().count();
+        long count = asLines(worldCitiesPopulation).map(csvParser().separatedBy(',').laxMode().build()).flatMap(Collection::stream).count();
         long time = (System.currentTimeMillis() - start);
         System.out.println("took " + time + " ms to read " + count + " rows. ");
         assertThat(count, greaterThan(3000000L));

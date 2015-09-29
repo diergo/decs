@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import java.text.DecimalFormatSymbols;
 
-import static diergo.csv.CsvPrinterBuilder.buildCsvPrinter;
+import static diergo.csv.CsvPrinterBuilder.csvPrinter;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -13,42 +13,42 @@ public class CsvPrinterBuilderTest {
 
     @Test
     public void noCommentStartIdPerDefault() {
-        RowPrinter printer = (RowPrinter) buildCsvPrinter().build();
+        RowPrinter printer = (RowPrinter) csvPrinter().build();
         
         assertThat(printer.commentStart, nullValue());
     }
 
     @Test
     public void commentStartCanBeConfigured() {
-        RowPrinter printer = (RowPrinter) buildCsvPrinter().commentsStartWith("//").build();
+        RowPrinter printer = (RowPrinter) csvPrinter().commentsStartWith("//").build();
 
         assertThat(printer.commentStart, is("//"));
     }
 
     @Test
     public void quoteIsDoublePerDefault() {
-        RowPrinter printer = (RowPrinter) buildCsvPrinter().build();
+        RowPrinter printer = (RowPrinter) csvPrinter().build();
 
         assertThat(printer.quote, is('"'));
     }
 
     @Test
     public void quoteCanBeConfigured() {
-        RowPrinter printer = (RowPrinter) buildCsvPrinter().quotedWith('\'').build();
+        RowPrinter printer = (RowPrinter) csvPrinter().quotedWith('\'').build();
 
         assertThat(printer.quote, is('\''));
     }
 
     @Test
     public void separatorIsPatternSeparatorForCurrentLocale() {
-        RowPrinter printer = (RowPrinter) buildCsvPrinter().build();
+        RowPrinter printer = (RowPrinter) csvPrinter().build();
 
         assertThat(printer.separator, is(DecimalFormatSymbols.getInstance().getPatternSeparator()));
     }
 
     @Test
     public void separatorCanBeConfigured() {
-        RowPrinter printer = (RowPrinter) buildCsvPrinter().separatedBy('\t').build();
+        RowPrinter printer = (RowPrinter) csvPrinter().separatedBy('\t').build();
 
         assertThat(printer.separator, is('\t'));
     }

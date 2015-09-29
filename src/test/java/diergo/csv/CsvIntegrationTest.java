@@ -8,18 +8,14 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
-import static diergo.csv.CsvParserBuilder.buildCsvParser;
-import static diergo.csv.CsvPrinterBuilder.buildCsvPrinter;
+import static diergo.csv.CsvParserBuilder.csvParser;
+import static diergo.csv.CsvPrinterBuilder.csvPrinter;
 import static diergo.csv.CsvWriterCollector.toWriter;
 import static diergo.csv.Maps.toMaps;
 import static diergo.csv.Maps.toRowsWithHeader;
+import static diergo.csv.Readers.asLines;
 import static java.math.BigDecimal.ROUND_UNNECESSARY;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.hasItems;
@@ -32,7 +28,7 @@ public class CsvIntegrationTest {
 
     @Test
     public void csvCanBeReadAndMapped() throws IOException {
-        List<Map<String,String>> rows = buildCsvParser(csv).separatedBy(',').build()
+        List<Map<String,String>> rows = asLines(csv).map(csvParser().separatedBy(',').build()).flatMap(Collection::stream)
             .map(Rows::replaceEmptyWithNull).map(toMaps()).flatMap(Collection::stream).collect(toList());
 
         assertThat(rows.size(), is(5));
@@ -59,7 +55,7 @@ public class CsvIntegrationTest {
 
         StringWriter out = new StringWriter();
         rows.stream().map(toRowsWithHeader())
-            .flatMap(Collection::stream).map(buildCsvPrinter().separatedBy(',').build()).collect(toWriter(out));
+            .flatMap(Collection::stream).map(csvPrinter().separatedBy(',').build()).collect(toWriter(out));
 
         String expected = new Scanner(csv).useDelimiter("\\Z").next();
         assertThat(out.toString(), is(expected.replaceAll(",\"\",", ",,") + '\n'));

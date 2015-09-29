@@ -7,7 +7,7 @@ import static diergo.csv.Row.DEFAULT_QUOTE;
 
 public class CsvPrinterBuilder {
 
-    public static CsvPrinterBuilder buildCsvPrinter() {
+    public static CsvPrinterBuilder csvPrinter() {
         return new CsvPrinterBuilder();
     }
 
