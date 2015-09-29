@@ -13,8 +13,18 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
+import static java.util.EnumSet.noneOf;
+
+/**
+ * Collect lines to a specific writer.
+ *
+ * lines.{@link java.util.stream.Stream#collect(Collector) collect}({@link #toWriter(Writer) toWriter(out)})
+ */
 public class CsvWriterCollector<O extends Writer> implements Collector<String, O, O> {
-    
+
+    /**
+     * Creates a new collector using the writer and returning it
+     */
     public static <O extends Writer> Collector<String, O, O> toWriter(O out) {
         return new CsvWriterCollector<>(out);
     }
@@ -27,11 +37,18 @@ public class CsvWriterCollector<O extends Writer> implements Collector<String, O
         this.out = out;
     }
 
+    /**
+     * Returns a supplier offering the original writer.
+     * @see #toWriter(Writer)
+     */
     @Override
     public Supplier<O> supplier() {
         return () -> out;
     }
 
+    /**
+     * Returns a consumer appending the line and a newline to the writer.
+     */
     @Override
     public BiConsumer<O, String> accumulator() {
         return (out, line) -> appendLine(line, out);
@@ -47,9 +64,12 @@ public class CsvWriterCollector<O extends Writer> implements Collector<String, O
         return (o) -> out;
     }
 
+    /**
+     * As the writer is ordered there are no characteristics.
+     */
     @Override
     public Set<Characteristics> characteristics() {
-        return EnumSet.noneOf(Characteristics.class);
+        return noneOf(Characteristics.class);
     }
 
     private void appendLine(String line, O out) {
