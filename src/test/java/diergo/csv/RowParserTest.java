@@ -1,17 +1,24 @@
 package diergo.csv;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.function.BiFunction;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RowParserTest {
 
     private RowParser parser;
+    private BiFunction<RuntimeException, String, List<Row>> errorHandler;
 
     @Test
     public void emptyLineIsNoColumns() {
@@ -49,8 +56,11 @@ public class RowParserTest {
     }
 
     @Test
-    public void lineWithUnquotedFieldWithQuotesIsIllegalAndReturnedAsTwoCommentsContainingTheLineAsSecondOne() {
-        assertThat(parse("hi\"ho"), is(new Comment("hi\"ho")));
+    public void lineWithUnquotedFieldWithQuotesIsIllegalAndDelegatesToErrorHandler() {
+        Comment handled = new Comment("error");
+        when(errorHandler.apply(any(IllegalArgumentException.class), anyString()))
+            .thenReturn(singletonList(handled));
+        assertThat(parse("hi\"ho"), is(handled));
     }
 
     @Test
@@ -71,14 +81,20 @@ public class RowParserTest {
             assertThat(parse(separators, '"', null, false, "a" + separator + "b"), is(new Columns("a", "b")));
         }
     }
+    
+    @Before
+    @SuppressWarnings("unchecked")
+    public void createErrorHandler() {
+        errorHandler = mock(BiFunction.class);
+    }
 
     private Row parse(String line) {
         return parse(",", '"', null, false, line);
     }
 
     private Row parse(CharSequence separators, char quote, String commentStart, boolean laxMode, String line) {
-        parser = new RowParser(separators, quote, commentStart, laxMode);
+        parser = new RowParser(separators, quote, commentStart, laxMode, errorHandler);
         List<Row> rows = parser.apply(line);
-        return rows.isEmpty() ? null : rows.get(rows.size() - 1);
+        return rows.isEmpty() ? null : rows.get(0);
     }
 }

@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
@@ -21,10 +21,12 @@ class RowParser implements Function<String,List<Row>> {
     final char quote;
     final String commentStart;
     final boolean laxMode;
+    final BiFunction<RuntimeException,String,List<Row>> errorHandler;
     private final AtomicReference<String> formerLine = new AtomicReference<>();
     private final AtomicInteger lineNo = new AtomicInteger(0);
 
-    RowParser(CharSequence separators, char quote, String commentStart, boolean laxMode) {
+    RowParser(CharSequence separators, char quote, String commentStart, boolean laxMode, BiFunction<RuntimeException, String, List<Row>> errorHandler) {
+        this.errorHandler = errorHandler;
         this.determiner = separators.length() == 1 ? line -> separators.charAt(0) : new AutoSeparatorDeterminer(separators);
         this.quote = quote;
         this.commentStart = commentStart;
@@ -70,7 +72,7 @@ class RowParser implements Function<String,List<Row>> {
                 } else if (laxMode) {
                     column.append(c);
                 } else {
-                    return asList(new Comment(String.format("columns with quote (%c) need to be quoted: position %d:%d, the following line was skipped", quote, lineNo.get(), i)), new Comment(line));
+                    return errorHandler.apply(new IllegalArgumentException(String.format("columns with quote (%c) need to be quoted: position %d:%d", quote, lineNo.get(), i)), line);
                 }
             } else {
                 column.append(c);

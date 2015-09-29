@@ -1,6 +1,7 @@
 package diergo.csv;
 
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static diergo.csv.Row.DEFAULT_QUOTE;
@@ -13,15 +14,11 @@ public class CsvParserBuilder {
         return new CsvParserBuilder();
     }
 
-    private Function<CsvParserBuilder, Function<String, List<Row>>> parserFactory;
     private CharSequence separators = DEFAULT_SEPARATORS;
     private char quote = DEFAULT_QUOTE;
     private String commentStart = null;
     private boolean laxMode = false;
-
-    private CsvParserBuilder() {
-        parserFactory = CsvParserBuilder::createParser;
-    }
+    private BiFunction<RuntimeException, String, List<Row>> errorHandler;
 
     public CsvParserBuilder quotedWith(char quote) {
         this.quote = quote;
@@ -33,7 +30,7 @@ public class CsvParserBuilder {
         return this;
     }
 
-    public CsvParserBuilder laxMode() {
+    public CsvParserBuilder inLaxMode() {
         this.laxMode = true;
         return this;
     }
@@ -48,16 +45,16 @@ public class CsvParserBuilder {
         return this;
     }
 
-    CsvParserBuilder creatingParser(Function<CsvParserBuilder, Function<String, List<Row>>> parserFactory) {
-        this.parserFactory = parserFactory;
+    public CsvParserBuilder handlingErrors(BiFunction<RuntimeException, String, List<Row>> errorHandler) {
+        this.errorHandler = errorHandler;
         return this;
     }
 
     public Function<String, List<Row>> build() {
-        return parserFactory.apply(this);
-    }
-
-    private Function<String, List<Row>> createParser() {
-        return new RowParser(separators, quote, commentStart, laxMode);
+        BiFunction<RuntimeException, String, List<Row>> effectiveErrorHandler = errorHandler;
+        if (effectiveErrorHandler == null) {
+            effectiveErrorHandler = commentStart == null ? new LoggingCsvParserErrorHandler() : new CommentingCsvParserErrorHandler();
+        }
+        return new RowParser(separators, quote, commentStart, laxMode, effectiveErrorHandler);
     }
 }
