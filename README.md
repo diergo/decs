@@ -15,6 +15,8 @@ value, the value has to be quoted double.
 The library offers read and write support using
 [Java 8 Streams](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
 and [functional interfaces](https://docs.oracle.com/javase/8/docs/api/java/lang/FunctionalInterface.html).
-It has no dependencies
+It has no runtime dependencies except for [SLF4J](http://www.slf4j.org).
+
+For an example usage have a look at the [integration test](src/test/java/diergo/csv/CsvIntegrationTest.java).
 
 The project is build with [gradle](https://gradle.org/).
