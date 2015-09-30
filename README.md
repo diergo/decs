@@ -9,8 +9,8 @@ in [RFC 4180](http://tools.ietf.org/html/rfc4180).
 The format is a simple line based text format for table data. Many databases
 or spreadsheet software like MS-Excel can use this data as an interchange
 format. Each line is a row of the table, the column values are separated by a
-comma (or an other character). If the separator character is part of a column
-value, the value has to be quoted double.
+comma (or an other character). If the separator or quote character is part of
+a column value, the value has to be quoted.
 
 The library offers read and write support using
 [Java 8 Streams](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
@@ -19,4 +19,4 @@ It has no runtime dependencies except for [SLF4J](http://www.slf4j.org).
 
 For an example usage have a look at the [integration test](src/test/java/diergo/csv/CsvIntegrationTest.java).
 
-The project is build with [gradle](https://gradle.org/).
+The project is build with [gradle](https://gradle.org/) and will be published to [jcenter](http://jcenter.bintray.com/).
