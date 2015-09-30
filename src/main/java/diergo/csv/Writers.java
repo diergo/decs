@@ -72,8 +72,8 @@ public class Writers {
 
     private static void appendLine(Appendable out, String line) {
         try {
-            out.append(line);
-            out.append('\n');
+            // done with one append call to be thread safe!
+            out.append(line + '\n');
         } catch (IOException e) {
             LOG.error("Cannot write line '{}'", line, e);
         }

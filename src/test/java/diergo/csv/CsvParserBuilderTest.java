@@ -6,9 +6,8 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import static diergo.csv.CsvParserBuilder.csvParser;
-import static org.hamcrest.Matchers.instanceOf;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -22,23 +21,7 @@ public class CsvParserBuilderTest {
         assertThat(parser.quote, is('"'));
         assertThat(parser.commentStart, nullValue());
         assertThat(parser.laxMode, is(false));
-        assertThat(parser.errorHandler, notNullValue());
-    }
-
-    @Test
-    public void withoutCommentsErrorsAreLogged() throws ReflectiveOperationException {
-        RowParser parser = (RowParser) csvParser().build();
-
-        assertThat(parser.commentStart, nullValue());
-        assertThat(parser.errorHandler, instanceOf(LoggingCsvParserErrorHandler.class));
-    }
-
-    @Test
-    public void withCommentsErrorsAreCommented() throws ReflectiveOperationException {
-        RowParser parser = (RowParser) csvParser().commentsStartWith("#").build();
-
-        assertThat(parser.commentStart, is("#"));
-        assertThat(parser.errorHandler, instanceOf(CommentingCsvParserErrorHandler.class));
+        assertThat(parser.errorHandler.apply(new RuntimeException(), ""), is(emptyList()));
     }
 
     @Test(expected = IllegalStateException.class)

@@ -7,6 +7,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static diergo.csv.Row.DEFAULT_QUOTE;
+import static java.util.Collections.emptyList;
 
 /**
  * Configure and build a CSV parser. Typically this is used as a mapper for a stream of lines:
@@ -34,7 +35,7 @@ public class CsvParserBuilder {
     private char quote = DEFAULT_QUOTE;
     private String commentStart = null;
     private boolean laxMode = false;
-    private BiFunction<RuntimeException, String, List<Row>> errorHandler;
+    private BiFunction<RuntimeException, String, List<Row>> errorHandler = (error, line) -> emptyList();
 
     /**
      * Configure the quoting character for data containing separator or multiple lines or a quote itself.
@@ -83,8 +84,7 @@ public class CsvParserBuilder {
 
     /**
      * Configures the error handler for input format problems.
-     * When {@link #commentsStartWith(String) comments are enabled} the invalid lines are turned into comments,
-     * otherwise the lines are logged.
+     * By default illegal lines are simply ignored.
      * 
      * @see CommentingCsvParserErrorHandler
      * @see LoggingCsvParserErrorHandler 
@@ -99,10 +99,6 @@ public class CsvParserBuilder {
      * @see java.util.stream.Stream#map(Function) 
      */
     public Function<String, List<Row>> build() {
-        BiFunction<RuntimeException, String, List<Row>> effectiveErrorHandler = errorHandler;
-        if (effectiveErrorHandler == null) {
-            effectiveErrorHandler = commentStart == null ? new LoggingCsvParserErrorHandler() : new CommentingCsvParserErrorHandler();
-        }
-        return new RowParser(separators, quote, commentStart, laxMode, effectiveErrorHandler);
+        return new RowParser(separators, quote, commentStart, laxMode, errorHandler);
     }
 }
