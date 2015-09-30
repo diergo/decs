@@ -22,6 +22,9 @@ public class CsvPrinterBuilder {
     private char separator = DecimalFormatSymbols.getInstance().getPatternSeparator();
     private char quote = DEFAULT_QUOTE;
     private String commentStart = null;
+    
+    private CsvPrinterBuilder() {
+    }
 
     /**
      * Configures the separator between data columns in the line.

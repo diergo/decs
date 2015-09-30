@@ -35,6 +35,9 @@ public class CsvParserBuilder {
     private String commentStart = null;
     private boolean laxMode = false;
     private BiFunction<RuntimeException, String, List<Row>> errorHandler = (error, line) -> { throw error; };
+    
+    private CsvParserBuilder() {
+    }
 
     /**
      * Configure the quoting character for data containing separator or multiple lines or a quote itself.

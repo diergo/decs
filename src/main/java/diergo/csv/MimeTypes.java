@@ -40,6 +40,10 @@ public class MimeTypes {
         return new Builder();
     }
 
+    /**
+     * Create a MIME type with fluent API.
+     * @see #mimeType() 
+     */
     public static class Builder {
 
         private boolean headers = false;
