@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -12,8 +13,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 import static java.util.EnumSet.noneOf;
+import static java.util.stream.Collector.Characteristics.CONCURRENT;
+import static java.util.stream.Collector.Characteristics.UNORDERED;
 
 /**
  * Helpers for {@link Writer} usage.
@@ -23,7 +27,8 @@ public class Writers {
     private static final Logger LOG = LoggerFactory.getLogger(CsvWriterCollector.class);
 
     /**
-     * Creates a collector writing lines to a specific writer. Typical usage for a stream of strings:
+     * Creates a collector writing lines to a specific writer.
+     * Typical usage for a stream of strings:
      *
      * <br/>{@link java.util.stream.Stream Stream}{@code <String>} lines = ...;
      * <br/>{@code lines.}{@link java.util.stream.Stream#collect(Collector) collect}({@code toWriter(out)})
@@ -31,11 +36,28 @@ public class Writers {
      * @param <R> the result type of the reduction operation, any {@link Writer}
      */
     public static <R extends Writer> Collector<String, Appendable, R> toWriter(R out) {
-        return new CsvWriterCollector<>(out);
+        return new CsvWriterCollector<>(out, true);
     }
 
     /**
-     * Creates a consumer writing lines to a specific writer. Typical usage for a stream of strings:
+     * Creates a collector writing lines to a specific writer.
+     * The lines in the resulting writer may have any order and by written concurrently.
+     * Do not use this when a header line with column names is included in the stream!
+     * Typical usage for a stream of strings:
+     *
+     * <br/>{@link java.util.stream.Stream Stream}{@code <String>} lines = ...;
+     * <br/>{@code lines.}{@link java.util.stream.Stream#collect(Collector) collect}({@code toWriterUnordered(out)})
+     *
+     * @param <R> the result type of the reduction operation, any {@link Writer}
+     * @see Stream#parallel()
+     */
+    public static <R extends Writer> Collector<String, Appendable, R> toWriterUnordered(R out) {
+        return new CsvWriterCollector<>(out, false);
+    }
+
+    /**
+     * Creates a consumer writing lines to a specific writer.
+     * Typical usage for a stream of strings:
      *
      * <br/>{@link java.util.stream.Stream Stream}{@code <String>} lines = ...;
      * <br/>{@code lines.}{@link java.util.stream.Stream#forEach(Consumer) forEach}({@code consumeTo(out)})
@@ -57,11 +79,13 @@ public class Writers {
     private static class CsvWriterCollector<R extends Writer> implements Collector<String, Appendable, R> {
     
         private final R out;
-    
-        CsvWriterCollector(R out) {
+        private final boolean ordered;
+
+        public CsvWriterCollector(R out, boolean ordered) {
             this.out = out;
+            this.ordered = ordered;
         }
-    
+
         @Override
         public Supplier<Appendable> supplier() {
             return () -> out;
@@ -84,7 +108,7 @@ public class Writers {
     
         @Override
         public Set<Characteristics> characteristics() {
-            return noneOf(Characteristics.class);
+            return ordered ? noneOf(Characteristics.class) : EnumSet.of(UNORDERED, CONCURRENT);
         }
     }
 }
