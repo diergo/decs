@@ -10,13 +10,13 @@ import static java.util.Collections.emptyList;
 
 /**
  * Handles parser errors by logging and skipping them.
+ *
+ * @see CsvParserBuilder#handlingErrors(BiFunction)
  */
 public class LoggingCsvParserErrorHandler implements BiFunction<RuntimeException, String, List<Row>> {
 
     /**
      * Creates a new error handler.
-     *
-     * @see CsvParserBuilder#handlingErrors(BiFunction)
      */
     public static BiFunction<RuntimeException, String, List<Row>> loggingErrors() {
         return new LoggingCsvParserErrorHandler();
