@@ -66,6 +66,9 @@ public class Writers {
     public static Consumer<String> consumeTo(Writer out) {
         return line -> appendLine(out, line);
     }
+    
+    private Writers() {
+    }
 
     private static void appendLine(Appendable out, String line) {
         try {

@@ -5,16 +5,16 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 
-class Columns implements Row {
+class Cells implements Row {
     
-    private final List<String> columns;
+    private final List<String> cells;
 
-    Columns(String... columns) {
-        this.columns = asList(columns);
+    Cells(String... cells) {
+        this.cells = asList(cells);
     }
 
-    Columns(List<String> columns) {
-        this.columns = columns;
+    Cells(List<String> cells) {
+        this.cells = cells;
     }
 
     @Override
@@ -24,12 +24,12 @@ class Columns implements Row {
 
     @Override
     public int getLength() {
-        return columns.size();
+        return cells.size();
     }
 
     @Override
     public Iterator<String> iterator() {
-        return columns.iterator();
+        return cells.iterator();
     }
 
     @Override
@@ -40,17 +40,17 @@ class Columns implements Row {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Columns other = (Columns) o;
-        return columns.equals(other.columns);
+        Cells other = (Cells) o;
+        return cells.equals(other.cells);
     }
 
     @Override
     public int hashCode() {
-        return columns.hashCode();
+        return cells.hashCode();
     }
 
     @Override
     public String toString() {
-        return columns.toString();
+        return cells.toString();
     }
 }

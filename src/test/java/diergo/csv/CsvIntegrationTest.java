@@ -22,6 +22,8 @@ import static diergo.csv.Maps.toMaps;
 import static diergo.csv.Maps.toRowsWithHeader;
 import static diergo.csv.Maps.withValuesMapped;
 import static diergo.csv.Readers.asLines;
+import static diergo.csv.Rows.emptyCellToNull;
+import static diergo.csv.Rows.rows;
 import static diergo.csv.Values.parsedValue;
 import static diergo.csv.Writers.toWriter;
 import static java.math.BigDecimal.ROUND_UNNECESSARY;
@@ -50,7 +52,7 @@ public class CsvIntegrationTest {
     public void csvCanBeReadAndMapped() throws IOException {
         List<Map<String, Object>> rows = asLines(csv)
             .map(csvParser().separatedBy(',').build()).flatMap(Collection::stream)
-            .map(Rows::replaceEmptyWithNull)
+            .map(rows(emptyCellToNull()))
             .map(toMaps()).flatMap(Collection::stream)
             .map(withValuesMapped(parsedValue(VALUE_TYPES)))
             .collect(toList());

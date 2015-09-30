@@ -2,7 +2,6 @@ package diergo.csv;
 
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,7 @@ public class MapsTest {
 
     @Test
     public void mapIsCreatedFromRowWithPredefinedHeader() {
-        List<Map<String, String>> result = toMaps(asList("one", "two")).apply(new Columns("1", "2"));
+        List<Map<String, String>> result = toMaps(asList("one", "two")).apply(new Cells("1", "2"));
         assertThat(result.size(), is(1));
         Map<String, String> values = result.get(0);
         assertThat(values.get("one"), is("1"));
@@ -33,8 +32,8 @@ public class MapsTest {
     @Test
     public void mapIsCreatedFromRowWithHeaderFromFirstRow() {
         Function<Row, List<Map<String, String>>> mapper = toMaps();
-        assertThat(mapper.apply(new Columns("one", "two")).size(), is(0));
-        List<Map<String, String>> result = mapper.apply(new Columns("1", "2"));
+        assertThat(mapper.apply(new Cells("one", "two")).size(), is(0));
+        List<Map<String, String>> result = mapper.apply(new Cells("1", "2"));
         assertThat(result.size(), is(1));
         Map<String, String> values = result.get(0);
         assertThat(values.get("one"), is("1"));
@@ -55,7 +54,7 @@ public class MapsTest {
         values.put("three", "3");
         List<Row> result = toRows(asList("one", "two")).apply(values);
         assertThat(result.size(), is(1));
-        assertThat(result.get(0), is(new Columns("1", "2")));
+        assertThat(result.get(0), is(new Cells("1", "2")));
     }
 
     @Test
@@ -65,8 +64,8 @@ public class MapsTest {
         values.put("two", "2");
         List<Row> result = toRowsWithHeader(asList("one", "two")).apply(values);
         assertThat(result.size(), is(2));
-        assertThat(result.get(0), is(new Columns("one", "two")));
-        assertThat(result.get(1), is(new Columns("1", "2")));
+        assertThat(result.get(0), is(new Cells("one", "two")));
+        assertThat(result.get(1), is(new Cells("1", "2")));
     }
 
     @Test
@@ -76,8 +75,8 @@ public class MapsTest {
         values.put("two", "2");
         List<Row> result = toRowsWithHeader().apply(values);
         assertThat(result.size(), is(2));
-        assertThat(result.get(0), is(new Columns("one", "two")));
-        assertThat(result.get(1), is(new Columns("1", "2")));
+        assertThat(result.get(0), is(new Cells("one", "two")));
+        assertThat(result.get(1), is(new Cells("1", "2")));
     }
     
     @Test

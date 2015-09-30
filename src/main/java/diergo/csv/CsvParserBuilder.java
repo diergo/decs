@@ -53,6 +53,9 @@ public class CsvParserBuilder {
         return this;
     }
 
+    /**
+     * Enables a lax parsing mode allowing quotes in cell data.
+     */
     public CsvParserBuilder inLaxMode() {
         this.laxMode = true;
         return this;

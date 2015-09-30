@@ -2,6 +2,7 @@ package diergo.csv;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
@@ -20,30 +21,36 @@ public class Rows {
     }
 
     /**
+     * Creates a mapper to map cell data one by one.
+     * @see java.util.stream.Stream#map(Function)
+     */
+    public static UnaryOperator<Row> rows(UnaryOperator<String> cellMapper) {
+        return row -> row.isComment() ? row : new Cells(stream(row.spliterator(), false)
+            .map(cellMapper).collect(toList()));
+    }
+
+    /**
      * A mapper to trim column data.
-     * @see java.util.stream.Stream#map(Function) 
+     * @see #rows(UnaryOperator) 
      */
-    public static Row trim(Row row) {
-        return row.isComment() ? row : new Columns(stream(row.spliterator(), false)
-            .map(column -> column == null ? null : column.trim()).collect(toList()));
+    public static UnaryOperator<String> trimCell() {
+        return cell -> cell == null ? null : cell.trim();
     }
 
     /**
-     * A mapper to replace empty column data with {@code null}.
-     * @see java.util.stream.Stream#map(Function)
+     * A mapper to replace empty cells with {@code null}.
+     * @see #rows(UnaryOperator)
      */
-    public static Row replaceEmptyWithNull(Row row) {
-        return row.isComment() ? row : new Columns(stream(row.spliterator(), false)
-            .map(column -> (column == null || column.length() == 0) ? null : column).collect(toList()));
+    public static UnaryOperator<String> emptyCellToNull() {
+        return cell -> (cell == null || cell.length() == 0) ? null : cell;
     }
 
     /**
-     * A mapper to replace null column data with an empty string ({@code ""}).
-     * @see java.util.stream.Stream#map(Function)
+     * A mapper to replace {@code null} with empty cells.
+     * @see #rows(UnaryOperator)
      */
-    public static Row replaceNullWithEmpty(Row row) {
-        return row.isComment() ? row : new Columns(stream(row.spliterator(), false)
-            .map(column -> column == null ? "" : column).collect(toList()));
+    public static UnaryOperator<String> nullToEmptyCell() {
+        return cell -> cell == null ? "" : cell;
     }
 
     private Rows() {

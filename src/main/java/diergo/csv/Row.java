@@ -17,7 +17,7 @@ public interface Row extends Iterable<String>
     boolean isComment();
 
     /**
-     * The number of data columns in this row. Equal to the size of the iterable.
+     * The number of cells in this row. Equal to the size of the {@link Iterable}.
      * @see #iterator() 
      */
     int getLength();

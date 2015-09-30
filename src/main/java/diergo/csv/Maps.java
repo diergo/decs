@@ -136,14 +136,14 @@ public class Maps {
                 headers = header.get();
             }
             if (headerNeeded.compareAndSet(true, false)) {
-                result.add(new Columns(headers));
+                result.add(new Cells(headers));
             }
             List<String> columns = new ArrayList<>();
             for (String key : headers) {
                 String value = values.get(key);
                 columns.add(value == null ? null : value);
             }
-            result.add(new Columns(columns));
+            result.add(new Cells(columns));
             return result;
         }
     }

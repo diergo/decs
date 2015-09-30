@@ -15,7 +15,7 @@ import static java.util.Collections.singletonList;
 
 class RowParser implements Function<String,List<Row>> {
 
-    private static final Row EMPTY_LINE = new Columns();
+    private static final Row EMPTY_LINE = new Cells();
 
     final Function<String,Character> determiner;
     final char quote;
@@ -51,31 +51,31 @@ class RowParser implements Function<String,List<Row>> {
         if (commentStart != null && line.startsWith(commentStart)) {
             return singletonList(new Comment(line.substring(commentStart.length())));
         }
-        CharBuffer column = CharBuffer.allocate(line.length());
-        List<String> columns = new ArrayList<>();
+        CharBuffer cell = CharBuffer.allocate(line.length());
+        List<String> cells = new ArrayList<>();
         boolean quoted = false;
         boolean isQuote = false;
         int i = 0;
         for (char c : line.toCharArray()) {
             if (c == separator && (!quoted || isQuote)) {
-                columns.add(getValue(column));
+                cells.add(getValue(cell));
                 isQuote = false;
                 quoted = false;
             } else if (c == quote) {
                 if (isQuote) {
-                    column.append(c);
+                    cell.append(c);
                     isQuote = false;
                 } else if (quoted) {
                     isQuote = true;
-                } else if (column.position() == 0) {
+                } else if (cell.position() == 0) {
                     quoted = true;
                 } else if (laxMode) {
-                    column.append(c);
+                    cell.append(c);
                 } else {
                     return errorHandler.apply(new IllegalArgumentException(String.format("columns with quote (%c) need to be quoted: error at position %d:%d", quote, lineNo.get(), i)), line);
                 }
             } else {
-                column.append(c);
+                cell.append(c);
                 isQuote = false;
             }
             ++i;
@@ -83,8 +83,8 @@ class RowParser implements Function<String,List<Row>> {
         if (quoted && !isQuote) {
             return emptyList();
         }
-        columns.add(getValue(column));
-        return singletonList(new Columns(columns));
+        cells.add(getValue(cell));
+        return singletonList(new Cells(cells));
     }
 
     private String recoverFormerIncompleteLine(String line) {
@@ -131,7 +131,7 @@ class RowParser implements Function<String,List<Row>> {
             Map<Character, Integer> votes = new HashMap<>();
             for (char c : possibleSeparators.toString().toCharArray()) {
                 try {
-                    votes.put(c, getFieldCountFromLineParsed(line, c));
+                    votes.put(c, countCells(line, c));
                 } catch (IllegalArgumentException e) {
                     votes.put(c, 0);
                 }
@@ -145,7 +145,7 @@ class RowParser implements Function<String,List<Row>> {
                     .get().getKey();
         }
 
-        private int getFieldCountFromLineParsed(String line, char separator) {
+        private int countCells(String line, char separator) {
             List<Row> values = RowParser.this.parseLine(line, separator);
             return values.isEmpty() ? 0 : values.get(0).getLength();
         }

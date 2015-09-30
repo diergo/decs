@@ -9,17 +9,17 @@ public class RowPrinterTest {
 
     @Test
     public void columnsArePrintedAsSeparatedLine() {
-        assertThat(printRow(new Columns("foo", "bar")), is("foo,bar"));
+        assertThat(printRow(new Cells("foo", "bar")), is("foo,bar"));
     }
 
     @Test
     public void columnsAreQuotedWhenIncludingQuoteSeparatorOrNewline() {
-        assertThat(printRow(new Columns("f,oo", "ba\"r", "foo\nbar")), is("\"f,oo\",\"ba\"\"r\",\"foo\nbar\""));
+        assertThat(printRow(new Cells("f,oo", "ba\"r", "foo\nbar")), is("\"f,oo\",\"ba\"\"r\",\"foo\nbar\""));
     }
 
     @Test
     public void nullColumnsIsNotPrinted() {
-        assertThat(printRow(new Columns("foo", null, "bar")), is("foo,,bar"));
+        assertThat(printRow(new Cells("foo", null, "bar")), is("foo,,bar"));
     }
 
     @Test

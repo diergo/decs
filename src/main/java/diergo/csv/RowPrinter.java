@@ -27,12 +27,12 @@ class RowPrinter implements Function<Row,String> {
             line.append(row.iterator().next());
         } else {
             boolean first = true;
-            for (String field : row) {
+            for (String cell : row) {
                 if (!first) {
                     line.append(separator);
                 }
-                if (field != null) {
-                    line.append(printValue(field));
+                if (cell != null) {
+                    line.append(printValue(cell));
                 }
                 first = false;
             }
