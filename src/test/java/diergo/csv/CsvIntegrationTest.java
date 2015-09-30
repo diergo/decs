@@ -18,12 +18,12 @@ import java.util.stream.Stream;
 
 import static diergo.csv.CsvParserBuilder.csvParser;
 import static diergo.csv.CsvPrinterBuilder.csvPrinter;
-import static diergo.csv.CsvWriterCollector.toWriter;
 import static diergo.csv.Maps.toMaps;
 import static diergo.csv.Maps.toRowsWithHeader;
 import static diergo.csv.Maps.withValuesMapped;
 import static diergo.csv.Readers.asLines;
 import static diergo.csv.Values.parsedValue;
+import static diergo.csv.Writers.toWriter;
 import static java.math.BigDecimal.ROUND_UNNECESSARY;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.stream.Collectors.toList;
