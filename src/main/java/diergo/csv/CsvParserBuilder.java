@@ -89,7 +89,7 @@ public class CsvParserBuilder {
      * @see CommentingCsvParserErrorHandler
      * @see LoggingCsvParserErrorHandler 
      */
-    no rrs(BiFunction<RuntimeException, String, List<Row>> errorHandler) {
+    public CsvParserBuilder handlingErrors(BiFunction<RuntimeException, String, List<Row>> errorHandler) {
         this.errorHandler = errorHandler;
         return this;
     }
