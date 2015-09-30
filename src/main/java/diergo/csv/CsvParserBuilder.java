@@ -83,11 +83,9 @@ public class CsvParserBuilder {
 
     /**
      * Configures the error handler for input format problems.
-     * By default illegal lines create an error. To simple ignore errors by skipping those lines,
-     * use {@code (error, line) -> emptyList()}.
+     * By default illegal lines create an error.
      * 
-     * @see CommentingCsvParserErrorHandler
-     * @see LoggingCsvParserErrorHandler 
+     * @see ErrorHandlers
      */
     public CsvParserBuilder handlingErrors(BiFunction<RuntimeException, String, List<Row>> errorHandler) {
         this.errorHandler = errorHandler;
