@@ -12,12 +12,13 @@ import static java.lang.Integer.parseInt;
 
 /**
  * Helpers to work with data {@link Map}s.
+ *
+ * @see Maps#withValuesMapped(BiFunction)
  */
 public class Values {
 
     /**
      * Converts the value with the key to its string representation.
-     * @see Maps#withValuesMapped(BiFunction) 
      */
     public static String valueAsString(Map<String,Object> values, String key) {
         Object value = values.get(key);
@@ -28,7 +29,6 @@ public class Values {
      * Converts the value with the key by parsing it according to the target type.
      * The supported types are: {@link Integer}, {@link Double}, {@link Float},
      * {@link BigDecimal}, {@link BigInteger}, {@link Boolean} and {@link String}
-     * @see Maps#withValuesMapped(BiFunction)
      */
     public static BiFunction<Map<String,String>, String, Object> parsedValue(Map<String,Class<?>> types) {
         return (values, name) -> {

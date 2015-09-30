@@ -7,7 +7,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static diergo.csv.Row.DEFAULT_QUOTE;
-import static java.util.Collections.emptyList;
 
 /**
  * Configure and build a CSV parser. Typically this is used as a mapper for a stream of lines:
@@ -35,7 +34,7 @@ public class CsvParserBuilder {
     private char quote = DEFAULT_QUOTE;
     private String commentStart = null;
     private boolean laxMode = false;
-    private BiFunction<RuntimeException, String, List<Row>> errorHandler = (error, line) -> emptyList();
+    private BiFunction<RuntimeException, String, List<Row>> errorHandler = (error, line) -> { throw error; };
 
     /**
      * Configure the quoting character for data containing separator or multiple lines or a quote itself.
@@ -84,12 +83,13 @@ public class CsvParserBuilder {
 
     /**
      * Configures the error handler for input format problems.
-     * By default illegal lines are simply ignored.
+     * By default illegal lines create an error. To simple ignore errors by skipping those lines,
+     * use {@code (error, line) -> emptyList()}.
      * 
      * @see CommentingCsvParserErrorHandler
      * @see LoggingCsvParserErrorHandler 
      */
-    public CsvParserBuilder handlingErrors(BiFunction<RuntimeException, String, List<Row>> errorHandler) {
+    no rrs(BiFunction<RuntimeException, String, List<Row>> errorHandler) {
         this.errorHandler = errorHandler;
         return this;
     }

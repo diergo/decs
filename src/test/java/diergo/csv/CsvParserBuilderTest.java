@@ -10,6 +10,7 @@ import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 public class CsvParserBuilderTest {
@@ -21,7 +22,12 @@ public class CsvParserBuilderTest {
         assertThat(parser.quote, is('"'));
         assertThat(parser.commentStart, nullValue());
         assertThat(parser.laxMode, is(false));
-        assertThat(parser.errorHandler.apply(new RuntimeException(), ""), is(emptyList()));
+        try {
+            parser.errorHandler.apply(new RuntimeException(), "");
+            fail("parsing error not thrown");
+        } catch (RuntimeException expected) {
+            // ok
+        }
     }
 
     @Test(expected = IllegalStateException.class)

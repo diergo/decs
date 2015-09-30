@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.util.EnumSet;
 import java.util.Set;
@@ -23,8 +24,6 @@ import static java.util.stream.Collector.Characteristics.UNORDERED;
  * Helpers for {@link Writer} usage.
  */
 public class Writers {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CsvWriterCollector.class);
 
     /**
      * Creates a collector writing lines to a specific writer.
@@ -75,7 +74,7 @@ public class Writers {
             // done with one append call to be thread safe!
             out.append(line + '\n');
         } catch (IOException e) {
-            LOG.error("Cannot write line '{}'", line, e);
+            throw new UncheckedIOException(e);
         }
     }
 
