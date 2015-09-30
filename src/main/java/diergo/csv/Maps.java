@@ -20,12 +20,13 @@ import static java.util.stream.StreamSupport.stream;
 
 /**
  * Helpers to work with {@link Row}s and {@link Map}s.
+ *
+ * @see java.util.stream.Stream#map(Function)
  */
 public class Maps {
 
     /**
      * A mapper to convert rows to data maps using the columns names in header.
-     * @see java.util.stream.Stream#map(Function)
      */
     public static Function<Row,List<Map<String,String>>> toMaps(List<String> header) {
         return new Row2MapFunction(header);
@@ -33,7 +34,6 @@ public class Maps {
 
     /**
      * A mapper to convert rows to data maps using the columns names from the first row.
-     * @see java.util.stream.Stream#map(Function)
      */
     public static Function<Row,List<Map<String,String>>> toMaps() {
         return toMaps(null);
@@ -42,7 +42,6 @@ public class Maps {
     /**
      * A mapper to convert data maps to rows using the columns order in header.
      * Other map values are ignored. The columns names are not written as header.
-     * @see java.util.stream.Stream#map(Function)
      */
     public static Function<Map<String,String>, List<Row>> toRows(List<String> header) {
         return new Map2RowFunction(false, header);
@@ -51,7 +50,6 @@ public class Maps {
     /**
      * A mapper to convert data maps to rows using the columns order in header.
      * Other map values are ignored. The columns names are written as header.
-     * @see java.util.stream.Stream#map(Function)
      */
     public static Function<Map<String,String>, List<Row>> toRowsWithHeader(List<String> header) {
         return new Map2RowFunction(true, header);
@@ -60,7 +58,6 @@ public class Maps {
     /**
      * A mapper to convert data maps to rows using the keys of the first data map as columns names.
      * The columns names are not written as header.
-     * @see java.util.stream.Stream#map(Function)
      */
     public static Function<Map<String,String>, List<Row>> toRows() {
         return new Map2RowFunction(false, null);
@@ -69,7 +66,6 @@ public class Maps {
     /**
      * A mapper to convert data maps to rows using the keys of the first data map as columns names.
      * The columns names are written as header.
-     * @see java.util.stream.Stream#map(Function)
      */
     public static Function<Map<String,String>, List<Row>> toRowsWithHeader() {
         return new Map2RowFunction(true, null);
@@ -79,7 +75,6 @@ public class Maps {
      * A mapper for data maps by converting all values using a function.
      * @param <S> the source value type
      * @param <T> the target value type
-     * @see java.util.stream.Stream#map(Function)
      * @see Values
      */
     public static <S,T> Function<Map<String,S>, Map<String,T>> withValuesMapped(BiFunction<Map<String,S>,String,T> valueMapper) {

@@ -2,8 +2,8 @@ package diergo.csv;
 
 /**
  * The internal representation of a CSV data row. The cells can be iterated.
- * Rows are created by a {@link CsvParserBuilder#build()} from lines and
- * converted to lines by a {@link CsvPrinterBuilder#build()}.
+ * Rows are created by a {@linkplain CsvParserBuilder#build() parser} from lines and
+ * converted to lines by a {@linkplain CsvPrinterBuilder#build() printer}.
  */
 public interface Row extends Iterable<String>
 {
