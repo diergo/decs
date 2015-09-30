@@ -3,7 +3,7 @@ buildscript {
         maven { url 'http://repo.spring.io/plugins-release' }
     }
     dependencies {
-        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.6'
+        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
     }
 }
 
@@ -15,6 +15,7 @@ apply plugin: 'propdeps'
 apply plugin: 'java'
 apply plugin: 'findbugs'
 apply plugin: 'jacoco'
+apply plugin: 'maven-publish'
 
 ext {
     slf4jVersion = '1.7.12'
@@ -35,20 +36,6 @@ jacoco.toolVersion = '0.7.4.201502262128'
 
 repositories {
     jcenter()
-}
-
-bintray {
-    user = bintrayUser
-    key = bintrayKey
-    pkg {
-        repo = 'maven'
-        name = project.name
-        version {
-            name = project.version
-            vcsTag = "v${majorVersion}.${minorVersion}.${patchVersion}"
-        }
-    }
-    configurations = ['archives']
 }
 
 dependencies {
@@ -76,13 +63,13 @@ javadoc {
 tasks.withType(Jar) {
     manifest {
         attributes(
-                "Specification-Title": project.name,
-                "Specification-Version": "${majorVersion}.${minorVersion}",
-                "Specification-Vendor": vendor,
-                "Implementation-Title": project.name,
-                "Implementation-Version": "${majorVersion}.${minorVersion}.${patchVersion}",
-                "Implementation-Vendor": vendor,
-                "Implementation-Vendor-Id": project.group
+            "Specification-Title": project.description,
+            "Specification-Version": "${majorVersion}.${minorVersion}",
+            "Specification-Vendor": vendor,
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${majorVersion}.${minorVersion}.${patchVersion}",
+            "Implementation-Vendor": vendor,
+            "Implementation-Vendor-Id": project.group
         )
     }
 }
@@ -111,6 +98,31 @@ task javadocJar(type: Jar) {
 artifacts {
     archives sourcesJar
     archives javadocJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}
+
+bintray {
+    user = bintrayUser
+    key = bintrayKey
+    pkg {
+        repo = 'maven'
+        name = project.name
+        desc = project.description
+        version {
+            name = project.version
+            vcsTag = "v${majorVersion}.${minorVersion}.${patchVersion}"
+        }
+    }
+    publications = ['mavenJava']
 }
 
 build.dependsOn javadoc, jacocoTestReport
