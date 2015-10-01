@@ -5,6 +5,7 @@ import org.junit.Test;
 import static diergo.csv.Rows.emptyCellToNull;
 import static diergo.csv.Rows.nullToEmptyCell;
 import static diergo.csv.Rows.rows;
+import static diergo.csv.Rows.toStringArray;
 import static diergo.csv.Rows.trimCell;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
@@ -52,5 +53,15 @@ public class RowsTest {
     public void replaceNullWithEmptyLeavesCommentsUnchanged() {
         Comment unchanged = new Comment("");
         assertThat(rows(nullToEmptyCell()).apply(unchanged), is(unchanged));
+    }
+    
+    @Test
+    public void commentBecomesAnEmptyStringArray() {
+        assertThat(toStringArray(new Comment("foo")), is(new String[0]));
+    }
+
+    @Test
+    public void rowBecomesAStringArrayWithCells() {
+        assertThat(toStringArray(new Cells("foo", "bar")), is(new String[] {"foo", "bar"}));
     }
 }

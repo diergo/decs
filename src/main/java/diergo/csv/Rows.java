@@ -4,6 +4,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+import static java.util.Spliterator.SIZED;
+import static java.util.Spliterators.spliterator;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -11,6 +13,8 @@ import static java.util.stream.StreamSupport.stream;
  * Helpers to work with {@link Row}s.
  */
 public class Rows {
+
+    private static final String[] NO_CELLS = new String[0];
 
     /**
      * A filter to exclude comments.
@@ -51,6 +55,15 @@ public class Rows {
      */
     public static UnaryOperator<String> nullToEmptyCell() {
         return cell -> cell == null ? "" : cell;
+    }
+
+    /**
+     * A mapper to generate cell values as array.
+     * @see java.util.stream.Stream#map(Function)
+     * @since 3.0.1
+     */
+    public static String[] toStringArray(Row row) {
+        return row.isComment() ? NO_CELLS : stream(spliterator(row.iterator(), row.getLength(), SIZED), false).toArray(String[]::new);
     }
 
     private Rows() {
