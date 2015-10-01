@@ -39,12 +39,17 @@ class RowParser implements Function<String,List<Row>> {
         if (isEmpty(line)) {
             return singletonList(EMPTY_LINE);
         }
-        List<Row> rows = parseLine(line, determiner.apply(line));
-        if (rows.isEmpty()) {
-            formerLine.compareAndSet(null, line + '\n');
+        try {
+            List<Row> rows = parseLine(line, determiner.apply(line));
+            if (rows.isEmpty()) {
+                formerLine.compareAndSet(null, line + '\n');
+            }
+            return rows;
+        } catch (RuntimeException error) {
+            return errorHandler.apply(error, line);
+        } finally {
+            lineNo.incrementAndGet();
         }
-        lineNo.incrementAndGet();
-        return rows;
     }
 
     private List<Row> parseLine(String line, char separator) {
@@ -72,7 +77,7 @@ class RowParser implements Function<String,List<Row>> {
                 } else if (laxMode) {
                     cell.append(c);
                 } else {
-                    return errorHandler.apply(new IllegalArgumentException(String.format("columns with quote (%c) need to be quoted: error at position %d:%d", quote, lineNo.get(), i)), line);
+                    throw new IllegalArgumentException(String.format("columns with quote (%c) need to be quoted: error at position %d:%d", quote, lineNo.get(), i));
                 }
             } else {
                 cell.append(c);
@@ -141,8 +146,8 @@ class RowParser implements Function<String,List<Row>> {
 
         private char getBestVotedSeparator(Map<Character, Integer> votes) {
             return votes.entrySet().stream()
-                    .reduce((e1, e2) -> e1.getValue() < e2.getValue() ? e2 : e1)
-                    .get().getKey();
+                .reduce((e1, e2) -> e1.getValue() < e2.getValue() ? e2 : e1)
+                .get().getKey();
         }
 
         private int countCells(String line, char separator) {

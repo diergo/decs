@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -72,6 +73,14 @@ public class RowParserTest {
         assertThat(error.getValue(), instanceOf(IllegalArgumentException.class));
         assertThat(error.getValue().getMessage(), Matchers.containsString("0:2"));
         assertThat(line.getValue(), is("hi\"ho"));
+    }
+
+    @Test
+    public void errorhandlingWithNoResultingRowIsHandledProperly() {
+        when(errorHandler.apply(any(IllegalArgumentException.class), anyString()))
+            .thenReturn(emptyList());
+        assertThat(parse("hi\"ho,hi ho"), nullValue());
+        assertThat(parser.apply("hi ho"), is(singletonList(new Cells("hi ho"))));
     }
 
     @Test

@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.zip.GZIPInputStream;
 
 import static diergo.csv.CsvParserBuilder.csvParser;
+import static diergo.csv.ErrorHandlers.ignoreErrors;
 import static diergo.csv.Readers.asLines;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.hamcrest.Matchers.greaterThan;
@@ -33,7 +34,9 @@ public class CsvReaderPerformanceTest {
         InputStreamReader worldCitiesPopulation = new InputStreamReader(new FileInputStream(WORLDS_CITIES_POP.toFile()), StandardCharsets.UTF_8);
 
         long start = System.currentTimeMillis();
-        long count = asLines(worldCitiesPopulation).map(csvParser().separatedBy(',').inLaxMode().build()).flatMap(Collection::stream).count();
+        long count = asLines(worldCitiesPopulation)
+            .map(csvParser().separatedBy(',').handlingErrors(ignoreErrors()).build()).flatMap(Collection::stream)
+            .count();
         long time = (System.currentTimeMillis() - start);
         System.out.println("took " + time + " ms to read " + count + " rows. ");
         assertThat(count, greaterThan(3000000L));
