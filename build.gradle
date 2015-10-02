@@ -51,6 +51,18 @@ dependencies {
     testRuntime "org.slf4j:slf4j-simple:${slf4jVersion}"
 }
 
+test {
+    exclude '**/*Performance*'
+}
+
+task performance(type: Test) {
+    include '**/*Performance*'
+    reports {
+        html.enabled = true
+        html.destination = file('build/reports/performance')
+    }
+}
+
 javadoc {
     options.memberLevel = 'PROTECTED'
     options.author = false
