@@ -4,8 +4,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
-import static java.util.Spliterator.SIZED;
-import static java.util.Spliterators.spliterator;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -60,10 +58,10 @@ public class Rows {
     /**
      * A mapper to generate cell values as array.
      * @see java.util.stream.Stream#map(Function)
-     * @since 3.0.1
+     * @since 3.1.0
      */
     public static String[] toStringArray(Row row) {
-        return row.isComment() ? NO_CELLS : stream(spliterator(row.iterator(), row.getLength(), SIZED), false).toArray(String[]::new);
+        return row.isComment() ? NO_CELLS : stream(row.spliterator(), false).toArray(String[]::new);
     }
 
     private Rows() {
