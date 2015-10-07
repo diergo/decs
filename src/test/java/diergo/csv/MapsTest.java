@@ -2,19 +2,14 @@ package diergo.csv;
 
 import org.junit.Test;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
-import static diergo.csv.Maps.toMaps;
-import static diergo.csv.Maps.toRows;
-import static diergo.csv.Maps.toRowsWithHeader;
-import static diergo.csv.Maps.withValuesMapped;
+import static diergo.csv.Maps.*;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
+import static java.util.Collections.*;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -84,5 +79,41 @@ public class MapsTest {
         Object mapped = new Object();
         assertThat(withValuesMapped((values, name) -> mapped).apply(singletonMap("test", "x")),
             is(singletonMap("test", mapped)));
+    }
+
+    @Test
+    public void valueIsRemoved() {
+        Map<String,Integer> values = new HashMap<>();
+        values.put("foo", 0);
+        values.put("bar", 1);
+        Map<String, Integer> result = Maps.<Integer>removingValue("foo").apply(unmodifiableMap(values));
+        assertThat(result.size(), is(1));
+        assertThat(result, hasEntry("bar", 1));
+    }
+
+    @Test
+    public void valueIsRemovedInPlace() {
+        Map<String,Integer> values = new HashMap<>();
+        values.put("foo", 0);
+        values.put("bar", 1);
+        Map<String, Integer> result = Maps.<Integer>removingValueInPlace("foo").apply(values);
+        assertThat(result, is(values));
+        assertThat(result.size(), is(1));
+        assertThat(result, hasEntry("bar", 1));
+    }
+
+    @Test
+    public void valueIsAdded() {
+        assertThat(addingValue("test", any -> 1).apply(singletonMap("foo", 0)),
+                allOf(hasEntry("foo", 0), hasEntry("test", 1)));
+    }
+
+    @Test
+    public void valueIsAddedInPlace() {
+        Map<String,Integer> values = new HashMap<>();
+        values.put("foo", 0);
+        Map<String, Integer> result = Maps.<Integer>addingValueInPlace("test", any -> 1).apply(values);
+        assertThat(result, is(values));
+        assertThat(result, allOf(hasEntry("foo", 0), hasEntry("test", 1)));
     }
 }

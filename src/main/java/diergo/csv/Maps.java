@@ -2,11 +2,7 @@ package diergo.csv;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -14,7 +10,6 @@ import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.Spliterators.spliterator;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -77,8 +72,58 @@ public class Maps {
      * @param <T> the target value type
      * @see Values
      */
-    public static <S,T> Function<Map<String,S>, Map<String,T>> withValuesMapped(BiFunction<Map<String,S>,String,T> valueMapper) {
+    public static <S,T> Function<Map<String,S>, Map<String,T>> withValuesMapped(BiFunction<Map<String,S>,String,? extends T> valueMapper) {
         return new ValueMapperFunction<>(valueMapper);
+    }
+
+    /**
+     * A mapper for data maps by removing the entries for a key returning a new map.
+     * @param <V> the value type
+     * @since 3.1.0
+     */
+    public static <V> Function<Map<String,V>, Map<String,V>> removingValue(String key) {
+        return row -> {
+            Map<String, V> result = new HashMap<>(row);
+            result.remove(key);
+            return result;
+        };
+    }
+
+    /**
+     * A mapper for data maps by removing the entries for a key returning in place.
+     * @param <V> the value type
+     * @since 3.1.0
+     */
+    public static <V> Function<Map<String,V>, Map<String,V>> removingValueInPlace(String key) {
+        return row -> {
+            row.remove(key);
+            return row;
+        };
+    }
+
+    /**
+     * A mapper for data maps by adding new entries for a key creating a value from the former values returning a new map.
+     * @param <V> the value type
+     * @since 3.1.0
+     */
+    public static <V> Function<Map<String,V>, Map<String,V>> addingValue(String key, Function<Map<String, V>, ? extends V> valueCreator) {
+        return row -> {
+            Map<String, V> result = new HashMap<>(row);
+            result.put(key, valueCreator.apply(row));
+            return result;
+        };
+    }
+
+    /**
+     * A mapper for data maps by adding new entries for a key creating a value from the former values in place.
+     * @param <V> the value type
+     * @since 3.1.0
+     */
+    public static <V> Function<Map<String,V>, Map<String,V>> addingValueInPlace(String key, Function<Map<String, V>, ? extends V> valueCreator) {
+        return row -> {
+            row.put(key, valueCreator.apply(row));
+            return row;
+        };
     }
 
     private Maps() {
@@ -98,12 +143,12 @@ public class Maps {
                 return emptyList();
             }
             if (header.get() == null && header.compareAndSet(null,
-                stream(spliterator(values.iterator(), values.getLength(), 0), false).collect(toList()))) {
+                    stream(values.spliterator(), false).collect(toList()))) {
                 return Collections.emptyList();
             }
             List<String> keys = header.get();
             int i = 0;
-            Map<String, String> result = new LinkedHashMap<>();
+            Map<String, String> result = new HashMap<>();
             for (String value : values) {
                 result.put(keys.get(i++), value);
             }
@@ -145,15 +190,15 @@ public class Maps {
 
     private static class ValueMapperFunction<S,T> implements Function<Map<String, S>, Map<String, T>> {
 
-        private final BiFunction<Map<String,S>,String,T> valueMapper;
+        private final BiFunction<Map<String,S>,String,? extends T> valueMapper;
 
-        public ValueMapperFunction(BiFunction<Map<String,S>,String,T> valueMapper) {
+        public ValueMapperFunction(BiFunction<Map<String,S>,String,? extends T> valueMapper) {
             this.valueMapper = valueMapper;
         }
 
         @Override
         public Map<String, T> apply(Map<String, S> source) {
-            Map<String, T> result = new LinkedHashMap<>();
+            Map<String, T> result = new HashMap<>();
             for (Map.Entry<String,S> entry : source.entrySet()) {
                 result.put(entry.getKey(), valueMapper.apply(source, entry.getKey()));
             }
