@@ -12,7 +12,7 @@ file. This project adheres to [Semantic Versioning](http://semver.org).
 Added
 
 * [#2](https://github.com/aburmeis/decs/issues/2): allow access to cells as String[]
-* make line separator of Writers/collector configurable
+* [#4](https://github.com/aburmeis/decs/issues/4): make line separator of Writers/collector configurable
 
 
 ### 3.0.1
