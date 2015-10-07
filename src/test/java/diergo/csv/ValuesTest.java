@@ -8,8 +8,11 @@ import org.junit.runner.RunWith;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 
+import static diergo.csv.Values.convertedValue;
 import static diergo.csv.Values.parsedValue;
 import static diergo.csv.Values.valueAsString;
 import static java.util.Collections.emptyMap;
@@ -51,6 +54,14 @@ public class ValuesTest {
     @UseDataProvider("parsedValueProvider")
     public void knownValueParsedAsTargetType(String value, Class<?> type, Object expected) {
         assertThat(parsedValue(singletonMap("test", type)).apply(singletonMap("test", value), "test"), is(expected));
+    }
+
+    @Test
+    public void valuesAreConvertedOrReplacedByNull() {
+        BiFunction<Map<String, String>, String, Boolean> converter = convertedValue(name -> "test".equals(name) ? (value -> value.contains("test")) : null);
+        assertThat(converter.apply(singletonMap("test", "my test value"), "test"), is(true));
+        assertThat(converter.apply(singletonMap("test", "other value"), "test"), is(false));
+        assertThat(converter.apply(singletonMap("test", "other value"), "foo"), nullValue());
     }
     
     @DataProvider

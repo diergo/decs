@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Double.parseDouble;
@@ -26,19 +27,30 @@ public class Values {
     }
 
     /**
+     * Converts the value with the key by converting it function returned by the supplier.
+     * The returning function returns {@code null} for a missing converter.
+     * @param <S> the source value type
+     * @param <T> the target value type
+     * @since 3.1.0
+     */
+    public static <S,T> BiFunction<Map<String,S>, String, T> convertedValue(Function<String,Function<S,T>> converterSupplier) {
+        return (values, name) -> {
+            S value = values.get(name);
+            if (value == null) {
+                return null;
+            }
+            Function<S,T> converter = converterSupplier.apply(name);
+            return converter == null ? null : converter.apply(value);
+        };
+    }
+
+    /**
      * Converts the value with the key by parsing it according to the target type.
      * The supported types are: {@link Integer}, {@link Double}, {@link Float},
      * {@link BigDecimal}, {@link BigInteger}, {@link Boolean} and {@link String}
      */
     public static BiFunction<Map<String,String>, String, Object> parsedValue(Map<String,Class<?>> types) {
-        return (values, name) -> {
-            String value = values.get(name);
-            if (value == null) {
-                return null;
-            }
-            Class<?> type = types.get(name);
-            return type == null ? value : parseValue(value, type); 
-        };
+        return convertedValue(name -> (value -> parseValue(value, types.getOrDefault(name, String.class))));
     }
     
     private Values() {
