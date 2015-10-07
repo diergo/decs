@@ -33,9 +33,10 @@ or the [integration test](src/test/java/diergo/csv/CsvIntegrationTest.java).
 For the release notes, have a look at the [change log](CHANGELOG.md).
 
 
-## Build
+## Build ![CI status](https://travis-ci.org/aburmeis/decs.svg)
 
-The project is build with [gradle](https://gradle.org/) and is published to
+The project is build with [gradle](https://gradle.org/) continuously by
+[Travis CI](https://travis-ci.org/aburmeis/decs) and is published to
 [jcenter](http://jcenter.bintray.com/diergo/decs/) under [Apache License Version 2.0](LICENSE).
  
 To integrate the library in your project, use the following dependency:
