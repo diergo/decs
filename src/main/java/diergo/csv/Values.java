@@ -33,13 +33,13 @@ public class Values {
      * @param <T> the target value type
      * @since 3.1.0
      */
-    public static <S,T> BiFunction<Map<String,S>, String, T> convertedValue(Function<String,Function<S,T>> converterSupplier) {
+    public static <S,T> BiFunction<Map<String,S>, String, T> convertedValue(Function<String,Function<S,? extends T>> converterSupplier) {
         return (values, name) -> {
             S value = values.get(name);
             if (value == null) {
                 return null;
             }
-            Function<S,T> converter = converterSupplier.apply(name);
+            Function<S,? extends T> converter = converterSupplier.apply(name);
             return converter == null ? null : converter.apply(value);
         };
     }
