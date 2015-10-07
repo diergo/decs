@@ -28,6 +28,7 @@ import static diergo.csv.Values.parsedValue;
 import static diergo.csv.Writers.toWriter;
 import static java.math.BigDecimal.ROUND_UNNECESSARY;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
@@ -80,7 +81,7 @@ public class CsvIntegrationTest {
             .add(createValues(null, null, "Venture \"Extended Edition\"", null, 4900.0))
             .build()
             .map(withValuesMapped(Values::valueAsString))
-            .map(toRowsWithHeader())
+            .map(toRowsWithHeader(asList("Year", "Make", "Model", "Description", "Price")))
             .flatMap(Collection::stream)
             .map(csvPrinter().separatedBy(',').build())
             .collect(toWriter(new StringWriter(), '\n'));
