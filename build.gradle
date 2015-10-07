@@ -156,6 +156,7 @@ bintray {
 
 build.dependsOn javadoc, jacocoTestReport
 performance.dependsOn downloadTestData
+test.finalizedBy(jacocoTestReport)
 
 def getBranch() {
     return "git rev-parse --abbrev-ref HEAD".execute().text.trim()
