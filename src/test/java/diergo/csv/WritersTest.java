@@ -35,6 +35,13 @@ public class WritersTest {
     }
 
     @Test
+    public void lineSeparatorCanBeConfigured() {
+        StringWriter out = Stream.of("one", "two").collect(toWriter(new StringWriter(), '\n'));
+
+        assertThat(out.toString(), is("one\ntwo\n"));
+    }
+
+    @Test
     public void eachStringIsCollectedUnordered() {
         String[] lines = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
         StringWriter out = Stream.of(lines)

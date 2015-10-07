@@ -28,6 +28,15 @@ public class Writers<O extends Appendable> implements Consumer<String> {
     public static final String CRLF = "\r\n";
 
     /**
+     * Creates a collector writing lines to a specific writer using {@link #CRLF} as line separator.
+     * 
+     * @see #toWriter(Writer, char)
+     */
+    public static <R extends Writer> Collector<String, Appendable, R> toWriter(R out) {
+        return new CsvWriterCollector<>(new Writers<>(out, CRLF), true);
+    }
+
+    /**
      * Creates a collector writing lines to a specific writer.
      * Typical usage for a stream of strings:
      *
@@ -35,9 +44,19 @@ public class Writers<O extends Appendable> implements Consumer<String> {
      * <br/>{@code lines.}{@link java.util.stream.Stream#collect(Collector) collect}({@code toWriter(out)})
      *
      * @param <R> the result type of the reduction operation, any {@link Writer}
+     * @since 3.1.0
      */
-    public static <R extends Writer> Collector<String, Appendable, R> toWriter(R out) {
-        return new CsvWriterCollector<>(new Writers<>(out, CRLF), true);
+    public static <R extends Writer> Collector<String, Appendable, R> toWriter(R out, char lineSep) {
+        return new CsvWriterCollector<>(new Writers<>(out, String.valueOf(lineSep)), true);
+    }
+
+    /**
+     * Creates a collector writing lines to a specific writer using {@link #CRLF} as line separator.
+     * 
+     * @see #toWriterUnordered(Writer, char) 
+     */
+    public static <R extends Writer> Collector<String, Appendable, R> toWriterUnordered(R out) {
+        return new CsvWriterCollector<>(new Writers<>(out, CRLF), false);
     }
 
     /**
@@ -51,9 +70,10 @@ public class Writers<O extends Appendable> implements Consumer<String> {
      *
      * @param <R> the result type of the reduction operation, any {@link Writer}
      * @see Stream#parallel()
+     * @since 3.1.0
      */
-    public static <R extends Writer> Collector<String, Appendable, R> toWriterUnordered(R out) {
-        return new CsvWriterCollector<>(new Writers<>(out, CRLF), false);
+    public static <R extends Writer> Collector<String, Appendable, R> toWriterUnordered(R out, char lineSep) {
+        return new CsvWriterCollector<>(new Writers<>(out, String.valueOf(lineSep)), false);
     }
 
     /**

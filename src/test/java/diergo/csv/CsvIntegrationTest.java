@@ -83,7 +83,7 @@ public class CsvIntegrationTest {
             .map(toRowsWithHeader())
             .flatMap(Collection::stream)
             .map(csvPrinter().separatedBy(',').build())
-            .collect(toWriter(new StringWriter()));
+            .collect(toWriter(new StringWriter(), '\n'));
 
         assertThat(out.toString(), is(readData(csv).replaceAll(",\"\",", ",,")));
     }
