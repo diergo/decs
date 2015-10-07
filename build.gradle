@@ -39,7 +39,7 @@ repositories {
 }
 
 dependencies {
-    compile "com.google.code.findbugs:annotations:${findbugsVersion}"
+    provided "com.google.code.findbugs:annotations:${findbugsVersion}"
 
     optional "org.slf4j:slf4j-api:${slf4jVersion}"
 
