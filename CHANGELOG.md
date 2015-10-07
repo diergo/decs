@@ -13,6 +13,7 @@ Added
 
 * [#2](https://github.com/aburmeis/decs/issues/2): allow access to cells as String[]
 * [#4](https://github.com/aburmeis/decs/issues/4): make line separator of Writers/collector configurable
+* [#5](https://github.com/aburmeis/decs/issues/5): support more map operations (add, rename or remove values)
 
 
 ### 3.0.1
