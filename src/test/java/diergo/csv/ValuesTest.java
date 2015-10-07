@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;
 
 import static diergo.csv.Values.parsedValue;
@@ -65,7 +66,9 @@ public class ValuesTest {
     public static Object[][] parsedValueProvider() {
         return new Object[][] {
             {"1", Integer.class, 1},
+            {"1.5", Float.class, 1.5f},
             {"1.5", Double.class, 1.5},
+            {"8", BigInteger.class, new BigInteger("8")},
             {"5.43", BigDecimal.class, new BigDecimal("5.43")},
             {"DAYS", TimeUnit.class, TimeUnit.DAYS},
             {"true", Boolean.class, true},

@@ -7,10 +7,21 @@ import static diergo.csv.Rows.nullToEmptyCell;
 import static diergo.csv.Rows.rows;
 import static diergo.csv.Rows.toStringArray;
 import static diergo.csv.Rows.trimCell;
+import static diergo.csv.Rows.withoutComments;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 public class RowsTest {
+
+    @Test
+    public void commentsAreFilteredOut() {
+        assertThat(withoutComments(new Comment("")), is(false));
+    }
+
+    @Test
+    public void rowsAreNotFilteredOut() {
+        assertThat(withoutComments(new Cells()), is(true));
+    }
 
     @Test
     public void trimLeavesCommentsUnchanged() {
