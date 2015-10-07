@@ -2,15 +2,16 @@ package diergo.csv;
 
 import org.junit.Test;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import static diergo.csv.Maps.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class MapsTest {
@@ -97,9 +98,30 @@ public class MapsTest {
         values.put("foo", 0);
         values.put("bar", 1);
         Map<String, Integer> result = Maps.<Integer>removingValueInPlace("foo").apply(values);
-        assertThat(result, is(values));
+        assertThat(result, sameInstance(values));
         assertThat(result.size(), is(1));
         assertThat(result, hasEntry("bar", 1));
+    }
+
+    @Test
+    public void valueIsRenamed() {
+        Map<String,Integer> values = new HashMap<>();
+        values.put("foo", 0);
+        values.put("bar", 1);
+        Map<String, Integer> result = Maps.<Integer>renamingValue("bar", "test").apply(unmodifiableMap(values));
+        assertThat(result.size(), is(2));
+        assertThat(result, hasEntry("test", 1));
+    }
+
+    @Test
+    public void valueIsRenamedInPlace() {
+        Map<String,Integer> values = new HashMap<>();
+        values.put("foo", 0);
+        values.put("bar", 1);
+        Map<String, Integer> result = Maps.<Integer>renamingValueInPlace("bar", "test").apply(values);
+        assertThat(result, sameInstance(values));
+        assertThat(result.size(), is(2));
+        assertThat(result, hasEntry("test", 1));
     }
 
     @Test
@@ -113,7 +135,7 @@ public class MapsTest {
         Map<String,Integer> values = new HashMap<>();
         values.put("foo", 0);
         Map<String, Integer> result = Maps.<Integer>addingValueInPlace("test", any -> 1).apply(values);
-        assertThat(result, is(values));
+        assertThat(result, sameInstance(values));
         assertThat(result, allOf(hasEntry("foo", 0), hasEntry("test", 1)));
     }
 }

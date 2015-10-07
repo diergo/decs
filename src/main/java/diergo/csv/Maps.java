@@ -102,6 +102,31 @@ public class Maps {
     }
 
     /**
+     * A mapper for data maps by renaming the key of entries returning a new map.
+     * @param <V> the value type
+     * @since 3.1.0
+     */
+    public static <V> Function<Map<String,V>, Map<String,V>> renamingValue(String oldKey, String newKey) {
+        return row -> {
+            Map<String, V> result = new HashMap<>(row);
+            result.put(newKey, result.remove(oldKey));
+            return result;
+        };
+    }
+
+    /**
+     * A mapper for data maps by renaming the key of entries in place.
+     * @param <V> the value type
+     * @since 3.1.0
+     */
+    public static <V> Function<Map<String,V>, Map<String,V>> renamingValueInPlace(String oldKey, String newKey) {
+        return row -> {
+            row.put(newKey, row.remove(oldKey));
+            return row;
+        };
+    }
+
+    /**
      * A mapper for data maps by adding new entries for a key creating a value from the former values returning a new map.
      * @param <V> the value type
      * @since 3.1.0
