@@ -30,7 +30,7 @@ public class CsvReaderPerformanceTest {
     public static final String MAXMIND_WORLD_CITIES_POP = "/worldcitiespop.txt";
 
     @Test
-    @DataProvider({"true,false,2500","false,false,2500","true,true,50","false,true,50"})
+    @DataProvider({"true,false,2500","false,false,2500","true,true,100","false,true,100"})
     public void readMillions(boolean usingFlatMap, boolean parallel, long maxTime) throws IOException {
         String kind = (usingFlatMap ? "using flat map" : "using filter and map")
             + ", " + (parallel ? "parallel" : "sequential");
@@ -50,7 +50,7 @@ public class CsvReaderPerformanceTest {
         });
         double average = LongStream.of(times).average().getAsDouble();
         System.out.println(String.format("average %s is %.0fms", kind, average));
-        assertThat("acceptable average[ms]", average, lessThan((double)maxTime));
+        assertThat("acceptable average[ms] for " + kind, average, lessThan((double)maxTime));
     }
     
     private long[] runOnce(boolean usingFlatMap, boolean parallel) throws IOException {
