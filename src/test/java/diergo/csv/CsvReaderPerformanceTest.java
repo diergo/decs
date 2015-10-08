@@ -7,8 +7,6 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.LongStream;
@@ -30,7 +28,7 @@ public class CsvReaderPerformanceTest {
     public static final String MAXMIND_WORLD_CITIES_POP = "/worldcitiespop.txt";
 
     @Test
-    @DataProvider({"true,false,2500","false,false,2500","true,true,100","false,true,100"})
+    @DataProvider({"true,false,2500","false,false,2500","true,true,1000","false,true,1000"})
     public void readMillions(boolean usingFlatMap, boolean parallel, long maxTime) throws IOException {
         String kind = (usingFlatMap ? "using flat map" : "using filter and map")
             + ", " + (parallel ? "parallel" : "sequential");
@@ -55,8 +53,7 @@ public class CsvReaderPerformanceTest {
     
     private long[] runOnce(boolean usingFlatMap, boolean parallel) throws IOException {
         InputStreamReader worldCitiesPopulation = new InputStreamReader(getClass().getResourceAsStream(MAXMIND_WORLD_CITIES_POP), UTF_8);
-        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-        long start = threadMXBean.getCurrentThreadCpuTime();
+        long start = System.currentTimeMillis();
         Stream<String> lines = asLines(worldCitiesPopulation);
         if (parallel) {
             lines = lines.parallel();
@@ -66,7 +63,7 @@ public class CsvReaderPerformanceTest {
         long count = (usingFlatMap ? intermediate.flatMap(Collection::stream) :
                 intermediate.filter(rows -> !rows.isEmpty()).map(rows -> rows.get(0)))
             .count();
-        long durations = (threadMXBean.getCurrentThreadCpuTime() - start) / 1000000L;
+        long durations = System.currentTimeMillis() - start;
         try {
             return new long[]{durations, count};
         } finally {
