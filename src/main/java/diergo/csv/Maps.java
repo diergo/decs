@@ -2,7 +2,11 @@ package diergo.csv;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -10,6 +14,7 @@ import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.function.UnaryOperator.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -38,32 +43,38 @@ public class Maps {
      * A mapper to convert data maps to rows using the columns order in header.
      * Other map values are ignored. The columns names are not written as header.
      */
-    public static Function<Map<String,String>, List<Row>> toRows(List<String> header) {
-        return new Map2RowFunction(false, header);
+    public static Function<Map<String,String>, Row> toRows(List<String> header) {
+        return new Map2RowFunction<>(false, header, rows -> rows.get(0));
     }
 
     /**
      * A mapper to convert data maps to rows using the columns order in header.
      * Other map values are ignored. The columns names are written as header.
+     * The first result will contain two rows, the remaining ones one row.
+     * 
+     * @see java.util.stream.Stream#flatMap(Function) 
      */
     public static Function<Map<String,String>, List<Row>> toRowsWithHeader(List<String> header) {
-        return new Map2RowFunction(true, header);
+        return new Map2RowFunction<>(true, header, identity());
     }
 
     /**
      * A mapper to convert data maps to rows using the keys of the first data map as columns names.
      * The columns names are not written as header.
      */
-    public static Function<Map<String,String>, List<Row>> toRows() {
-        return new Map2RowFunction(false, null);
+    public static Function<Map<String,String>, Row> toRows() {
+        return new Map2RowFunction<>(false, null, rows -> rows.get(0));
     }
 
     /**
      * A mapper to convert data maps to rows using the keys of the first data map as columns names.
      * The columns names are written as header.
+     * The first result will contain two rows, the remaining ones one row.
+     *
+     * @see java.util.stream.Stream#flatMap(Function)
      */
     public static Function<Map<String,String>, List<Row>> toRowsWithHeader() {
-        return new Map2RowFunction(true, null);
+        return new Map2RowFunction<>(true, null, identity());
     }
 
     /**
@@ -185,19 +196,21 @@ public class Maps {
         }
     }
 
-    private static class Map2RowFunction implements Function<Map<String, String>, List<Row>> {
+    private static class Map2RowFunction<R> implements Function<Map<String, String>, R> {
 
         private final AtomicReference<List<String>> header;
+        private final Function<List<Row>, R> resultMapper;
         private final AtomicBoolean headerNeeded;
 
-        public Map2RowFunction(boolean includeHeader, List<String> header) {
+        public Map2RowFunction(boolean includeHeader, List<String> header, Function<List<Row>, R> resultMapper) {
             this.header = new AtomicReference<>(header);
+            this.resultMapper = resultMapper;
             this.headerNeeded = new AtomicBoolean(includeHeader);
         }
 
         @Override
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
-        public List<Row> apply(Map<String, String> values) {
+        public R apply(Map<String, String> values) {
             List<Row> result = new ArrayList<>();
             List<String> headers = header.get();
             if (headers == null && header.compareAndSet(null, values.keySet().stream().collect(toList()))) {
@@ -213,7 +226,7 @@ public class Maps {
                 columns.add(value == null ? null : value);
             }
             result.add(new Cells(columns));
-            return result;
+            return resultMapper.apply(result);
         }
     }
 

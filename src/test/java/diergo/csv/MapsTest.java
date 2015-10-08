@@ -48,9 +48,8 @@ public class MapsTest {
         values.put("one", "1");
         values.put("two", "2");
         values.put("three", "3");
-        List<Row> result = toRows(asList("one", "two")).apply(values);
-        assertThat(result.size(), is(1));
-        assertThat(result.get(0), is(new Cells("1", "2")));
+        Row result = toRows(asList("one", "two")).apply(values);
+        assertThat(result, is(new Cells("1", "2")));
     }
 
     @Test
