@@ -11,9 +11,10 @@ file. This project adheres to [Semantic Versioning](http://semver.org).
 
 Added
 
-* [#2](https://github.com/aburmeis/decs/issues/2): allow access to cells as String[]
-* [#4](https://github.com/aburmeis/decs/issues/4): make line separator of Writers/collector configurable
-* [#5](https://github.com/aburmeis/decs/issues/5): support more map operations (add, rename or remove values)
+* [Rows](src/main/diergo/csv/Rows.java) has new method `toStringArray` ([#2](https://github.com/aburmeis/decs/issues/2))
+* [Writers](src/main/diergo/csv/Writers.java) has new methods `toWriter` and `toWriterUnordered` with optional line separator ([#4](https://github.com/aburmeis/decs/issues/4))
+* [Maps](src/main/diergo/csv/Maps.java) has many new methods to manipulate maps like `removingValue`, `renamingValue` and `renamingValue` also with in place options ([#5](https://github.com/aburmeis/decs/issues/5))
+* [Values](src/main/diergo/csv/Values.java) has a new method `convertedValue` to allow more flexible conversions than the former `parsedValue` only. 
 
 
 ### 3.0.1
