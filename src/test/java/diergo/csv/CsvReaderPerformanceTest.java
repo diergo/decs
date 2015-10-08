@@ -30,16 +30,17 @@ public class CsvReaderPerformanceTest {
     public static final String MAXMIND_WORLD_CITIES_POP = "/worldcitiespop.txt";
 
     @Test
-    @DataProvider({"true","false"})
-    public void readMillions(boolean usingFlatMap) throws IOException {
-        String kind = usingFlatMap ? "using flat map" : "using filter and map";
+    @DataProvider({"true,false,2500","false,false,2500","true,true,50","false,true,50"})
+    public void readMillions(boolean usingFlatMap, boolean parallel, long maxTime) throws IOException {
+        String kind = (usingFlatMap ? "using flat map" : "using filter and map")
+            + ", " + (parallel ? "parallel" : "sequential");
         System.out.println("starting dry run " + kind + "…");
-        runOnce(usingFlatMap);
+        runOnce(usingFlatMap, parallel);
         long[] times = new long[6];
         rangeClosed(1, times.length).forEachOrdered(loop -> {
             try {
                 System.out.print(String.format("loop %d", loop));
-                long[] timeAndCount = runOnce(usingFlatMap);
+                long[] timeAndCount = runOnce(usingFlatMap, parallel);
                 times[loop - 1] = timeAndCount[0];
                 System.out.println(String.format(" took %dms to read %d rows", timeAndCount[0], timeAndCount[1]));
                 assertThat(timeAndCount[1], greaterThan(3000000L));
@@ -49,18 +50,22 @@ public class CsvReaderPerformanceTest {
         });
         double average = LongStream.of(times).average().getAsDouble();
         System.out.println(String.format("average %s is %.0fms", kind, average));
-        assertThat("acceptable average[ms]", average, lessThan(2000.0));
+        assertThat("acceptable average[ms]", average, lessThan((double)maxTime));
     }
     
-    private long[] runOnce(boolean usingFlatMap) throws IOException {
+    private long[] runOnce(boolean usingFlatMap, boolean parallel) throws IOException {
         InputStreamReader worldCitiesPopulation = new InputStreamReader(getClass().getResourceAsStream(MAXMIND_WORLD_CITIES_POP), UTF_8);
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         long start = threadMXBean.getCurrentThreadCpuTime();
-        Stream<List<Row>> intermediate = asLines(worldCitiesPopulation)
+        Stream<String> lines = asLines(worldCitiesPopulation);
+        if (parallel) {
+            lines = lines.parallel();
+        }
+        Stream<List<Row>> intermediate = lines
                 .map(csvParser().separatedBy(',').handlingErrors(ignoreErrors()).build());
         long count = (usingFlatMap ? intermediate.flatMap(Collection::stream) :
                 intermediate.filter(rows -> !rows.isEmpty()).map(rows -> rows.get(0)))
-                .count();
+            .count();
         long durations = (threadMXBean.getCurrentThreadCpuTime() - start) / 1000000L;
         try {
             return new long[]{durations, count};
