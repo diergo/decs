@@ -87,9 +87,10 @@ public class MapsTest {
         Map<String,Integer> values = new HashMap<>();
         values.put("foo", 0);
         values.put("bar", 1);
-        Map<String, Integer> result = Maps.<Integer>removingValue("foo").apply(unmodifiableMap(values));
+        values.put("test", 2);
+        Map<String, Integer> result = Maps.<Integer>removingValue("foo", "bar").apply(unmodifiableMap(values));
         assertThat(result.size(), is(1));
-        assertThat(result, hasEntry("bar", 1));
+        assertThat(result, hasEntry("test", 2));
     }
 
     @Test
@@ -97,10 +98,11 @@ public class MapsTest {
         Map<String,Integer> values = new HashMap<>();
         values.put("foo", 0);
         values.put("bar", 1);
-        Map<String, Integer> result = Maps.<Integer>removingValueInPlace("foo").apply(values);
+        values.put("test", 2);
+        Map<String, Integer> result = Maps.<Integer>removingValueInPlace("foo", "bar").apply(values);
         assertThat(result, sameInstance(values));
         assertThat(result.size(), is(1));
-        assertThat(result, hasEntry("bar", 1));
+        assertThat(result, hasEntry("test", 2));
     }
 
     @Test

@@ -81,10 +81,12 @@ public class Maps {
      * @param <V> the value type
      * @since 3.1.0
      */
-    public static <V> Function<Map<String,V>, Map<String,V>> removingValue(String key) {
+    public static <V> Function<Map<String,V>, Map<String,V>> removingValue(String... keys) {
         return row -> {
             Map<String, V> result = new HashMap<>(row);
-            result.remove(key);
+            for (String key : keys) {
+                result.remove(key);
+            }
             return result;
         };
     }
@@ -94,9 +96,11 @@ public class Maps {
      * @param <V> the value type
      * @since 3.1.0
      */
-    public static <V> Function<Map<String,V>, Map<String,V>> removingValueInPlace(String key) {
+    public static <V> Function<Map<String,V>, Map<String,V>> removingValueInPlace(String... keys) {
         return row -> {
-            row.remove(key);
+            for (String key : keys) {
+                row.remove(key);
+            }
             return row;
         };
     }
