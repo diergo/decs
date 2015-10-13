@@ -8,19 +8,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static diergo.csv.CsvParserBuilder.csvParser;
 import static diergo.csv.CsvPrinterBuilder.csvPrinter;
-import static diergo.csv.Maps.toMaps;
-import static diergo.csv.Maps.toRowsWithHeader;
-import static diergo.csv.Maps.withValuesMapped;
+import static diergo.csv.Maps.*;
 import static diergo.csv.Readers.asLines;
 import static diergo.csv.Rows.emptyCellToNull;
 import static diergo.csv.Rows.rows;
@@ -28,7 +21,6 @@ import static diergo.csv.Values.parsedValue;
 import static diergo.csv.Writers.toWriter;
 import static java.math.BigDecimal.ROUND_UNNECESSARY;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
@@ -55,7 +47,7 @@ public class CsvIntegrationTest {
             .map(csvParser().separatedBy(',').build()).flatMap(Collection::stream)
             .map(rows(emptyCellToNull()))
             .map(toMaps()).flatMap(Collection::stream)
-            .map(withValuesMapped(parsedValue(VALUE_TYPES)))
+            .map(Maps.<String,Object>withValuesMapped(HashMap::new, parsedValue(VALUE_TYPES)))
             .collect(toList());
 
         assertThat(rows.size(), is(5));
@@ -80,8 +72,8 @@ public class CsvIntegrationTest {
             .add(createValues(1999, "Chevy", "Venture \"Extended Edition, Very Large\"", null, 5000.0))
             .add(createValues(null, null, "Venture \"Extended Edition\"", null, 4900.0))
             .build()
-            .map(withValuesMapped(Values::valueAsString))
-            .map(toRowsWithHeader(asList("Year", "Make", "Model", "Description", "Price")))
+            .map(Maps.<Object,String>withValuesMapped(LinkedHashMap::new, Values::valueAsString))
+            .map(toRowsWithHeader())
             .flatMap(Collection::stream)
             .map(csvPrinter().separatedBy(',').build())
             .collect(toWriter(new StringWriter(), '\n'));

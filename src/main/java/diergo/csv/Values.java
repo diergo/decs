@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Double.parseDouble;
@@ -14,7 +15,7 @@ import static java.lang.Integer.parseInt;
 /**
  * Helpers to work with data {@link Map}s.
  *
- * @see Maps#withValuesMapped(BiFunction)
+ * @see Maps#withValuesMapped(Supplier, BiFunction)
  */
 public class Values {
 

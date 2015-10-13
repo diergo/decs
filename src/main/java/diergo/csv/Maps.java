@@ -2,15 +2,13 @@ package diergo.csv;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -81,20 +79,28 @@ public class Maps {
      * A mapper for data maps by converting all values using a function.
      * @param <S> the source value type
      * @param <T> the target value type
+     * @param supplier creating the result typee, e.g. {@link HashMap#HashMap(Map)}
      * @see Values
      */
-    public static <S,T> Function<Map<String,S>, Map<String,T>> withValuesMapped(BiFunction<Map<String,S>,String,? extends T> valueMapper) {
-        return new ValueMapperFunction<>(valueMapper);
+    public static <S,T> Function<Map<String,S>, Map<String,T>> withValuesMapped(Supplier<Map<String, T>> supplier, BiFunction<Map<String, S>, String, ? extends T> valueMapper) {
+        return row -> {
+            Map<String, T> result = supplier.get();
+            for (Map.Entry<String, S> entry : row.entrySet()) {
+                result.put(entry.getKey(), valueMapper.apply(row, entry.getKey()));
+            }
+            return result;
+        };
     }
 
     /**
      * A mapper for data maps by removing the entries for a key returning a new map.
      * @param <V> the value type
+     * @param supplier creating the result from the source, e.g. {@link HashMap#HashMap(Map)} or {@link UnaryOperator#identity()}
      * @since 3.1.0
      */
-    public static <V> Function<Map<String,V>, Map<String,V>> removingValue(String... keys) {
+    public static <V> Function<Map<String,V>, Map<String,V>> removingValue(UnaryOperator<Map<String, V>> supplier, String... keys) {
         return row -> {
-            Map<String, V> result = new HashMap<>(row);
+            Map<String, V> result = supplier.apply(row);
             for (String key : keys) {
                 result.remove(key);
             }
@@ -103,66 +109,30 @@ public class Maps {
     }
 
     /**
-     * A mapper for data maps by removing the entries for a key returning in place.
-     * @param <V> the value type
-     * @since 3.1.0
-     */
-    public static <V> Function<Map<String,V>, Map<String,V>> removingValueInPlace(String... keys) {
-        return row -> {
-            for (String key : keys) {
-                row.remove(key);
-            }
-            return row;
-        };
-    }
-
-    /**
      * A mapper for data maps by renaming the key of entries returning a new map.
      * @param <V> the value type
+     * @param supplier creating the result from the source, e.g. {@link HashMap#HashMap(Map)} or {@link UnaryOperator#identity()}
      * @since 3.1.0
      */
-    public static <V> Function<Map<String,V>, Map<String,V>> renamingValue(String oldKey, String newKey) {
+    public static <V> Function<Map<String,V>, Map<String,V>> renamingValue(UnaryOperator<Map<String, V>> supplier, String oldKey, String newKey) {
         return row -> {
-            Map<String, V> result = new HashMap<>(row);
+            Map<String, V> result = supplier.apply(row);
             result.put(newKey, result.remove(oldKey));
             return result;
         };
     }
 
     /**
-     * A mapper for data maps by renaming the key of entries in place.
-     * @param <V> the value type
-     * @since 3.1.0
-     */
-    public static <V> Function<Map<String,V>, Map<String,V>> renamingValueInPlace(String oldKey, String newKey) {
-        return row -> {
-            row.put(newKey, row.remove(oldKey));
-            return row;
-        };
-    }
-
-    /**
      * A mapper for data maps by adding new entries for a key creating a value from the former values returning a new map.
      * @param <V> the value type
+     * @param supplier creating the result from the source, e.g. {@link HashMap#HashMap(Map)} or {@link UnaryOperator#identity()}
      * @since 3.1.0
      */
-    public static <V> Function<Map<String,V>, Map<String,V>> addingValue(String key, Function<Map<String, V>, ? extends V> valueCreator) {
+    public static <V> Function<Map<String,V>, Map<String,V>> addingValue(UnaryOperator<Map<String, V>> supplier, String key, Function<Map<String, V>, ? extends V> valueCreator) {
         return row -> {
-            Map<String, V> result = new HashMap<>(row);
+            Map<String, V> result = supplier.apply(row);
             result.put(key, valueCreator.apply(row));
             return result;
-        };
-    }
-
-    /**
-     * A mapper for data maps by adding new entries for a key creating a value from the former values in place.
-     * @param <V> the value type
-     * @since 3.1.0
-     */
-    public static <V> Function<Map<String,V>, Map<String,V>> addingValueInPlace(String key, Function<Map<String, V>, ? extends V> valueCreator) {
-        return row -> {
-            row.put(key, valueCreator.apply(row));
-            return row;
         };
     }
 
@@ -227,24 +197,6 @@ public class Maps {
             }
             result.add(new Cells(columns));
             return resultMapper.apply(result);
-        }
-    }
-
-    private static class ValueMapperFunction<S,T> implements Function<Map<String, S>, Map<String, T>> {
-
-        private final BiFunction<Map<String,S>,String,? extends T> valueMapper;
-
-        public ValueMapperFunction(BiFunction<Map<String,S>,String,? extends T> valueMapper) {
-            this.valueMapper = valueMapper;
-        }
-
-        @Override
-        public Map<String, T> apply(Map<String, S> source) {
-            Map<String, T> result = new HashMap<>();
-            for (Map.Entry<String,S> entry : source.entrySet()) {
-                result.put(entry.getKey(), valueMapper.apply(source, entry.getKey()));
-            }
-            return result;
         }
     }
 }

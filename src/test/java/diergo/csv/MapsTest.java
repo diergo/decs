@@ -11,6 +11,7 @@ import java.util.function.Function;
 import static diergo.csv.Maps.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
+import static java.util.function.UnaryOperator.identity;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -77,7 +78,7 @@ public class MapsTest {
     @Test
     public void valuesAreMapped() {
         Object mapped = new Object();
-        assertThat(withValuesMapped((values, name) -> mapped).apply(singletonMap("test", "x")),
+        assertThat(Maps.<String,Object>withValuesMapped(HashMap::new, (values, name) -> mapped).apply(singletonMap("test", "x")),
             is(singletonMap("test", mapped)));
     }
 
@@ -87,7 +88,7 @@ public class MapsTest {
         values.put("foo", 0);
         values.put("bar", 1);
         values.put("test", 2);
-        Map<String, Integer> result = Maps.<Integer>removingValue("foo", "bar").apply(unmodifiableMap(values));
+        Map<String, Integer> result = Maps.<Integer>removingValue(HashMap::new, "foo", "bar").apply(unmodifiableMap(values));
         assertThat(result.size(), is(1));
         assertThat(result, hasEntry("test", 2));
     }
@@ -98,7 +99,7 @@ public class MapsTest {
         values.put("foo", 0);
         values.put("bar", 1);
         values.put("test", 2);
-        Map<String, Integer> result = Maps.<Integer>removingValueInPlace("foo", "bar").apply(values);
+        Map<String, Integer> result = Maps.<Integer>removingValue(identity(), "foo", "bar").apply(values);
         assertThat(result, sameInstance(values));
         assertThat(result.size(), is(1));
         assertThat(result, hasEntry("test", 2));
@@ -109,7 +110,7 @@ public class MapsTest {
         Map<String,Integer> values = new HashMap<>();
         values.put("foo", 0);
         values.put("bar", 1);
-        Map<String, Integer> result = Maps.<Integer>renamingValue("bar", "test").apply(unmodifiableMap(values));
+        Map<String, Integer> result = Maps.<Integer>renamingValue(HashMap::new, "bar", "test").apply(unmodifiableMap(values));
         assertThat(result.size(), is(2));
         assertThat(result, hasEntry("test", 1));
     }
@@ -119,7 +120,7 @@ public class MapsTest {
         Map<String,Integer> values = new HashMap<>();
         values.put("foo", 0);
         values.put("bar", 1);
-        Map<String, Integer> result = Maps.<Integer>renamingValueInPlace("bar", "test").apply(values);
+        Map<String, Integer> result = Maps.<Integer>renamingValue(identity(), "bar", "test").apply(values);
         assertThat(result, sameInstance(values));
         assertThat(result.size(), is(2));
         assertThat(result, hasEntry("test", 1));
@@ -127,7 +128,7 @@ public class MapsTest {
 
     @Test
     public void valueIsAdded() {
-        assertThat(addingValue("test", any -> 1).apply(singletonMap("foo", 0)),
+        assertThat(addingValue(HashMap::new, "test", any -> 1).apply(singletonMap("foo", 0)),
                 allOf(hasEntry("foo", 0), hasEntry("test", 1)));
     }
 
@@ -135,7 +136,8 @@ public class MapsTest {
     public void valueIsAddedInPlace() {
         Map<String,Integer> values = new HashMap<>();
         values.put("foo", 0);
-        Map<String, Integer> result = Maps.<Integer>addingValueInPlace("test", any -> 1).apply(values);
+        Function<Map<String, Integer>, ? extends Integer> valueCreator = any -> 1;
+        Map<String, Integer> result = addingValue(identity(), "test", valueCreator).apply(values);
         assertThat(result, sameInstance(values));
         assertThat(result, allOf(hasEntry("foo", 0), hasEntry("test", 1)));
     }
