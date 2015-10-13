@@ -2,20 +2,17 @@ package diergo.csv;
 
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static diergo.csv.Maps.toMaps;
-import static diergo.csv.Maps.toRows;
-import static diergo.csv.Maps.toRowsWithHeader;
-import static diergo.csv.Maps.withValuesMapped;
+import static diergo.csv.Maps.*;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.Matchers.is;
+import static java.util.Collections.*;
+import static java.util.function.UnaryOperator.identity;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class MapsTest {
@@ -52,9 +49,8 @@ public class MapsTest {
         values.put("one", "1");
         values.put("two", "2");
         values.put("three", "3");
-        List<Row> result = toRows(asList("one", "two")).apply(values);
-        assertThat(result.size(), is(1));
-        assertThat(result.get(0), is(new Cells("1", "2")));
+        Row result = toRows(asList("one", "two")).apply(values);
+        assertThat(result, is(new Cells("1", "2")));
     }
 
     @Test
@@ -82,7 +78,67 @@ public class MapsTest {
     @Test
     public void valuesAreMapped() {
         Object mapped = new Object();
-        assertThat(withValuesMapped((values, name) -> mapped).apply(singletonMap("test", "x")),
+        assertThat(Maps.<String,Object>withValuesMapped(HashMap::new, (values, name) -> mapped).apply(singletonMap("test", "x")),
             is(singletonMap("test", mapped)));
+    }
+
+    @Test
+    public void valueIsRemoved() {
+        Map<String,Integer> values = new HashMap<>();
+        values.put("foo", 0);
+        values.put("bar", 1);
+        values.put("test", 2);
+        Map<String, Integer> result = Maps.<Integer>removingValue(HashMap::new, "foo", "bar").apply(unmodifiableMap(values));
+        assertThat(result.size(), is(1));
+        assertThat(result, hasEntry("test", 2));
+    }
+
+    @Test
+    public void valueIsRemovedInPlace() {
+        Map<String,Integer> values = new HashMap<>();
+        values.put("foo", 0);
+        values.put("bar", 1);
+        values.put("test", 2);
+        Map<String, Integer> result = Maps.<Integer>removingValue(identity(), "foo", "bar").apply(values);
+        assertThat(result, sameInstance(values));
+        assertThat(result.size(), is(1));
+        assertThat(result, hasEntry("test", 2));
+    }
+
+    @Test
+    public void valueIsRenamed() {
+        Map<String,Integer> values = new HashMap<>();
+        values.put("foo", 0);
+        values.put("bar", 1);
+        Map<String, Integer> result = Maps.<Integer>renamingValue(HashMap::new, "bar", "test").apply(unmodifiableMap(values));
+        assertThat(result.size(), is(2));
+        assertThat(result, hasEntry("test", 1));
+    }
+
+    @Test
+    public void valueIsRenamedInPlace() {
+        Map<String,Integer> values = new HashMap<>();
+        values.put("foo", 0);
+        values.put("bar", 1);
+        Map<String, Integer> result = Maps.<Integer>renamingValue(identity(), "bar", "test").apply(values);
+        assertThat(result, sameInstance(values));
+        assertThat(result.size(), is(2));
+        assertThat(result, hasEntry("test", 1));
+    }
+
+    @Test
+    public void valueIsAdded() {
+        assertThat(addingValue(HashMap::new, "test", any -> 1).apply(singletonMap("foo", 0)),
+                allOf(hasEntry("foo", 0), hasEntry("test", 1)));
+    }
+
+    @Test
+    public void valueIsAddedInPlace() {
+        Map<String,Integer> values = new HashMap<>();
+        values.put("foo", 0);
+        Function<Map<String, Integer>, ? extends Integer> valueCreator = any -> 1;
+        Map<String, Integer> result = addingValue(identity(), "test", valueCreator).apply(values);
+        assertThat(result, sameInstance(values));
+        assertThat(result, allOf(hasEntry("foo", 0), hasEntry("test", 1)));
     }
 }

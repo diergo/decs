@@ -16,17 +16,28 @@ a column value, the value has to be quoted.
 
 ## Usage
 
-The [package](src/main/java/diergo/csv) contains a tool box to read and write CSV data using
-[Java 8 Streams](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
-and [functional interfaces](https://docs.oracle.com/javase/8/docs/api/java/lang/FunctionalInterface.html). You can easily connect the functionaliy by using [`map()`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#map-java.util.function.Function-), [`filter()`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#filter-java.util.function.Predicate-) and [`collect()`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#collect-java.util.stream.Collector-) of a [`Stream`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html). As there are no direct dependencies of the tools you can simply extend it for your needs by creating new lambdas or functional interfaces and inject them to mappings and filters.
+The [package](src/main/java/diergo/csv) contains a tool box to read and write
+CSV data using [Java 8 Streams](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
+and [functional interfaces](https://docs.oracle.com/javase/8/docs/api/java/lang/FunctionalInterface.html).
+You can easily connect the functionaliy by using
+[`map()`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#map-java.util.function.Function-),
+[`filter()`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#filter-java.util.function.Predicate-)
+and [`collect()`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#collect-java.util.stream.Collector-)
+of a [`Stream`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html).
+As there are no direct dependencies of the tools you can simply extend it for
+your needs by creating new lambdas or functional interfaces and inject them to
+mappings and filters.
 
 For an example usage have a look at the [package documentation](src/main/java/diergo/csv/package-info.java)
 or the [integration test](src/test/java/diergo/csv/CsvIntegrationTest.java).
+For the release notes, have a look at the [change log](CHANGELOG.md).
 
 
-## Build
+## Build ![CI status](https://travis-ci.org/aburmeis/decs.svg)
 
-The project is build with [gradle](https://gradle.org/) and is published to
+The project is build with [gradle](https://gradle.org/) continuously by
+[Travis CI](https://travis-ci.org/aburmeis/decs/) and is published via
+[Bintray](https://bintray.com/aburmeis/maven/decs/) to
 [jcenter](http://jcenter.bintray.com/diergo/decs/) under [Apache License Version 2.0](LICENSE).
  
 To integrate the library in your project, use the following dependency:
@@ -34,7 +45,7 @@ To integrate the library in your project, use the following dependency:
 **gradle:**
 
 ```gradle
-  compile 'diergo:decs:3.0.0-RELEASE'
+  compile 'diergo:decs:3.0.1-RELEASE'
 ```
 
 **maven:**
@@ -42,7 +53,7 @@ To integrate the library in your project, use the following dependency:
   <dependency>
     <groupId>diergo</groupId>
     <artifactId>decs</artifactId>
-    <version>3.0.0-RELEASE</version>
+    <version>3.0.1-RELEASE</version>
   </dependency>
 ```
 

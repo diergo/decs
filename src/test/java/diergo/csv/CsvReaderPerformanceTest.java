@@ -1,59 +1,73 @@
 package diergo.csv;
 
-import org.junit.BeforeClass;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collection;
-import java.util.zip.GZIPInputStream;
+import java.util.List;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static diergo.csv.CsvParserBuilder.csvParser;
 import static diergo.csv.ErrorHandlers.ignoreErrors;
 import static diergo.csv.Readers.asLines;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.IntStream.rangeClosed;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assume.assumeNoException;
+import static org.junit.Assert.fail;
 
+@RunWith(DataProviderRunner.class)
 public class CsvReaderPerformanceTest {
 
-    public static final String MAXMIND_WORLD_CITIES_POP =
-        "http://www.maxmind.com/download/worldcities/worldcitiespop.txt.gz";
-
-    private static Path WORLDS_CITIES_POP;
+    public static final String MAXMIND_WORLD_CITIES_POP = "/worldcitiespop.txt";
 
     @Test
-    public void readerHandlesHugeAmountOfData() throws IOException {
-        InputStreamReader worldCitiesPopulation = new InputStreamReader(new FileInputStream(WORLDS_CITIES_POP.toFile()), StandardCharsets.UTF_8);
-
-        long start = System.currentTimeMillis();
-        long count = asLines(worldCitiesPopulation)
-            .map(csvParser().separatedBy(',').handlingErrors(ignoreErrors()).build()).flatMap(Collection::stream)
-            .count();
-        long time = (System.currentTimeMillis() - start);
-        System.out.println("took " + time + " ms to read " + count + " rows. ");
-        assertThat(count, greaterThan(3000000L));
+    @DataProvider({"true,false,2500","false,false,2500","true,true,1000","false,true,1000"})
+    public void readMillions(boolean usingFlatMap, boolean parallel, long maxTime) throws IOException {
+        String kind = (usingFlatMap ? "using flat map" : "using filter and map")
+            + ", " + (parallel ? "parallel" : "sequential");
+        System.out.println("starting dry run " + kind + "…");
+        runOnce(usingFlatMap, parallel);
+        long[] times = new long[6];
+        rangeClosed(1, times.length).forEachOrdered(loop -> {
+            try {
+                System.out.print(String.format("loop %d", loop));
+                long[] timeAndCount = runOnce(usingFlatMap, parallel);
+                times[loop - 1] = timeAndCount[0];
+                System.out.println(String.format(" took %dms to read %d rows", timeAndCount[0], timeAndCount[1]));
+                assertThat(timeAndCount[1], greaterThan(3000000L));
+            } catch (IOException e) {
+                fail(e.getMessage());
+            }
+        });
+        double average = LongStream.of(times).average().getAsDouble();
+        System.out.println(String.format("average %s is %.0fms", kind, average));
+        assertThat("acceptable average[ms] for " + kind, average, lessThan((double)maxTime));
     }
-
-    @BeforeClass
-    public static void cacheFilesLocally() throws IOException {
-        WORLDS_CITIES_POP = Files.createTempFile("worldcitiespop", "txt");
-        URL url = new URL(MAXMIND_WORLD_CITIES_POP);
+    
+    private long[] runOnce(boolean usingFlatMap, boolean parallel) throws IOException {
+        InputStreamReader worldCitiesPopulation = new InputStreamReader(getClass().getResourceAsStream(MAXMIND_WORLD_CITIES_POP), UTF_8);
+        long start = System.currentTimeMillis();
+        Stream<String> lines = asLines(worldCitiesPopulation);
+        if (parallel) {
+            lines = lines.parallel();
+        }
+        Stream<List<Row>> intermediate = lines
+                .map(csvParser().separatedBy(',').handlingErrors(ignoreErrors()).build());
+        long count = (usingFlatMap ? intermediate.flatMap(Collection::stream) :
+                intermediate.filter(rows -> !rows.isEmpty()).map(rows -> rows.get(0)))
+            .count();
+        long durations = System.currentTimeMillis() - start;
         try {
-            URLConnection connection = url.openConnection();
-            connection.setConnectTimeout(500);
-            connection.setReadTimeout(1000);
-            Files.copy(new GZIPInputStream(connection.getInputStream()), WORLDS_CITIES_POP, REPLACE_EXISTING);
-        } catch (IOException error) {
-            System.out.print("cannot read " + MAXMIND_WORLD_CITIES_POP + ", performance test skipped");
-            assumeNoException(error); 
+            return new long[]{durations, count};
+        } finally {
+            worldCitiesPopulation.close();
         }
     }
 }

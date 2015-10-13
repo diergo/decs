@@ -11,12 +11,18 @@ import static diergo.csv.Row.DEFAULT_QUOTE;
 /**
  * Configure and build a CSV parser. Typically this is used as a mapper for a stream of lines:
  * 
- * {@link Readers#asLines(Reader) asLines}(in).{@link java.util.stream.Stream#map(Function) map}({@link #csvParser()}.{@link #build()}).{@link java.util.stream.Stream#flatMap(Function) flatMap}({@link Collection#stream() Collection::stream})
+ * {@link Readers#asLines(Reader) asLines}(in)
+ *   .{@link java.util.stream.Stream#map(Function) map}({@link #csvParser()}.{@link #build()})
+ *   .{@link java.util.stream.Stream#flatMap(Function) flatMap}({@link Collection#stream() Collection::stream})
+ *   
+ * The parser will return one row for most lines, zero rows if the end of line is part of a quoted cell
+ * and any number of rows created by an {@link #handlingErrors(BiFunction) error handler} on invalid data.   
  * 
- * Don't forget the {@code flatMap()} call as the parser may return zero to multiple rows per line! 
+ * Don't forget the {@code flatMap(Collection::stream)} call as the parser may return zero to multiple rows per line!
  * 
  * @see Readers#asLines(Reader) 
  * @see java.util.stream.Stream#map(Function)
+ * @see java.util.stream.Stream#flatMap(Function)
  */
 public class CsvParserBuilder {
 

@@ -12,6 +12,8 @@ import static java.util.stream.StreamSupport.stream;
  */
 public class Rows {
 
+    private static final String[] NO_CELLS = new String[0];
+
     /**
      * A filter to exclude comments.
      * @see java.util.stream.Stream#filter(Predicate) 
@@ -51,6 +53,15 @@ public class Rows {
      */
     public static UnaryOperator<String> nullToEmptyCell() {
         return cell -> cell == null ? "" : cell;
+    }
+
+    /**
+     * A mapper to generate cell values as array.
+     * @see java.util.stream.Stream#map(Function)
+     * @since 3.1.0
+     */
+    public static String[] toStringArray(Row row) {
+        return row.isComment() ? NO_CELLS : stream(row.spliterator(), false).toArray(String[]::new);
     }
 
     private Rows() {

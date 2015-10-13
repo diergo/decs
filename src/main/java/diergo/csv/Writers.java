@@ -1,8 +1,5 @@
 package diergo.csv;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.io.Writer;
@@ -23,7 +20,21 @@ import static java.util.stream.Collector.Characteristics.UNORDERED;
 /**
  * Helpers for {@link Writer} usage.
  */
-public class Writers {
+public class Writers<O extends Appendable> implements Consumer<String> {
+
+    /**
+     * Used as a default line separator
+     */
+    public static final String CRLF = "\r\n";
+
+    /**
+     * Creates a collector writing lines to a specific writer using {@link #CRLF} as line separator.
+     * 
+     * @see #toWriter(Writer, char)
+     */
+    public static <R extends Writer> Collector<String, Appendable, R> toWriter(R out) {
+        return new CsvWriterCollector<>(new Writers<>(out, CRLF), true);
+    }
 
     /**
      * Creates a collector writing lines to a specific writer.
@@ -33,9 +44,19 @@ public class Writers {
      * <br/>{@code lines.}{@link java.util.stream.Stream#collect(Collector) collect}({@code toWriter(out)})
      *
      * @param <R> the result type of the reduction operation, any {@link Writer}
+     * @since 3.1.0
      */
-    public static <R extends Writer> Collector<String, Appendable, R> toWriter(R out) {
-        return new CsvWriterCollector<>(out, true);
+    public static <R extends Writer> Collector<String, Appendable, R> toWriter(R out, char lineSep) {
+        return new CsvWriterCollector<>(new Writers<>(out, String.valueOf(lineSep)), true);
+    }
+
+    /**
+     * Creates a collector writing lines to a specific writer using {@link #CRLF} as line separator.
+     * 
+     * @see #toWriterUnordered(Writer, char) 
+     */
+    public static <R extends Writer> Collector<String, Appendable, R> toWriterUnordered(R out) {
+        return new CsvWriterCollector<>(new Writers<>(out, CRLF), false);
     }
 
     /**
@@ -49,9 +70,10 @@ public class Writers {
      *
      * @param <R> the result type of the reduction operation, any {@link Writer}
      * @see Stream#parallel()
+     * @since 3.1.0
      */
-    public static <R extends Writer> Collector<String, Appendable, R> toWriterUnordered(R out) {
-        return new CsvWriterCollector<>(out, false);
+    public static <R extends Writer> Collector<String, Appendable, R> toWriterUnordered(R out, char lineSep) {
+        return new CsvWriterCollector<>(new Writers<>(out, String.valueOf(lineSep)), false);
     }
 
     /**
@@ -63,39 +85,45 @@ public class Writers {
      * or {@code lines.}{@link java.util.stream.Stream#forEachOrdered(Consumer) forEachOrdered}({@code consumeTo(out)})
      */
     public static Consumer<String> consumeTo(Writer out) {
-        return line -> appendLine(out, line);
-    }
-    
-    private Writers() {
+        return new Writers<>(out, CRLF);
     }
 
-    private static void appendLine(Appendable out, String line) {
+    private final O out;
+    private final String lineSep;
+
+    private Writers(O out, String lineSep) {
+        this.out = out;
+        this.lineSep = lineSep;
+    }
+
+    @Override
+    public void accept(String line) {
         try {
             // done with one append call to be thread safe!
-            out.append(line + '\n');
+            out.append(line + lineSep);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
-
-    private static class CsvWriterCollector<R extends Writer> implements Collector<String, Appendable, R> {
     
-        private final R out;
+    private static class CsvWriterCollector<R extends Writer> implements Collector<String, Appendable, R> {
+
+        private final Writers<R> consumer;
         private final boolean ordered;
 
-        public CsvWriterCollector(R out, boolean ordered) {
-            this.out = out;
+        public CsvWriterCollector(Writers<R> consumer, boolean ordered) {
+            this.consumer = consumer;
             this.ordered = ordered;
         }
 
         @Override
         public Supplier<Appendable> supplier() {
-            return () -> out;
+            return () -> consumer.out;
         }
     
         @Override
         public BiConsumer<Appendable, String> accumulator() {
-            return Writers::appendLine;
+            return (out, line) -> consumer.accept(line);
         }
     
         @Override
@@ -105,7 +133,7 @@ public class Writers {
     
         @Override
         public Function<Appendable, R> finisher() {
-            return (o) -> out;
+            return (o) -> consumer.out;
         }
     
         @Override
