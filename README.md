@@ -45,7 +45,7 @@ To integrate the library in your project, use the following dependency:
 **gradle:**
 
 ```gradle
-  compile 'diergo:decs:3.0.1-RELEASE'
+  compile 'diergo:decs:3.1.0-RELEASE'
 ```
 
 **maven:**
@@ -53,7 +53,7 @@ To integrate the library in your project, use the following dependency:
   <dependency>
     <groupId>diergo</groupId>
     <artifactId>decs</artifactId>
-    <version>3.0.1-RELEASE</version>
+    <version>3.1.0-RELEASE</version>
   </dependency>
 ```
 
