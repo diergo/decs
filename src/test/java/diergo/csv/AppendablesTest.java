@@ -1,6 +1,5 @@
 package diergo.csv;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -10,9 +9,8 @@ import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.util.stream.Stream;
 
-import static diergo.csv.Appendables.consumeTo;
-import static diergo.csv.Appendables.toAppendable;
-import static diergo.csv.Appendables.toAppendableUnordered;
+import static diergo.csv.Appendables.*;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -49,7 +47,7 @@ public class AppendablesTest {
 
         String content = out.toString();
         for (String line : lines) {
-            assertThat(content, Matchers.containsString(line + "\r\n"));
+            assertThat(content, containsString(line + "\r\n"));
         }
     }
 

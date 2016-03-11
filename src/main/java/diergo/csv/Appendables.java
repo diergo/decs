@@ -30,7 +30,7 @@ public class Appendables<O extends Appendable> implements Consumer<String> {
      * @see #toAppendable(Appendable, char)
      */
     public static <R extends Appendable> Collector<String, Appendable, R> toAppendable(R out) {
-        return new CsvWriterCollector<>(new Appendables<>(out, CRLF), true);
+        return new CsvAppendableCollector<>(new Appendables<>(out, CRLF), true);
     }
 
     /**
@@ -43,7 +43,7 @@ public class Appendables<O extends Appendable> implements Consumer<String> {
      * @param <R> the result type of the reduction operation, any {@link Appendable}
      */
     public static <R extends Appendable> Collector<String, Appendable, R> toAppendable(R out, char lineSep) {
-        return new CsvWriterCollector<>(new Appendables<>(out, String.valueOf(lineSep)), true);
+        return new CsvAppendableCollector<>(new Appendables<>(out, String.valueOf(lineSep)), true);
     }
 
     /**
@@ -52,7 +52,7 @@ public class Appendables<O extends Appendable> implements Consumer<String> {
      * @see #toAppendableUnordered(Appendable, char)
      */
     public static <R extends Appendable> Collector<String, Appendable, R> toAppendableUnordered(R out) {
-        return new CsvWriterCollector<>(new Appendables<>(out, CRLF), false);
+        return new CsvAppendableCollector<>(new Appendables<>(out, CRLF), false);
     }
 
     /**
@@ -68,7 +68,7 @@ public class Appendables<O extends Appendable> implements Consumer<String> {
      * @see Stream#parallel()
      */
     public static <R extends Appendable> Collector<String, Appendable, R> toAppendableUnordered(R out, char lineSep) {
-        return new CsvWriterCollector<>(new Appendables<>(out, String.valueOf(lineSep)), false);
+        return new CsvAppendableCollector<>(new Appendables<>(out, String.valueOf(lineSep)), false);
     }
 
     /**
@@ -95,19 +95,18 @@ public class Appendables<O extends Appendable> implements Consumer<String> {
     public void accept(String line) {
         try {
             // done with one append call to be thread safe!
-            out.append(line);
-            out.append(lineSep);
+            out.append(line + lineSep);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
     
-    private static class CsvWriterCollector<R extends Appendable> implements Collector<String, Appendable, R> {
+    private static class CsvAppendableCollector<R extends Appendable> implements Collector<String, Appendable, R> {
 
         private final Appendables<R> consumer;
         private final boolean ordered;
 
-        public CsvWriterCollector(Appendables<R> consumer, boolean ordered) {
+        public CsvAppendableCollector(Appendables<R> consumer, boolean ordered) {
             this.consumer = consumer;
             this.ordered = ordered;
         }
