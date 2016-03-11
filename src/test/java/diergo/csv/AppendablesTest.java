@@ -10,33 +10,33 @@ import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.util.stream.Stream;
 
-import static diergo.csv.Writers.consumeTo;
-import static diergo.csv.Writers.toWriter;
-import static diergo.csv.Writers.toWriterUnordered;
+import static diergo.csv.Appendables.consumeTo;
+import static diergo.csv.Appendables.toAppendable;
+import static diergo.csv.Appendables.toAppendableUnordered;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
-public class WritersTest {
+public class AppendablesTest {
 
     @Test
     public void emptyStreamCollectsToAnUnchangedWriter() {
-        StringWriter out = Stream.<String>empty().collect(toWriter(new StringWriter()));
+        StringWriter out = Stream.<String>empty().collect(toAppendable(new StringWriter()));
 
         assertThat(out.toString(), is(""));
     }
 
     @Test
     public void eachStringIsCollectedToALine() {
-        StringWriter out = Stream.of("one", "two").collect(toWriter(new StringWriter()));
+        StringWriter out = Stream.of("one", "two").collect(toAppendable(new StringWriter()));
 
         assertThat(out.toString(), is("one\r\ntwo\r\n"));
     }
 
     @Test
     public void lineSeparatorCanBeConfigured() {
-        StringWriter out = Stream.of("one", "two").collect(toWriter(new StringWriter(), '\n'));
+        StringWriter out = Stream.of("one", "two").collect(toAppendable(new StringWriter(), '\n'));
 
         assertThat(out.toString(), is("one\ntwo\n"));
     }
@@ -45,7 +45,7 @@ public class WritersTest {
     public void eachStringIsCollectedUnordered() {
         String[] lines = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
         StringWriter out = Stream.of(lines)
-            .parallel().collect(toWriterUnordered(new StringWriter()));
+            .parallel().collect(toAppendableUnordered(new StringWriter()));
 
         String content = out.toString();
         for (String line : lines) {

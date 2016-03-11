@@ -11,14 +11,15 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static diergo.csv.Appendables.toAppendable;
 import static diergo.csv.CsvParserBuilder.csvParser;
 import static diergo.csv.CsvPrinterBuilder.csvPrinter;
-import static diergo.csv.Maps.*;
+import static diergo.csv.Maps.toMaps;
+import static diergo.csv.Maps.toRowsWithHeader;
 import static diergo.csv.Readers.asLines;
 import static diergo.csv.Rows.emptyCellToNull;
 import static diergo.csv.Rows.rows;
 import static diergo.csv.Values.parsedValue;
-import static diergo.csv.Writers.toWriter;
 import static java.math.BigDecimal.ROUND_UNNECESSARY;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.stream.Collectors.toList;
@@ -30,7 +31,8 @@ public class CsvIntegrationTest {
 
     private static final Map<String, Class<?>> VALUE_TYPES;
 
-    // the data is originally from https://raw.githubusercontent.com/uniVocity/csv-parsers-comparison/master/src/main/resources/correctness.csv
+    // the data is originally from
+    // https://raw.githubusercontent.com/uniVocity/csv-parsers-comparison/master/src/main/resources/correctness.csv
     private static final String EXAMPLE_DATA = "/correctness.csv";
 
     static {
@@ -76,7 +78,7 @@ public class CsvIntegrationTest {
             .map(toRowsWithHeader())
             .flatMap(Collection::stream)
             .map(csvPrinter().separatedBy(',').build())
-            .collect(toWriter(new StringWriter(), '\n'));
+            .collect(toAppendable(new StringWriter(), '\n'));
 
         assertThat(out.toString(), is(readData(csv).replaceAll(",\"\",", ",,")));
     }
@@ -85,7 +87,7 @@ public class CsvIntegrationTest {
     public void prepareCsvResource() {
         csv = new InputStreamReader(getClass().getResourceAsStream(EXAMPLE_DATA), ISO_8859_1);
     }
-    
+
     private String readData(Reader data) {
         String content = new Scanner(data).useDelimiter("\\Z").next();
         return content.endsWith("\n") ? content : (content + '\n');
