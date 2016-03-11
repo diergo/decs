@@ -19,7 +19,8 @@ apply plugin: 'maven-publish'
 
 ext {
     slf4jVersion = '1.7.12'
-    findbugsVersion = '3.0.0'
+    findbugsVersion = '3.0.1'
+    jacocoVersion = '0.7.6.201602180812'
     branch = getBranch()
     buildType = getBuildType(branch)
     if (!project.hasProperty('bintrayUser')) {
@@ -93,8 +94,14 @@ tasks.withType(FindBugs) {
     }
 }
 
+jacoco {
+    toolVersion = jacocoVersion
+    //sourceSets = [sourceSets.main]
+}
+
 findbugs {
-    sourceSets = [sourceSets.main]
+    toolVersion = findbugsVersion
+    //sourceSets = [sourceSets.main]
 }
 
 task sourcesJar(type: Jar) {
