@@ -44,7 +44,7 @@ public class Rows {
      * @see #rows(UnaryOperator)
      */
     public static UnaryOperator<String> emptyCellToNull() {
-        return cell -> (cell == null || cell.length() == 0) ? null : cell;
+        return cell -> cell == null || cell.isEmpty() ? null : cell;
     }
 
     /**

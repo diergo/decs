@@ -106,7 +106,7 @@ public class Appendables<O extends Appendable> implements Consumer<String> {
         private final Appendables<R> consumer;
         private final boolean ordered;
 
-        public CsvAppendableCollector(Appendables<R> consumer, boolean ordered) {
+        CsvAppendableCollector(Appendables<R> consumer, boolean ordered) {
             this.consumer = consumer;
             this.ordered = ordered;
         }
@@ -128,7 +128,7 @@ public class Appendables<O extends Appendable> implements Consumer<String> {
     
         @Override
         public Function<Appendable, R> finisher() {
-            return (o) -> consumer.out;
+            return o -> consumer.out;
         }
     
         @Override

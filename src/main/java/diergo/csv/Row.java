@@ -4,6 +4,7 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 
 import static java.util.Spliterator.IMMUTABLE;
+import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterator.SIZED;
 import static java.util.Spliterator.SUBSIZED;
 
@@ -33,6 +34,6 @@ public interface Row extends Iterable<String>
 
     @Override
     default Spliterator<String> spliterator() {
-        return Spliterators.spliterator(iterator(), getLength(), SIZED);
+        return Spliterators.spliterator(iterator(), getLength(), SIZED | ORDERED);
     }
 }

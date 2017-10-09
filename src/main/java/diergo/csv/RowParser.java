@@ -98,7 +98,7 @@ class RowParser implements Function<String,List<Row>> {
     }
 
     private boolean isEmpty(String line) {
-        return line == null || line.trim().length() == 0;
+        return line == null || line.trim().isEmpty();
     }
 
     private String getValue(CharBuffer value) {

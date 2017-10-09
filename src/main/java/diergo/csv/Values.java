@@ -51,7 +51,7 @@ public class Values {
      * {@link BigDecimal}, {@link BigInteger}, {@link Boolean} and {@link String}
      */
     public static BiFunction<Map<String,String>, String, Object> parsedValue(Map<String,Class<?>> types) {
-        return convertedValue(name -> (value -> parseValue(value, types.getOrDefault(name, String.class))));
+        return convertedValue(name -> value -> parseValue(value, types.getOrDefault(name, String.class)));
     }
     
     private Values() {
