@@ -22,7 +22,7 @@ ext {
     findbugsVersion = '3.0.1'
     jacocoVersion = '0.7.9'
     branch = getBranch()
-    buildType = getBuildType(branch)
+    versionSuffix = getVersionSuffix(branch)
     if (!project.hasProperty('bintrayUser')) {
         bintrayUser = System.getProperty("user.name")
     }
@@ -32,7 +32,7 @@ ext {
 }
 
 sourceCompatibility = 1.8
-version = "${majorVersion}.${minorVersion}.${patchVersion}-${buildType}"
+version = "${majorVersion}.${minorVersion}.${patchVersion}${versionSuffix}"
 
 repositories {
     jcenter()
@@ -191,12 +191,12 @@ def getBranch() {
     return "git rev-parse --abbrev-ref HEAD".execute().text.trim()
 }
 
-def getBuildType(branch) {
+def getVersionSuffix(branch) {
     switch (branch) {
         case ~/(master|version.*)/:
-            return 'RELEASE'
+            return ''
         default:
-            return 'SNAPSHOT'
+            return '-SNAPSHOT'
     }
 }
 

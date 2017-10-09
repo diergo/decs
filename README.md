@@ -1,7 +1,4 @@
-# decs
-
-
-## Diergo Easy CSV Streamable
+# DeCS: Diergo Easy CSV Streamable
 
 This Java library supports parsing and generation of comma separated value
 ([csv](https://en.wikipedia.org/wiki/Comma-separated_values)) data as defined
@@ -14,7 +11,7 @@ comma (or an other character). If the separator or quote character is part of
 a column value, the value has to be quoted.
 
 
-## Usage
+## Usage [![Download](https://api.bintray.com/packages/aburmeis/maven/decs/images/download.svg)](https://bintray.com/aburmeis/maven/decs/_latestVersion)
 
 The [package](src/main/java/diergo/csv) contains a tool box to read and write
 CSV data using [Java 8 Streams](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
@@ -45,7 +42,7 @@ To integrate the library in your project, use the following dependency:
 **gradle:**
 
 ```gradle
-  compile 'diergo:decs:3.1.0-RELEASE'
+  compile 'diergo:decs:3.1.1'
 ```
 
 **maven:**
@@ -53,7 +50,7 @@ To integrate the library in your project, use the following dependency:
   <dependency>
     <groupId>diergo</groupId>
     <artifactId>decs</artifactId>
-    <version>3.1.0-RELEASE</version>
+    <version>3.1.1</version>
   </dependency>
 ```
 
