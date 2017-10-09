@@ -3,12 +3,12 @@ buildscript {
         maven { url 'http://repo.spring.io/plugins-release' }
     }
     dependencies {
-        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
+        classpath 'io.spring.gradle:propdeps-plugin:0.0.9.RELEASE'
     }
 }
 
 plugins {
-    id "com.jfrog.bintray" version "1.3.1"
+    id "com.jfrog.bintray" version "1.7.3"
 }
 
 apply plugin: 'propdeps'
@@ -18,9 +18,9 @@ apply plugin: 'jacoco'
 apply plugin: 'maven-publish'
 
 ext {
-    slf4jVersion = '1.7.12'
+    slf4jVersion = '1.7.25'
     findbugsVersion = '3.0.1'
-    jacocoVersion = '0.7.6.201602180812'
+    jacocoVersion = '0.7.9'
     branch = getBranch()
     buildType = getBuildType(branch)
     if (!project.hasProperty('bintrayUser')) {
@@ -33,7 +33,6 @@ ext {
 
 sourceCompatibility = 1.8
 version = "${majorVersion}.${minorVersion}.${patchVersion}-${buildType}"
-jacoco.toolVersion = '0.7.4.201502262128'
 
 repositories {
     jcenter()
@@ -45,7 +44,7 @@ dependencies {
     optional "org.slf4j:slf4j-api:${slf4jVersion}"
 
     testCompile 'junit:junit:4.12',
-        'com.tngtech.java:junit-dataprovider:1.10.1',
+        'com.tngtech.java:junit-dataprovider:1.12.0',
         'org.hamcrest:hamcrest-library:1.3',
         'org.mockito:mockito-core:1.10.19'
 
@@ -114,6 +113,25 @@ task javadocJar(type: Jar) {
     from javadoc
 }
 
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = 'CLASS'
+                minimum = 0.9
+            }
+            limit {
+                counter = 'LINE'
+                minimum = 0.9
+            }
+            limit {
+                counter = 'BRANCH'
+                minimum = 0.8
+            }
+        }
+    }
+}
+
 task downloadTestData {
     ext.localCopy = file('src/test/resources/worldcitiespop.txt')
     ext.tempFile = file('build/resources/worldcitiespop.txt.gz')
@@ -161,12 +179,12 @@ bintray {
     publications = ['mavenJava']
 }
 
-build.dependsOn javadoc, jacocoTestReport
+check.dependsOn jacocoTestCoverageVerification, jacocoTestReport
+build.dependsOn javadoc
 performance.dependsOn downloadTestData
-test.finalizedBy(jacocoTestReport)
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.11'
+    gradleVersion = '4.2.1'
 }
 
 def getBranch() {
