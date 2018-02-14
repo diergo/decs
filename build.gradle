@@ -2,14 +2,14 @@ plugins {
     id 'com.jfrog.bintray' version '1.7.3'
     id 'nebula.optional-base' version '3.3.0'
     id 'java'
-    id 'findbugs'
+    id 'com.github.spotbugs' version '1.6.0'
     id 'jacoco'
     id 'maven-publish'
 }
 
 ext {
     slf4jVersion = '1.7.25'
-    findbugsVersion = '3.0.1'
+    spotbugsVersion = '3.1.1'
     branch = getBranch()
     versionSuffix = getVersionSuffix(branch)
     if (!project.hasProperty('bintrayUser')) {
@@ -28,7 +28,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly "com.google.code.findbugs:annotations:${findbugsVersion}"
+    compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}"
 
     compile "org.slf4j:slf4j-api:${slf4jVersion}", optional
     compile "com.sun.activation:javax.activation:1.2.0", optional
@@ -82,7 +82,7 @@ tasks.withType(Jar) {
     }
 }
 
-tasks.withType(FindBugs) {
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
     reports {
         xml.enabled = false
         html.enabled = true
@@ -91,12 +91,10 @@ tasks.withType(FindBugs) {
 
 jacoco {
     toolVersion = '0.8.0'
-    //sourceSets = [sourceSets.main]
 }
 
-findbugs {
-    toolVersion = findbugsVersion
-    //sourceSets = [sourceSets.main]
+spotbugs {
+    toolVersion = spotbugsVersion
 }
 
 task sourcesJar(type: Jar) {
