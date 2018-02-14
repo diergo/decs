@@ -184,7 +184,7 @@ build.dependsOn javadoc
 performance.dependsOn downloadTestData
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.2.1'
+    gradleVersion = '4.5.1'
 }
 
 def getBranch() {
