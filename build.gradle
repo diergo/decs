@@ -1,26 +1,15 @@
-buildscript {
-    repositories {
-        maven { url 'http://repo.spring.io/plugins-release' }
-    }
-    dependencies {
-        classpath 'io.spring.gradle:propdeps-plugin:0.0.9.RELEASE'
-    }
-}
-
 plugins {
-    id "com.jfrog.bintray" version "1.7.3"
+    id 'com.jfrog.bintray' version '1.7.3'
+    id 'nebula.optional-base' version '3.3.0'
+    id 'java'
+    id 'findbugs'
+    id 'jacoco'
+    id 'maven-publish'
 }
-
-apply plugin: 'propdeps'
-apply plugin: 'java'
-apply plugin: 'findbugs'
-apply plugin: 'jacoco'
-apply plugin: 'maven-publish'
 
 ext {
     slf4jVersion = '1.7.25'
     findbugsVersion = '3.0.1'
-    jacocoVersion = '0.7.9'
     branch = getBranch()
     versionSuffix = getVersionSuffix(branch)
     if (!project.hasProperty('bintrayUser')) {
@@ -39,9 +28,9 @@ repositories {
 }
 
 dependencies {
-    provided "com.google.code.findbugs:annotations:${findbugsVersion}"
+    compileOnly "com.google.code.findbugs:annotations:${findbugsVersion}"
 
-    optional "org.slf4j:slf4j-api:${slf4jVersion}"
+    compile "org.slf4j:slf4j-api:${slf4jVersion}", optional
 
     testCompile 'junit:junit:4.12',
         'com.tngtech.java:junit-dataprovider:1.12.0',
@@ -72,9 +61,15 @@ javadoc {
     options.addStringOption('Xdoclint:none', '-quiet')
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
 tasks.withType(Jar) {
     manifest {
         attributes(
+            "Automatic-Module-Name": "diergo.decs",
             "Specification-Title": project.description,
             "Specification-Version": "${majorVersion}.${minorVersion}",
             "Specification-Vendor": vendor,
@@ -94,7 +89,7 @@ tasks.withType(FindBugs) {
 }
 
 jacoco {
-    toolVersion = jacocoVersion
+    toolVersion = '0.8.0'
     //sourceSets = [sourceSets.main]
 }
 

@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+@SuppressWarnings("unchecked")
 public class CsvIntegrationTest {
 
     private static final Map<String, Class<?>> VALUE_TYPES;
