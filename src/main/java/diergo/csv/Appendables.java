@@ -17,7 +17,7 @@ import static java.util.stream.Collector.Characteristics.UNORDERED;
  *
  * @since 3.1.1
  */
-public class Appendables<O extends Appendable> implements Consumer<String> {
+public class Appendables {
 
     /**
      * Used as a default line separator
@@ -30,7 +30,7 @@ public class Appendables<O extends Appendable> implements Consumer<String> {
      * @see #toAppendable(Appendable, char)
      */
     public static <R extends Appendable> Collector<String, Appendable, R> toAppendable(R out) {
-        return new CsvAppendableCollector<>(new Appendables<>(out, CRLF), true);
+        return new CsvAppendableCollector<>(new StringAppendable<>(out, CRLF), true);
     }
 
     /**
@@ -43,7 +43,7 @@ public class Appendables<O extends Appendable> implements Consumer<String> {
      * @param <R> the result type of the reduction operation, any {@link Appendable}
      */
     public static <R extends Appendable> Collector<String, Appendable, R> toAppendable(R out, char lineSep) {
-        return new CsvAppendableCollector<>(new Appendables<>(out, String.valueOf(lineSep)), true);
+        return new CsvAppendableCollector<>(new StringAppendable<>(out, String.valueOf(lineSep)), true);
     }
 
     /**
@@ -52,7 +52,7 @@ public class Appendables<O extends Appendable> implements Consumer<String> {
      * @see #toAppendableUnordered(Appendable, char)
      */
     public static <R extends Appendable> Collector<String, Appendable, R> toAppendableUnordered(R out) {
-        return new CsvAppendableCollector<>(new Appendables<>(out, CRLF), false);
+        return new CsvAppendableCollector<>(new StringAppendable<>(out, CRLF), false);
     }
 
     /**
@@ -68,7 +68,7 @@ public class Appendables<O extends Appendable> implements Consumer<String> {
      * @see Stream#parallel()
      */
     public static <R extends Appendable> Collector<String, Appendable, R> toAppendableUnordered(R out, char lineSep) {
-        return new CsvAppendableCollector<>(new Appendables<>(out, String.valueOf(lineSep)), false);
+        return new CsvAppendableCollector<>(new StringAppendable<>(out, String.valueOf(lineSep)), false);
     }
 
     /**
@@ -80,33 +80,35 @@ public class Appendables<O extends Appendable> implements Consumer<String> {
      * or {@code lines.}{@link Stream#forEachOrdered(Consumer) forEachOrdered}({@code consumeTo(out)})
      */
     public static Consumer<String> consumeTo(Appendable out) {
-        return new Appendables<>(out, CRLF);
+        return new StringAppendable<>(out, CRLF);
     }
 
-    private final O out;
-    private final String lineSep;
+    private static class StringAppendable<O extends Appendable> implements Consumer<String> {
+        private final O out;
+        private final String lineSep;
 
-    protected Appendables(O out, String lineSep) {
-        this.out = out;
-        this.lineSep = lineSep;
-    }
+        protected StringAppendable(O out, String lineSep) {
+            this.out = out;
+            this.lineSep = lineSep;
+        }
 
-    @Override
-    public void accept(String line) {
-        try {
-            // done with one append call to be thread safe!
-            out.append(line + lineSep);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        @Override
+        public void accept(String line) {
+            try {
+                // done with one append call to be thread safe!
+                out.append(line + lineSep);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     }
-    
+
     private static class CsvAppendableCollector<R extends Appendable> implements Collector<String, Appendable, R> {
 
-        private final Appendables<R> consumer;
+        private final StringAppendable<R> consumer;
         private final boolean ordered;
 
-        CsvAppendableCollector(Appendables<R> consumer, boolean ordered) {
+        CsvAppendableCollector(StringAppendable<R> consumer, boolean ordered) {
             this.consumer = consumer;
             this.ordered = ordered;
         }

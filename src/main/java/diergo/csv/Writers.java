@@ -4,16 +4,19 @@ import java.io.Writer;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import static diergo.csv.Appendables.toAppendable;
+import static diergo.csv.Appendables.toAppendableUnordered;
+
 /**
  * Helpers for {@link Writer} usage.
  *
  * @see Appendables
  */
 @Deprecated
-public class Writers<O extends Appendable> extends Appendables<O> {
+public class Writers {
 
     /**
-     * Creates a collector writing lines to a specific writer using {@link #CRLF} as line separator.
+     * Creates a collector writing lines to a specific writer using {@link Appendables#CRLF} as line separator.
      * 
      * @see #toWriter(Writer, char)
      */
@@ -38,7 +41,7 @@ public class Writers<O extends Appendable> extends Appendables<O> {
     }
 
     /**
-     * Creates a collector writing lines to a specific writer using {@link #CRLF} as line separator.
+     * Creates a collector writing lines to a specific writer using {@link Appendables#CRLF} as line separator.
      * 
      * @see #toWriterUnordered(Writer, char) 
      */
@@ -64,9 +67,4 @@ public class Writers<O extends Appendable> extends Appendables<O> {
     public static <R extends Writer> Collector<String, Appendable, R> toWriterUnordered(R out, char lineSep) {
         return toAppendableUnordered(out, lineSep);
     }
-
-    private Writers() {
-        super(null, null);
-    }
-
 }
