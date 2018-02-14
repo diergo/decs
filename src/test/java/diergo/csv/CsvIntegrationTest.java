@@ -20,7 +20,7 @@ import static diergo.csv.Readers.asLines;
 import static diergo.csv.Rows.emptyCellToNull;
 import static diergo.csv.Rows.rows;
 import static diergo.csv.Values.parsedValue;
-import static java.math.BigDecimal.ROUND_UNNECESSARY;
+import static java.math.RoundingMode.UNNECESSARY;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.hasItems;
@@ -40,7 +40,7 @@ public class CsvIntegrationTest {
         VALUE_TYPES.put("Year", Integer.class);
         VALUE_TYPES.put("Price", Double.class);
     }
-    
+
     private InputStreamReader csv;
 
     @Test
@@ -99,7 +99,7 @@ public class CsvIntegrationTest {
         values.put("Make", make);
         values.put("Model", model);
         values.put("Description", description);
-        values.put("Price", BigDecimal.valueOf(price).setScale(2, ROUND_UNNECESSARY));
+        values.put("Price", BigDecimal.valueOf(price).setScale(2, UNNECESSARY));
         return values;
     }
 }
