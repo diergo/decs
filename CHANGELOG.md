@@ -6,6 +6,11 @@ All notable changes to [this project](README.md) will be documented in this
 file. This project adheres to [Semantic Versioning](http://semver.org).
  
 
+### 3.1.1
+(2018-02-14)
+* Java 9 support ([#7](https://github.com/aburmeis/decs/issues/7))
+* support Java 8 Appendable instead of Writer ([#6](https://github.com/aburmeis/decs/issues/6))
+
 ### 3.1.0
 (2015-10-13)
 
