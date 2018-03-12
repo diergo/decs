@@ -1,8 +1,8 @@
 package diergo.csv;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -52,7 +52,7 @@ public class RowParserTest {
 
     @Test
     public void quotedFieldsAreUnquoted() {
-        assertThat(parse("\"hi\",\"ho\""), is(new Cells("hi","ho")));
+        assertThat(parse("\"hi\",\"ho\""), is(new Cells("hi", "ho")));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class RowParserTest {
     public void lineWithUnquotedFieldWithQuotesIsIllegalAndDelegatesToErrorHandler() {
         Comment handled = new Comment("error");
         when(errorHandler.apply(any(IllegalArgumentException.class), anyString()))
-            .thenReturn(singletonList(handled));
+                .thenReturn(singletonList(handled));
         assertThat(parse("hi\"ho"), is(handled));
 
         ArgumentCaptor<RuntimeException> error = ArgumentCaptor.forClass(RuntimeException.class);
@@ -78,7 +78,7 @@ public class RowParserTest {
     @Test
     public void errorhandlingWithNoResultingRowIsHandledProperly() {
         when(errorHandler.apply(any(IllegalArgumentException.class), anyString()))
-            .thenReturn(emptyList());
+                .thenReturn(emptyList());
         assertThat(parse("hi\"ho,hi ho"), nullValue());
         assertThat(parser.apply("hi ho"), is(singletonList(new Cells("hi ho"))));
     }
@@ -101,8 +101,8 @@ public class RowParserTest {
             assertThat(parse(separators, '"', null, false, "a" + separator + "b"), is(new Cells("a", "b")));
         }
     }
-    
-    @Before
+
+    @BeforeEach
     @SuppressWarnings("unchecked")
     public void createErrorHandler() {
         errorHandler = mock(BiFunction.class);

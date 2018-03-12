@@ -1,6 +1,6 @@
 package diergo.csv;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,7 +13,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static java.util.function.UnaryOperator.identity;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class MapsTest {
 

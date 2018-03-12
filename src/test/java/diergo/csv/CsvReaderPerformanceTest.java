@@ -1,10 +1,8 @@
 package diergo.csv;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,16 +18,16 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@RunWith(DataProviderRunner.class)
 public class CsvReaderPerformanceTest {
 
     private static final String MAXMIND_WORLD_CITIES_POP = "/worldcitiespop.txt";
 
-    @Test
-    @DataProvider({"true,false,3000", "false,false,2500", "true,true,1200", "false,true,1000"})
+    @ParameterizedTest(name = "readMillions({arguments})")
+    @CsvSource({"true,false,3000", "false,false,2500", "true,true,1200", "false,true,1000"})
+    @Tag("performance")
     public void readMillions(boolean usingFlatMap, boolean parallel, long maxTime) throws IOException {
         String kind = (usingFlatMap ? "using flat map" : "using filter and map")
                 + ", " + (parallel ? "parallel" : "sequential");

@@ -1,6 +1,6 @@
 package diergo.csv;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import static diergo.csv.ErrorHandlers.loggingErrors;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ErrorHandlersTest {
 

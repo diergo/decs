@@ -1,6 +1,6 @@
 package diergo.csv;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -9,8 +9,9 @@ import static diergo.csv.CsvParserBuilder.csvParser;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 public class CsvParserBuilderTest {
@@ -30,10 +31,10 @@ public class CsvParserBuilderTest {
         }
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void byDefaultAnAutoSeparatorDeterminerIsConfiguredWhichCannotHandleAnEmptyLine() throws ReflectiveOperationException {
         RowParser parser = (RowParser) csvParser().build();
-        parser.determiner.apply("");
+        assertThrows(IllegalStateException.class, () -> parser.determiner.apply(""));
     }
 
     @Test

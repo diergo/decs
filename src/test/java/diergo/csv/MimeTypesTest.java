@@ -1,7 +1,7 @@
 package diergo.csv;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.activation.MimeType;
 import javax.activation.MimeTypeParseException;
@@ -12,7 +12,7 @@ import static diergo.csv.MimeTypes.getCharset;
 import static diergo.csv.MimeTypes.includesHeaders;
 import static diergo.csv.MimeTypes.mimeType;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class MimeTypesTest {
 
@@ -67,7 +67,7 @@ public class MimeTypesTest {
         assertThat(mimeType().encoded(StandardCharsets.UTF_8).build().toString(), is(csv.toString()));
     }
 
-    @Before
+    @BeforeEach
     public void createMimeType() throws MimeTypeParseException {
         csv = new MimeType("text/csv");
     }

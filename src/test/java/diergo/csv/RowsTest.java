@@ -1,6 +1,6 @@
 package diergo.csv;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static diergo.csv.Rows.emptyCellToNull;
 import static diergo.csv.Rows.nullToEmptyCell;
@@ -9,7 +9,7 @@ import static diergo.csv.Rows.toStringArray;
 import static diergo.csv.Rows.trimCell;
 import static diergo.csv.Rows.withoutComments;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class RowsTest {
 
@@ -65,7 +65,7 @@ public class RowsTest {
         Comment unchanged = new Comment("");
         assertThat(rows(nullToEmptyCell()).apply(unchanged), is(unchanged));
     }
-    
+
     @Test
     public void commentBecomesAnEmptyStringArray() {
         assertThat(toStringArray(new Comment("foo")), is(new String[0]));
@@ -73,6 +73,6 @@ public class RowsTest {
 
     @Test
     public void rowBecomesAStringArrayWithCells() {
-        assertThat(toStringArray(new Cells("foo", "bar")), is(new String[] {"foo", "bar"}));
+        assertThat(toStringArray(new Cells("foo", "bar")), is(new String[]{"foo", "bar"}));
     }
 }

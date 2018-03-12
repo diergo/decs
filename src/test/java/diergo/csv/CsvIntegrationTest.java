@@ -1,7 +1,7 @@
 package diergo.csv;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -25,7 +25,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @SuppressWarnings("unchecked")
 public class CsvIntegrationTest {
@@ -47,44 +47,44 @@ public class CsvIntegrationTest {
     @Test
     public void csvCanBeReadAndMapped() throws IOException {
         List<Map<String, Object>> rows = asLines(csv)
-            .map(csvParser().separatedBy(',').build()).flatMap(Collection::stream)
-            .map(rows(emptyCellToNull()))
-            .map(toMaps()).flatMap(Collection::stream)
-            .map(Maps.<String,Object>withValuesMapped(HashMap::new, parsedValue(VALUE_TYPES)))
-            .collect(toList());
+                .map(csvParser().separatedBy(',').build()).flatMap(Collection::stream)
+                .map(rows(emptyCellToNull()))
+                .map(toMaps()).flatMap(Collection::stream)
+                .map(Maps.<String, Object>withValuesMapped(HashMap::new, parsedValue(VALUE_TYPES)))
+                .collect(toList());
 
         assertThat(rows.size(), is(5));
         for (Map<String, Object> row : rows) {
             assertThat(row.keySet(), hasItems("Year", "Make", "Model", "Description", "Price"));
         }
         assertThat(rows.stream().map(Map::values).collect(toList()), hasItems(
-            hasItems(1997, "Ford", "E350", "ac, abs, moon", 3000.0),
-            hasItems(1999, "Chevy", "Venture \"Extended Edition\"", null, 4900.0),
-            hasItems(1996, "Jeep", "Grand Cherokee", "MUST SELL!\nair, moon roof, loaded", 4799.0),
-            hasItems(1999, "Chevy", "Venture \"Extended Edition, Very Large\"", null, 5000.0),
-            hasItems(null, null, "Venture \"Extended Edition\"", null, 4900.0)
+                hasItems(1997, "Ford", "E350", "ac, abs, moon", 3000.0),
+                hasItems(1999, "Chevy", "Venture \"Extended Edition\"", null, 4900.0),
+                hasItems(1996, "Jeep", "Grand Cherokee", "MUST SELL!\nair, moon roof, loaded", 4799.0),
+                hasItems(1999, "Chevy", "Venture \"Extended Edition, Very Large\"", null, 5000.0),
+                hasItems(null, null, "Venture \"Extended Edition\"", null, 4900.0)
         ));
     }
 
     @Test
     public void csvCanBeMappedAndWritten() {
         StringWriter out = Stream.<Map<String, Object>>builder()
-            .add(createValues(1997, "Ford", "E350", "ac, abs, moon", 3000.0))
-            .add(createValues(1999, "Chevy", "Venture \"Extended Edition\"", "", 4900.0))
-            .add(createValues(1996, "Jeep", "Grand Cherokee", "MUST SELL!\nair, moon roof, loaded", 4799.0))
-            .add(createValues(1999, "Chevy", "Venture \"Extended Edition, Very Large\"", null, 5000.0))
-            .add(createValues(null, null, "Venture \"Extended Edition\"", null, 4900.0))
-            .build()
-            .map(Maps.<Object,String>withValuesMapped(LinkedHashMap::new, Values::valueAsString))
-            .map(toRowsWithHeader())
-            .flatMap(Collection::stream)
-            .map(csvPrinter().separatedBy(',').build())
-            .collect(toAppendable(new StringWriter(), '\n'));
+                .add(createValues(1997, "Ford", "E350", "ac, abs, moon", 3000.0))
+                .add(createValues(1999, "Chevy", "Venture \"Extended Edition\"", "", 4900.0))
+                .add(createValues(1996, "Jeep", "Grand Cherokee", "MUST SELL!\nair, moon roof, loaded", 4799.0))
+                .add(createValues(1999, "Chevy", "Venture \"Extended Edition, Very Large\"", null, 5000.0))
+                .add(createValues(null, null, "Venture \"Extended Edition\"", null, 4900.0))
+                .build()
+                .map(Maps.<Object, String>withValuesMapped(LinkedHashMap::new, Values::valueAsString))
+                .map(toRowsWithHeader())
+                .flatMap(Collection::stream)
+                .map(csvPrinter().separatedBy(',').build())
+                .collect(toAppendable(new StringWriter(), '\n'));
 
         assertThat(out.toString(), is(readData(csv).replaceAll(",\"\",", ",,")));
     }
 
-    @Before
+    @BeforeEach
     public void prepareCsvResource() {
         csv = new InputStreamReader(getClass().getResourceAsStream(EXAMPLE_DATA), ISO_8859_1);
     }

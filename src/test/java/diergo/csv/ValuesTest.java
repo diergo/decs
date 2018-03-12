@@ -1,16 +1,16 @@
 package diergo.csv;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 import static diergo.csv.Values.convertedValue;
 import static diergo.csv.Values.parsedValue;
@@ -19,13 +19,13 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(DataProviderRunner.class)
 public class ValuesTest {
 
-    @Test
-    @UseDataProvider("valueAsStringProvider")
+    @ParameterizedTest(name = "knownValueAsStringIsPrinted({arguments})")
+    @MethodSource("valueAsStringProvider")
     public void knownValueAsStringIsPrinted(Object value, String expected) {
         assertThat(valueAsString(singletonMap("test", value), "test"), is(expected));
     }
@@ -45,13 +45,14 @@ public class ValuesTest {
         assertThat(parsedValue(emptyMap()).apply(singletonMap("test", "1"), "test"), is("1"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void knownValueParsedToUnsupportedTypeRaisesError() {
-        parsedValue(singletonMap("test", Row.class)).apply(singletonMap("test", "ha,ha"), "test");
+        assertThrows(IllegalArgumentException.class,
+                () -> parsedValue(singletonMap("test", Row.class)).apply(singletonMap("test", "ha,ha"), "test"));
     }
 
-    @Test
-    @UseDataProvider("parsedValueProvider")
+    @ParameterizedTest(name = "knownValueParsedAsTargetType({arguments})")
+    @MethodSource("parsedValueProvider")
     public void knownValueParsedAsTargetType(String value, Class<?> type, Object expected) {
         assertThat(parsedValue(singletonMap("test", type)).apply(singletonMap("test", value), "test"), is(expected));
     }
@@ -63,28 +64,24 @@ public class ValuesTest {
         assertThat(converter.apply(singletonMap("test", "other value"), "test"), is(false));
         assertThat(converter.apply(singletonMap("test", "other value"), "foo"), nullValue());
     }
-    
-    @DataProvider
-    public static Object[][] valueAsStringProvider() {
-        return new Object[][] {
-            {"foo", "foo"},
-            {1, "1"},
-            {null, null},
-        };
+
+    public static Stream<Arguments> valueAsStringProvider() {
+        return Stream.of(
+                Arguments.of("foo", "foo"),
+                Arguments.of(1, "1"),
+                Arguments.of(null, null));
     }
-    
-    @DataProvider
-    public static Object[][] parsedValueProvider() {
-        return new Object[][] {
-            {"1", Integer.class, 1},
-            {"1.5", Float.class, 1.5f},
-            {"1.5", Double.class, 1.5},
-            {"8", BigInteger.class, new BigInteger("8")},
-            {"5.43", BigDecimal.class, new BigDecimal("5.43")},
-            {"DAYS", TimeUnit.class, TimeUnit.DAYS},
-            {"true", Boolean.class, true},
-            {"false", Boolean.class, false},
-            {"foo", String.class, "foo"}
-        };
+
+    public static Stream<Arguments> parsedValueProvider() {
+        return Stream.of(
+                Arguments.of("1", Integer.class, 1),
+                Arguments.of("1.5", Float.class, 1.5f),
+                Arguments.of("1.5", Double.class, 1.5),
+                Arguments.of("8", BigInteger.class, new BigInteger("8")),
+                Arguments.of("5.43", BigDecimal.class, new BigDecimal("5.43")),
+                Arguments.of("DAYS", TimeUnit.class, TimeUnit.DAYS),
+                Arguments.of("true", Boolean.class, true),
+                Arguments.of("false", Boolean.class, false),
+                Arguments.of("foo", String.class, "foo"));
     }
 }
