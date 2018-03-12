@@ -43,14 +43,28 @@ dependencies {
 }
 
 test {
-    exclude '**/*Performance*'
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+        excludeTags 'performance'
+    }
+    testLogging {
+        events 'skipped', 'failed'
+    }
+    reports {
+        html.enabled = true
+    }
 }
 
 task performance(type: Test) {
-    include '**/*Performance*'
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+        includeTags 'performance'
+    }
+    testLogging {
+        events 'skipped', 'failed'
+    }
     reports {
         html.enabled = true
-        html.destination = file('build/reports/performance')
     }
 }
 
