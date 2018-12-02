@@ -2,7 +2,7 @@ plugins {
     id 'com.jfrog.bintray' version '1.7.3'
     id 'nebula.optional-base' version '3.3.0'
     id 'java'
-    id 'com.github.spotbugs' version '1.6.0'
+    id 'com.github.spotbugs' version '1.6.5'
     id 'jacoco'
     id 'maven-publish'
 }
@@ -105,7 +105,7 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
 }
 
 jacoco {
-    toolVersion = '0.8.0'
+    toolVersion = '0.8.2'
 }
 
 spotbugs {
@@ -193,7 +193,7 @@ build.dependsOn javadoc
 performance.dependsOn downloadTestData
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.6'
+    gradleVersion = '4.10.2'
 }
 
 def getBranch() {
