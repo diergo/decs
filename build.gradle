@@ -192,8 +192,8 @@ check.dependsOn jacocoTestCoverageVerification, jacocoTestReport
 build.dependsOn javadoc
 performance.dependsOn downloadTestData
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.10.2'
+wrapper {
+    gradleVersion = '4.10.3'
 }
 
 def getBranch() {
