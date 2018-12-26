@@ -183,7 +183,7 @@ bintray {
         desc = project.description
         version {
             name = project.version
-            vcsTag = "v${majorVersion}.${minorVersion}.${patchVersion}"
+            vcsTag = "v${project.version}"
         }
     }
     publications = ['mavenJava']
