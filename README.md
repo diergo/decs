@@ -71,10 +71,7 @@ The library has no external dependencies except two optional ones:
 * [javax.activation](https://stackoverflow.com/questions/46493613/what-is-the-replacement-for-javax-activation-package-in-java-9) for [MimeTypes](src/main/java/diergo/csv/MimeTypes.java) helper running on Java 11 or later.
 
 
-Build ![CI status](https://travis-ci.org/aburmeis/decs.svg)
------------------------------------------------------------
+License
+-------
 
-The project is build with [gradle](https://gradle.org/) continuously by
-[Travis CI](https://travis-ci.org/aburmeis/decs/) and is published via
-[Bintray](https://bintray.com/aburmeis/maven/decs/) to
-[jcenter](http://jcenter.bintray.com/diergo/decs/) under [Apache License Version 2.0](LICENSE).
+This library is published under [Apache License Version 2.0](LICENSE).
