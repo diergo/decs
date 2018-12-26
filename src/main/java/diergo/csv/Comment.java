@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 class Comment implements Row {
-    
+
     private final String comment;
 
     Comment(String comment) {

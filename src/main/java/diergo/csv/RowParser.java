@@ -13,15 +13,15 @@ import java.util.function.Function;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-class RowParser implements Function<String,List<Row>> {
+class RowParser implements Function<String, List<Row>> {
 
     private static final Row EMPTY_LINE = new Cells();
 
-    final Function<String,Character> determiner;
+    final Function<String, Character> determiner;
     final char quote;
     final String commentStart;
     final boolean laxMode;
-    final BiFunction<RuntimeException,String,List<Row>> errorHandler;
+    final BiFunction<RuntimeException, String, List<Row>> errorHandler;
     private final AtomicReference<String> formerLine = new AtomicReference<>();
     private final AtomicInteger lineNo = new AtomicInteger(0);
 
@@ -112,7 +112,7 @@ class RowParser implements Function<String,List<Row>> {
         }
     }
 
-    private class AutoSeparatorDeterminer implements Function<String,Character> {
+    private class AutoSeparatorDeterminer implements Function<String, Character> {
         private final CharSequence possibleSeparators;
         private Character separator = null;
 
@@ -146,8 +146,8 @@ class RowParser implements Function<String,List<Row>> {
 
         private char getBestVotedSeparator(Map<Character, Integer> votes) {
             return votes.entrySet().stream()
-                .reduce((e1, e2) -> e1.getValue() < e2.getValue() ? e2 : e1)
-                .get().getKey();
+                    .reduce((e1, e2) -> e1.getValue() < e2.getValue() ? e2 : e1)
+                    .get().getKey();
         }
 
         private int countCells(String line, char separator) {

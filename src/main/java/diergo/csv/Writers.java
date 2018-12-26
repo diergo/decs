@@ -17,7 +17,7 @@ public class Writers {
 
     /**
      * Creates a collector writing lines to a specific writer using {@link Appendables#CRLF} as line separator.
-     * 
+     *
      * @see #toWriter(Writer, char)
      */
     @Deprecated
@@ -28,7 +28,7 @@ public class Writers {
     /**
      * Creates a collector writing lines to a specific writer.
      * Typical usage for a stream of strings:
-     *
+     * <p>
      * <br/>{@link java.util.stream.Stream Stream}{@code <String>} lines = ...;
      * <br/>{@code lines.}{@link java.util.stream.Stream#collect(Collector) collect}({@code toWriter(out)})
      *
@@ -42,8 +42,8 @@ public class Writers {
 
     /**
      * Creates a collector writing lines to a specific writer using {@link Appendables#CRLF} as line separator.
-     * 
-     * @see #toWriterUnordered(Writer, char) 
+     *
+     * @see #toWriterUnordered(Writer, char)
      */
     @Deprecated
     public static <R extends Writer> Collector<String, Appendable, R> toWriterUnordered(R out) {
@@ -55,7 +55,7 @@ public class Writers {
      * The lines in the resulting writer may have any order and by written concurrently.
      * Do not use this when a header line with column names is included in the stream!
      * Typical usage for a stream of strings:
-     *
+     * <p>
      * <br/>{@link java.util.stream.Stream Stream}{@code <String>} lines = ...;
      * <br/>{@code lines.}{@link java.util.stream.Stream#collect(Collector) collect}({@code toWriterUnordered(out)})
      *

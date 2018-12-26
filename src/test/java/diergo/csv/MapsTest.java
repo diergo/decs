@@ -74,17 +74,17 @@ class MapsTest {
         assertThat(result.get(0), is(new Cells("one", "two")));
         assertThat(result.get(1), is(new Cells("1", "2")));
     }
-    
+
     @Test
     void valuesAreMapped() {
         Object mapped = new Object();
-        assertThat(Maps.<String,Object>withValuesMapped(HashMap::new, (values, name) -> mapped).apply(singletonMap("test", "x")),
-            is(singletonMap("test", mapped)));
+        assertThat(Maps.<String, Object>withValuesMapped(HashMap::new, (values, name) -> mapped).apply(singletonMap("test", "x")),
+                is(singletonMap("test", mapped)));
     }
 
     @Test
     void valueIsRemoved() {
-        Map<String,Integer> values = new HashMap<>();
+        Map<String, Integer> values = new HashMap<>();
         values.put("foo", 0);
         values.put("bar", 1);
         values.put("test", 2);
@@ -95,7 +95,7 @@ class MapsTest {
 
     @Test
     void valueIsRemovedInPlace() {
-        Map<String,Integer> values = new HashMap<>();
+        Map<String, Integer> values = new HashMap<>();
         values.put("foo", 0);
         values.put("bar", 1);
         values.put("test", 2);
@@ -107,7 +107,7 @@ class MapsTest {
 
     @Test
     void valueIsRenamed() {
-        Map<String,Integer> values = new HashMap<>();
+        Map<String, Integer> values = new HashMap<>();
         values.put("foo", 0);
         values.put("bar", 1);
         Map<String, Integer> result = Maps.<Integer>renamingValue(HashMap::new, "bar", "test").apply(unmodifiableMap(values));
@@ -117,7 +117,7 @@ class MapsTest {
 
     @Test
     void valueIsRenamedInPlace() {
-        Map<String,Integer> values = new HashMap<>();
+        Map<String, Integer> values = new HashMap<>();
         values.put("foo", 0);
         values.put("bar", 1);
         Map<String, Integer> result = Maps.<Integer>renamingValue(identity(), "bar", "test").apply(values);
@@ -134,7 +134,7 @@ class MapsTest {
 
     @Test
     void valueIsAddedInPlace() {
-        Map<String,Integer> values = new HashMap<>();
+        Map<String, Integer> values = new HashMap<>();
         values.put("foo", 0);
         Function<Map<String, Integer>, ? extends Integer> valueCreator = any -> 1;
         Map<String, Integer> result = addingValue(identity(), "test", valueCreator).apply(values);

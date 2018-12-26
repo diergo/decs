@@ -6,7 +6,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 
 class Cells implements Row {
-    
+
     private final List<String> cells;
 
     Cells(String... cells) {

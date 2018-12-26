@@ -10,17 +10,17 @@ import static diergo.csv.Row.DEFAULT_QUOTE;
 
 /**
  * Configure and build a CSV parser. Typically this is used as a mapper for a stream of lines:
- * 
+ * <p>
  * {@link Readers#asLines(Reader) asLines}(in)
- *   .{@link java.util.stream.Stream#map(Function) map}({@link #csvParser()}.{@link #build()})
- *   .{@link java.util.stream.Stream#flatMap(Function) flatMap}({@link Collection#stream() Collection::stream})
- *   
+ * .{@link java.util.stream.Stream#map(Function) map}({@link #csvParser()}.{@link #build()})
+ * .{@link java.util.stream.Stream#flatMap(Function) flatMap}({@link Collection#stream() Collection::stream})
+ * <p>
  * The parser will return one row for most lines, zero rows if the end of line is part of a quoted cell
- * and any number of rows created by an {@link #handlingErrors(BiFunction) error handler} on invalid data.   
- * 
+ * and any number of rows created by an {@link #handlingErrors(BiFunction) error handler} on invalid data.
+ * <p>
  * Don't forget the {@code flatMap(Collection::stream)} call as the parser may return zero to multiple rows per line!
- * 
- * @see Readers#asLines(Reader) 
+ *
+ * @see Readers#asLines(Reader)
  * @see java.util.stream.Stream#map(Function)
  * @see java.util.stream.Stream#flatMap(Function)
  */
@@ -30,7 +30,8 @@ public class CsvParserBuilder {
 
     /**
      * Creates a builder for a new parser.
-     * @see #build() 
+     *
+     * @see #build()
      */
     public static CsvParserBuilder csvParser() {
         return new CsvParserBuilder();
@@ -40,8 +41,10 @@ public class CsvParserBuilder {
     private char quote = DEFAULT_QUOTE;
     private String commentStart = null;
     private boolean laxMode = false;
-    private BiFunction<RuntimeException, String, List<Row>> errorHandler = (error, line) -> { throw error; };
-    
+    private BiFunction<RuntimeException, String, List<Row>> errorHandler = (error, line) -> {
+        throw error;
+    };
+
     private CsvParserBuilder() {
     }
 
@@ -73,8 +76,8 @@ public class CsvParserBuilder {
     /**
      * Configures the fixed separator between data columns in the line.
      * By default a couple of separators are possible.
-     * 
-     * @see #separatedByAnyOf(CharSequence) 
+     *
+     * @see #separatedByAnyOf(CharSequence)
      */
     public CsvParserBuilder separatedBy(char separator) {
         return separatedByAnyOf(String.valueOf(separator));
@@ -82,7 +85,7 @@ public class CsvParserBuilder {
 
     /**
      * Configures any of multiple possible separators between data columns in the line.
-     * 
+     *
      * @see #DEFAULT_SEPARATORS
      */
     public CsvParserBuilder separatedByAnyOf(CharSequence possibleSeparators) {
@@ -93,7 +96,7 @@ public class CsvParserBuilder {
     /**
      * Configures the error handler for input format problems.
      * By default illegal lines create an error.
-     * 
+     *
      * @see ErrorHandlers
      */
     public CsvParserBuilder handlingErrors(BiFunction<RuntimeException, String, List<Row>> errorHandler) {
@@ -103,7 +106,8 @@ public class CsvParserBuilder {
 
     /**
      * Created a new configured parser.
-     * @see java.util.stream.Stream#map(Function) 
+     *
+     * @see java.util.stream.Stream#map(Function)
      */
     public Function<String, List<Row>> build() {
         return new RowParser(separators, quote, commentStart, laxMode, errorHandler);

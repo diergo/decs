@@ -16,7 +16,8 @@ public class Rows {
 
     /**
      * A filter to exclude comments.
-     * @see java.util.stream.Stream#filter(Predicate) 
+     *
+     * @see java.util.stream.Stream#filter(Predicate)
      */
     public static boolean withoutComments(Row row) {
         return !row.isComment();
@@ -24,16 +25,18 @@ public class Rows {
 
     /**
      * Creates a mapper to map cell data one by one.
+     *
      * @see java.util.stream.Stream#map(Function)
      */
     public static UnaryOperator<Row> rows(UnaryOperator<String> cellMapper) {
         return row -> row.isComment() ? row : new Cells(stream(row.spliterator(), false)
-            .map(cellMapper).collect(toList()));
+                .map(cellMapper).collect(toList()));
     }
 
     /**
      * A mapper to trim column data.
-     * @see #rows(UnaryOperator) 
+     *
+     * @see #rows(UnaryOperator)
      */
     public static UnaryOperator<String> trimCell() {
         return cell -> cell == null ? null : cell.trim();
@@ -41,6 +44,7 @@ public class Rows {
 
     /**
      * A mapper to replace empty cells with {@code null}.
+     *
      * @see #rows(UnaryOperator)
      */
     public static UnaryOperator<String> emptyCellToNull() {
@@ -49,6 +53,7 @@ public class Rows {
 
     /**
      * A mapper to replace {@code null} with empty cells.
+     *
      * @see #rows(UnaryOperator)
      */
     public static UnaryOperator<String> nullToEmptyCell() {
@@ -57,6 +62,7 @@ public class Rows {
 
     /**
      * A mapper to generate cell values as array.
+     *
      * @see java.util.stream.Stream#map(Function)
      * @since 3.1.0
      */
