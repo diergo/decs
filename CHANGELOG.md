@@ -12,6 +12,7 @@ file. This project adheres to [Semantic Versioning](http://semver.org).
 * [Appendables](src/main/java/diergo/csv/Appendables.java) are now supported instead of Writers ([#6](https://github.com/aburmeis/decs/issues/6))
 * migrated tests to [JUnit 5](https://junit.org/junit5/)
 * [Writers](src/main/java/diergo/csv/Writers.java) is deprecated and will be removed in a future release
+* dropped RELEASE-suffix of version
 
 ### 3.1.0
 
