@@ -3,7 +3,7 @@ package diergo.csv;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-class RowPrinter implements Function<Row,String> {
+class RowPrinter implements Function<Row, String> {
 
     final char separator;
     final char quote;

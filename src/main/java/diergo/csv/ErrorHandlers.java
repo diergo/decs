@@ -11,8 +11,8 @@ import static java.util.Collections.emptyList;
 
 /**
  * Error handlers to be used by the parser.
- * 
- * @see CsvParserBuilder#handlingErrors(BiFunction) 
+ *
+ * @see CsvParserBuilder#handlingErrors(BiFunction)
  */
 public class ErrorHandlers {
 
@@ -32,8 +32,8 @@ public class ErrorHandlers {
 
     /**
      * Creates an error handler logging the error and skipping the line. The
-     * log is created with level WARN to logger of {@link CsvParserBuilder}. 
-     * 
+     * log is created with level WARN to logger of {@link CsvParserBuilder}.
+     * <p>
      * This has a dependency to <a href="http://www.slf4j.org">SLF4J</a>!
      */
     public static BiFunction<RuntimeException, String, List<Row>> loggingErrors() {

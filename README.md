@@ -1,7 +1,4 @@
-# decs
-
-
-## Diergo Easy CSV Streamable
+# DeCS: Diergo Easy CSV Streamable
 
 This Java library supports parsing and generation of comma separated value
 ([csv](https://en.wikipedia.org/wiki/Comma-separated_values)) data as defined
@@ -14,9 +11,10 @@ comma (or an other character). If the separator or quote character is part of
 a column value, the value has to be quoted.
 
 
-## Usage
+Usage
+-----
 
-The [package](src/main/java/diergo/csv) contains a tool box to read and write
+The [diergo.csv](src/main/java/diergo/csv) package contains a tool box to read and write
 CSV data using [Java 8 Streams](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
 and [functional interfaces](https://docs.oracle.com/javase/8/docs/api/java/lang/FunctionalInterface.html).
 You can easily connect the functionaliy by using
@@ -26,26 +24,37 @@ and [`collect()`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Str
 of a [`Stream`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html).
 As there are no direct dependencies of the tools you can simply extend it for
 your needs by creating new lambdas or functional interfaces and inject them to
-mappings and filters.
+mappings and filters:
 
-For an example usage have a look at the [package documentation](src/main/java/diergo/csv/package-info.java)
-or the [integration test](src/test/java/diergo/csv/CsvIntegrationTest.java).
+```
+  List<Map<String, String>> lines = Readers.asLines(new FileReader("input.csv", StandardCharsets.UTF_8))
+      // CSV parser turns each line into a row
+      .map(CsvParserBuilder.csvParser().separatedBy(',').build()).flatMap(Collection::stream)
+      // turn each line into a map, the first line is treated as header with column names
+      .map(Maps.toMaps()).flatMap(Collection::stream);
+
+  lines.stream()
+      // create a stream of rows with an initial header row containing the column names
+      .map(Maps.toRowsWithHeader()).flatMap(Collection::stream)
+      // CSV printer turns each row into one line
+      .map(CsvPrinterBuilder.csvPrinter().separatedBy(',').build())
+      .collect(Appendables.toAppendable(new FileWriter("output.csv", StandardCharsets.UTF_8), '\n'));
+```
+
+There are more ready to use helper functions to filter and map at [Rows](src/main/java/diergo/csv/Rows.java), [Maps](src/main/java/diergo/csv/Maps.java) and [Values](src/main/java/diergo/csv/Values.java).
+Handling of comments, headers and separators is configured using the builders for CSV [parser](src/main/java/diergo/csv/CsvParserBuilder.java) and [printer](src/main/java/diergo/csv/CsvPrinterBuilder.java).
 For the release notes, have a look at the [change log](CHANGELOG.md).
 
 
-## Build ![CI status](https://travis-ci.org/aburmeis/decs.svg)
+Dependency [![Download](https://api.bintray.com/packages/aburmeis/maven/decs/images/download.svg)](https://bintray.com/aburmeis/maven/decs/_latestVersion)
+----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-The project is build with [gradle](https://gradle.org/) continuously by
-[Travis CI](https://travis-ci.org/aburmeis/decs/) and is published via
-[Bintray](https://bintray.com/aburmeis/maven/decs/) to
-[jcenter](http://jcenter.bintray.com/diergo/decs/) under [Apache License Version 2.0](LICENSE).
- 
 To integrate the library in your project, use the following dependency:
 
 **gradle:**
 
 ```gradle
-  compile 'diergo:decs:3.1.0-RELEASE'
+  compile 'diergo:decs:3.1.1'
 ```
 
 **maven:**
@@ -53,9 +62,16 @@ To integrate the library in your project, use the following dependency:
   <dependency>
     <groupId>diergo</groupId>
     <artifactId>decs</artifactId>
-    <version>3.1.0-RELEASE</version>
+    <version>3.1.1</version>
   </dependency>
 ```
 
-It has no external dependencies except an optional
-[SLF4J 1.7](http://www.slf4j.org) dependency for an error handler.
+The library has no external dependencies except two optional ones:
+* [SLF4J 1.7](http://www.slf4j.org) for an [error handler](src/main/java/diergo/csv/ErrorHandlers.java)
+* [javax.activation](https://stackoverflow.com/questions/46493613/what-is-the-replacement-for-javax-activation-package-in-java-9) for [MimeTypes](src/main/java/diergo/csv/MimeTypes.java) helper running on Java 11 or later.
+
+
+License
+-------
+
+This library is published under [Apache License Version 2.0](LICENSE).

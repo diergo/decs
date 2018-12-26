@@ -8,7 +8,7 @@ import static diergo.csv.Row.DEFAULT_QUOTE;
 
 /**
  * Configure and build a CSV printer. Typically this is used as a mapper for a stream of rows before a collector:
- *
+ * <p>
  * rows.{@link java.util.stream.Stream#map(Function) map}({@link #csvPrinter()}.{@link #build()}).{@link java.util.stream.Stream#collect(Collector) collect(...)}
  *
  * @see java.util.stream.Stream#map(Function)
@@ -22,7 +22,7 @@ public class CsvPrinterBuilder {
     private char separator = DecimalFormatSymbols.getInstance().getPatternSeparator();
     private char quote = DEFAULT_QUOTE;
     private String commentStart = null;
-    
+
     private CsvPrinterBuilder() {
     }
 
@@ -56,9 +56,10 @@ public class CsvPrinterBuilder {
 
     /**
      * Created a new configured printer.
+     *
      * @see java.util.stream.Stream#map(Function)
      */
-    public Function<Row,String> build() {
+    public Function<Row, String> build() {
         return new RowPrinter(separator, quote, commentStart);
     }
 }

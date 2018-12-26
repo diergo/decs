@@ -1,27 +1,18 @@
-buildscript {
-    repositories {
-        maven { url 'http://repo.spring.io/plugins-release' }
-    }
-    dependencies {
-        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
-    }
-}
-
 plugins {
-    id "com.jfrog.bintray" version "1.3.1"
+    id 'com.jfrog.bintray' version '1.8.4'
+    id 'nebula.optional-base' version '4.0.1'
+    id 'java'
+    id 'com.github.spotbugs' version '1.6.5'
+    id 'jacoco'
+    id 'maven-publish'
 }
-
-apply plugin: 'propdeps'
-apply plugin: 'java'
-apply plugin: 'findbugs'
-apply plugin: 'jacoco'
-apply plugin: 'maven-publish'
 
 ext {
-    slf4jVersion = '1.7.12'
-    findbugsVersion = '3.0.0'
+    slf4jVersion = '1.7.25'
+    spotbugsVersion = '3.1.9'
+    junitVersion = '5.3.2'
     branch = getBranch()
-    buildType = getBuildType(branch)
+    versionSuffix = getVersionSuffix(branch)
     if (!project.hasProperty('bintrayUser')) {
         bintrayUser = System.getProperty("user.name")
     }
@@ -31,35 +22,50 @@ ext {
 }
 
 sourceCompatibility = 1.8
-version = "${majorVersion}.${minorVersion}.${patchVersion}-${buildType}"
-jacoco.toolVersion = '0.7.4.201502262128'
+version = "${majorVersion}.${minorVersion}.${patchVersion}${versionSuffix}"
 
 repositories {
     jcenter()
 }
 
 dependencies {
-    provided "com.google.code.findbugs:annotations:${findbugsVersion}"
+    compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}"
 
-    optional "org.slf4j:slf4j-api:${slf4jVersion}"
+    compile "org.slf4j:slf4j-api:${slf4jVersion}", optional
+    compile "com.sun.activation:javax.activation:1.2.0", optional
 
-    testCompile 'junit:junit:4.12',
-        'com.tngtech.java:junit-dataprovider:1.10.1',
+    testCompile "org.junit.jupiter:junit-jupiter-api:${junitVersion}",
+        "org.junit.jupiter:junit-jupiter-params:${junitVersion}",
         'org.hamcrest:hamcrest-library:1.3',
-        'org.mockito:mockito-core:1.10.19'
+        'org.mockito:mockito-core:2.23.4'
 
-    testRuntime "org.slf4j:slf4j-simple:${slf4jVersion}"
+    testRuntime "org.slf4j:slf4j-simple:${slf4jVersion}",
+            "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
 }
 
 test {
-    exclude '**/*Performance*'
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+        excludeTags 'performance'
+    }
+    testLogging {
+        events 'skipped', 'failed'
+    }
+    reports {
+        html.enabled = true
+    }
 }
 
 task performance(type: Test) {
-    include '**/*Performance*'
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+        includeTags 'performance'
+    }
+    testLogging {
+        events 'skipped', 'failed'
+    }
     reports {
         html.enabled = true
-        html.destination = file('build/reports/performance')
     }
 }
 
@@ -72,9 +78,15 @@ javadoc {
     options.addStringOption('Xdoclint:none', '-quiet')
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
 tasks.withType(Jar) {
     manifest {
         attributes(
+            "Automatic-Module-Name": "diergo.decs",
             "Specification-Title": project.description,
             "Specification-Version": "${majorVersion}.${minorVersion}",
             "Specification-Vendor": vendor,
@@ -86,15 +98,19 @@ tasks.withType(Jar) {
     }
 }
 
-tasks.withType(FindBugs) {
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
     reports {
         xml.enabled = false
         html.enabled = true
     }
 }
 
-findbugs {
-    sourceSets = [sourceSets.main]
+jacoco {
+    toolVersion = '0.8.2'
+}
+
+spotbugs {
+    toolVersion = spotbugsVersion
 }
 
 task sourcesJar(type: Jar) {
@@ -105,6 +121,25 @@ task sourcesJar(type: Jar) {
 task javadocJar(type: Jar) {
     classifier = "javadoc"
     from javadoc
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = 'CLASS'
+                minimum = 0.9
+            }
+            limit {
+                counter = 'LINE'
+                minimum = 0.9
+            }
+            limit {
+                counter = 'BRANCH'
+                minimum = 0.8
+            }
+        }
+    }
 }
 
 task downloadTestData {
@@ -148,26 +183,30 @@ bintray {
         desc = project.description
         version {
             name = project.version
-            vcsTag = "v${majorVersion}.${minorVersion}.${patchVersion}"
+            vcsTag = "v${project.version}"
         }
     }
     publications = ['mavenJava']
 }
 
-build.dependsOn javadoc, jacocoTestReport
+check.dependsOn jacocoTestCoverageVerification, jacocoTestReport
+build.dependsOn javadoc
 performance.dependsOn downloadTestData
-test.finalizedBy(jacocoTestReport)
+
+wrapper {
+    gradleVersion = '4.10.3'
+}
 
 def getBranch() {
     return "git rev-parse --abbrev-ref HEAD".execute().text.trim()
 }
 
-def getBuildType(branch) {
+def getVersionSuffix(branch) {
     switch (branch) {
         case ~/(master|version.*)/:
-            return 'RELEASE'
+            return ''
         default:
-            return 'SNAPSHOT'
+            return '-SNAPSHOT'
     }
 }
 

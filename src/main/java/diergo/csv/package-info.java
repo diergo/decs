@@ -6,7 +6,7 @@
  * <a href="http://tools.ietf.org/html/rfc4180">RFC 4180</a>. The cell
  * separator and quote can be configured to be different from {@code ,} and
  * {@code "}.
- * 
+ *
  * @see diergo.csv.CsvParserBuilder
  * @see diergo.csv.CsvPrinterBuilder
  */

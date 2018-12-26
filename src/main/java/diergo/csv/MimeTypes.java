@@ -42,13 +42,14 @@ public class MimeTypes {
 
     /**
      * Create a MIME type with fluent API.
-     * @see #mimeType() 
+     *
+     * @see #mimeType()
      */
     public static class Builder {
 
         private boolean headers = false;
         private Charset charset = US_ASCII;
-        
+
         private Builder() {
         }
 

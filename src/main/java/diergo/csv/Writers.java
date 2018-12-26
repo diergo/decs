@@ -1,62 +1,54 @@
 package diergo.csv;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.io.Writer;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-import static java.util.EnumSet.noneOf;
-import static java.util.stream.Collector.Characteristics.CONCURRENT;
-import static java.util.stream.Collector.Characteristics.UNORDERED;
+import static diergo.csv.Appendables.toAppendable;
+import static diergo.csv.Appendables.toAppendableUnordered;
 
 /**
  * Helpers for {@link Writer} usage.
+ *
+ * @deprecated since 3.1.1, use {@link Appendables} instead
  */
-public class Writers<O extends Appendable> implements Consumer<String> {
+@Deprecated
+public class Writers {
 
     /**
-     * Used as a default line separator
+     * Creates a collector writing lines to a specific writer using {@link Appendables#CRLF} as line separator.
+     *
+     * @deprecated use {@link Appendables#toAppendable(Appendable)} instead
      */
-    public static final String CRLF = "\r\n";
-
-    /**
-     * Creates a collector writing lines to a specific writer using {@link #CRLF} as line separator.
-     * 
-     * @see #toWriter(Writer, char)
-     */
+    @Deprecated
     public static <R extends Writer> Collector<String, Appendable, R> toWriter(R out) {
-        return new CsvWriterCollector<>(new Writers<>(out, CRLF), true);
+        return toAppendable(out);
     }
 
     /**
      * Creates a collector writing lines to a specific writer.
      * Typical usage for a stream of strings:
-     *
+     * <p>
      * <br/>{@link java.util.stream.Stream Stream}{@code <String>} lines = ...;
      * <br/>{@code lines.}{@link java.util.stream.Stream#collect(Collector) collect}({@code toWriter(out)})
      *
      * @param <R> the result type of the reduction operation, any {@link Writer}
      * @since 3.1.0
+     * @deprecated use {@link Appendables#toAppendable(Appendable, char)} instead
      */
+    @Deprecated
     public static <R extends Writer> Collector<String, Appendable, R> toWriter(R out, char lineSep) {
-        return new CsvWriterCollector<>(new Writers<>(out, String.valueOf(lineSep)), true);
+        return toAppendable(out, lineSep);
     }
 
     /**
-     * Creates a collector writing lines to a specific writer using {@link #CRLF} as line separator.
-     * 
-     * @see #toWriterUnordered(Writer, char) 
+     * Creates a collector writing lines to a specific writer using {@link Appendables#CRLF} as line separator.
+     *
+     * @see #toWriterUnordered(Writer, char)
      */
+    @Deprecated
     public static <R extends Writer> Collector<String, Appendable, R> toWriterUnordered(R out) {
-        return new CsvWriterCollector<>(new Writers<>(out, CRLF), false);
+        return toAppendableUnordered(out);
     }
 
     /**
@@ -64,7 +56,7 @@ public class Writers<O extends Appendable> implements Consumer<String> {
      * The lines in the resulting writer may have any order and by written concurrently.
      * Do not use this when a header line with column names is included in the stream!
      * Typical usage for a stream of strings:
-     *
+     * <p>
      * <br/>{@link java.util.stream.Stream Stream}{@code <String>} lines = ...;
      * <br/>{@code lines.}{@link java.util.stream.Stream#collect(Collector) collect}({@code toWriterUnordered(out)})
      *
@@ -72,73 +64,8 @@ public class Writers<O extends Appendable> implements Consumer<String> {
      * @see Stream#parallel()
      * @since 3.1.0
      */
+    @Deprecated
     public static <R extends Writer> Collector<String, Appendable, R> toWriterUnordered(R out, char lineSep) {
-        return new CsvWriterCollector<>(new Writers<>(out, String.valueOf(lineSep)), false);
-    }
-
-    /**
-     * Creates a consumer writing lines to a specific writer.
-     * Typical usage for a stream of strings:
-     *
-     * <br/>{@link java.util.stream.Stream Stream}{@code <String>} lines = ...;
-     * <br/>{@code lines.}{@link java.util.stream.Stream#forEach(Consumer) forEach}({@code consumeTo(out)})
-     * or {@code lines.}{@link java.util.stream.Stream#forEachOrdered(Consumer) forEachOrdered}({@code consumeTo(out)})
-     */
-    public static Consumer<String> consumeTo(Writer out) {
-        return new Writers<>(out, CRLF);
-    }
-
-    private final O out;
-    private final String lineSep;
-
-    private Writers(O out, String lineSep) {
-        this.out = out;
-        this.lineSep = lineSep;
-    }
-
-    @Override
-    public void accept(String line) {
-        try {
-            // done with one append call to be thread safe!
-            out.append(line + lineSep);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-    
-    private static class CsvWriterCollector<R extends Writer> implements Collector<String, Appendable, R> {
-
-        private final Writers<R> consumer;
-        private final boolean ordered;
-
-        public CsvWriterCollector(Writers<R> consumer, boolean ordered) {
-            this.consumer = consumer;
-            this.ordered = ordered;
-        }
-
-        @Override
-        public Supplier<Appendable> supplier() {
-            return () -> consumer.out;
-        }
-    
-        @Override
-        public BiConsumer<Appendable, String> accumulator() {
-            return (out, line) -> consumer.accept(line);
-        }
-    
-        @Override
-        public BinaryOperator<Appendable> combiner() {
-            return (o1, o2) -> o1;
-        }
-    
-        @Override
-        public Function<Appendable, R> finisher() {
-            return (o) -> consumer.out;
-        }
-    
-        @Override
-        public Set<Characteristics> characteristics() {
-            return ordered ? noneOf(Characteristics.class) : EnumSet.of(UNORDERED, CONCURRENT);
-        }
+        return toAppendableUnordered(out, lineSep);
     }
 }

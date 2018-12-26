@@ -6,11 +6,11 @@ import java.util.List;
 import static java.util.Arrays.asList;
 
 class Cells implements Row {
-    
+
     private final List<String> cells;
 
     Cells(String... cells) {
-        this.cells = asList(cells);
+        this(asList(cells));
     }
 
     Cells(List<String> cells) {
@@ -33,14 +33,14 @@ class Cells implements Row {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        Cells other = (Cells) o;
+        Cells other = (Cells) obj;
         return cells.equals(other.cells);
     }
 
