@@ -10,7 +10,7 @@ import static diergo.csv.Appendables.toAppendableUnordered;
 /**
  * Helpers for {@link Writer} usage.
  *
- * @see Appendables
+ * @deprecated since 3.1.1, use {@link Appendables} instead
  */
 @Deprecated
 public class Writers {
@@ -18,7 +18,7 @@ public class Writers {
     /**
      * Creates a collector writing lines to a specific writer using {@link Appendables#CRLF} as line separator.
      *
-     * @see #toWriter(Writer, char)
+     * @deprecated use {@link Appendables#toAppendable(Appendable)} instead
      */
     @Deprecated
     public static <R extends Writer> Collector<String, Appendable, R> toWriter(R out) {
@@ -34,6 +34,7 @@ public class Writers {
      *
      * @param <R> the result type of the reduction operation, any {@link Writer}
      * @since 3.1.0
+     * @deprecated use {@link Appendables#toAppendable(Appendable, char)} instead
      */
     @Deprecated
     public static <R extends Writer> Collector<String, Appendable, R> toWriter(R out, char lineSep) {
