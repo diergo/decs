@@ -11,7 +11,8 @@ comma (or an other character). If the separator or quote character is part of
 a column value, the value has to be quoted.
 
 
-## Usage [![Download](https://api.bintray.com/packages/aburmeis/maven/decs/images/download.svg)](https://bintray.com/aburmeis/maven/decs/_latestVersion)
+Usage
+-----
 
 The [diergo.csv](src/main/java/diergo/csv) package contains a tool box to read and write
 CSV data using [Java 8 Streams](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
@@ -45,13 +46,9 @@ Handling of comments, headers and separators is configured using the builders fo
 For the release notes, have a look at the [change log](CHANGELOG.md).
 
 
-## Build ![CI status](https://travis-ci.org/aburmeis/decs.svg)
+Dependency [![Download](https://api.bintray.com/packages/aburmeis/maven/decs/images/download.svg)](https://bintray.com/aburmeis/maven/decs/_latestVersion)
+----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-The project is build with [gradle](https://gradle.org/) continuously by
-[Travis CI](https://travis-ci.org/aburmeis/decs/) and is published via
-[Bintray](https://bintray.com/aburmeis/maven/decs/) to
-[jcenter](http://jcenter.bintray.com/diergo/decs/) under [Apache License Version 2.0](LICENSE).
- 
 To integrate the library in your project, use the following dependency:
 
 **gradle:**
@@ -69,5 +66,15 @@ To integrate the library in your project, use the following dependency:
   </dependency>
 ```
 
-It has no external dependencies except an optional
-[SLF4J 1.7](http://www.slf4j.org) dependency for an error handler.
+The library has no external dependencies except two optional ones:
+* [SLF4J 1.7](http://www.slf4j.org) for an [error handler](src/main/java/diergo/csv/ErrorHandlers.java)
+* [javax.activation](https://stackoverflow.com/questions/46493613/what-is-the-replacement-for-javax-activation-package-in-java-9) for [MimeTypes](src/main/java/diergo/csv/MimeTypes.java) helper running on Java 11 or later.
+
+
+Build ![CI status](https://travis-ci.org/aburmeis/decs.svg)
+-----------------------------------------------------------
+
+The project is build with [gradle](https://gradle.org/) continuously by
+[Travis CI](https://travis-ci.org/aburmeis/decs/) and is published via
+[Bintray](https://bintray.com/aburmeis/maven/decs/) to
+[jcenter](http://jcenter.bintray.com/diergo/decs/) under [Apache License Version 2.0](LICENSE).
