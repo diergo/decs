@@ -17,31 +17,31 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
-public class AppendablesTest {
+class AppendablesTest {
 
     @Test
-    public void emptyStreamCollectsToAnUnchangedWriter() {
+    void emptyStreamCollectsToAnUnchangedWriter() {
         StringWriter out = Stream.<String>empty().collect(toAppendable(new StringWriter()));
 
         assertThat(out.toString(), is(""));
     }
 
     @Test
-    public void eachStringIsCollectedToALine() {
+    void eachStringIsCollectedToALine() {
         StringWriter out = Stream.of("one", "two").collect(toAppendable(new StringWriter()));
 
         assertThat(out.toString(), is("one\r\ntwo\r\n"));
     }
 
     @Test
-    public void lineSeparatorCanBeConfigured() {
+    void lineSeparatorCanBeConfigured() {
         StringWriter out = Stream.of("one", "two").collect(toAppendable(new StringWriter(), '\n'));
 
         assertThat(out.toString(), is("one\ntwo\n"));
     }
 
     @Test
-    public void eachStringIsCollectedUnordered() {
+    void eachStringIsCollectedUnordered() {
         String[] lines = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
         StringWriter out = Stream.of(lines)
                 .parallel().collect(toAppendableUnordered(new StringWriter()));
@@ -53,7 +53,7 @@ public class AppendablesTest {
     }
 
     @Test
-    public void eachStringIsConsumedToALine() {
+    void eachStringIsConsumedToALine() {
         StringWriter out = new StringWriter();
         Stream.of("one", "two").forEach(consumeTo(out));
 
@@ -61,7 +61,7 @@ public class AppendablesTest {
     }
 
     @Test
-    public void ioExcpetionIsWrappedToUnchecked() throws IOException {
+    void ioExcpetionIsWrappedToUnchecked() throws IOException {
         Writer out = Mockito.mock(Writer.class);
         when(out.append(anyString()))
                 .thenThrow(new IOException("test"));

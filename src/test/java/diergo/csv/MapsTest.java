@@ -15,10 +15,10 @@ import static java.util.function.UnaryOperator.identity;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class MapsTest {
+class MapsTest {
 
     @Test
-    public void mapIsCreatedFromRowWithPredefinedHeader() {
+    void mapIsCreatedFromRowWithPredefinedHeader() {
         List<Map<String, String>> result = toMaps(asList("one", "two")).apply(new Cells("1", "2"));
         assertThat(result.size(), is(1));
         Map<String, String> values = result.get(0);
@@ -27,7 +27,7 @@ public class MapsTest {
     }
 
     @Test
-    public void mapIsCreatedFromRowWithHeaderFromFirstRow() {
+    void mapIsCreatedFromRowWithHeaderFromFirstRow() {
         Function<Row, List<Map<String, String>>> mapper = toMaps();
         assertThat(mapper.apply(new Cells("one", "two")).size(), is(0));
         List<Map<String, String>> result = mapper.apply(new Cells("1", "2"));
@@ -38,12 +38,12 @@ public class MapsTest {
     }
 
     @Test
-    public void commentIsIgnoredAsMap() {
+    void commentIsIgnoredAsMap() {
         assertThat(toMaps(singletonList("one")).apply(new Comment("what?")), is(emptyList()));
     }
 
     @Test
-    public void rowContainsOnlyColumnsOfPredefinedHeader() {
+    void rowContainsOnlyColumnsOfPredefinedHeader() {
         Map<String, String> values = new LinkedHashMap<>();
         values.put("zero", "0");
         values.put("one", "1");
@@ -54,7 +54,7 @@ public class MapsTest {
     }
 
     @Test
-    public void headerCanBeAdded() {
+    void headerCanBeAdded() {
         Map<String, String> values = new LinkedHashMap<>();
         values.put("one", "1");
         values.put("two", "2");
@@ -65,7 +65,7 @@ public class MapsTest {
     }
 
     @Test
-    public void headerCanBeExtractedFromValue() {
+    void headerCanBeExtractedFromValue() {
         Map<String, String> values = new LinkedHashMap<>();
         values.put("one", "1");
         values.put("two", "2");
@@ -76,14 +76,14 @@ public class MapsTest {
     }
     
     @Test
-    public void valuesAreMapped() {
+    void valuesAreMapped() {
         Object mapped = new Object();
         assertThat(Maps.<String,Object>withValuesMapped(HashMap::new, (values, name) -> mapped).apply(singletonMap("test", "x")),
             is(singletonMap("test", mapped)));
     }
 
     @Test
-    public void valueIsRemoved() {
+    void valueIsRemoved() {
         Map<String,Integer> values = new HashMap<>();
         values.put("foo", 0);
         values.put("bar", 1);
@@ -94,7 +94,7 @@ public class MapsTest {
     }
 
     @Test
-    public void valueIsRemovedInPlace() {
+    void valueIsRemovedInPlace() {
         Map<String,Integer> values = new HashMap<>();
         values.put("foo", 0);
         values.put("bar", 1);
@@ -106,7 +106,7 @@ public class MapsTest {
     }
 
     @Test
-    public void valueIsRenamed() {
+    void valueIsRenamed() {
         Map<String,Integer> values = new HashMap<>();
         values.put("foo", 0);
         values.put("bar", 1);
@@ -116,7 +116,7 @@ public class MapsTest {
     }
 
     @Test
-    public void valueIsRenamedInPlace() {
+    void valueIsRenamedInPlace() {
         Map<String,Integer> values = new HashMap<>();
         values.put("foo", 0);
         values.put("bar", 1);
@@ -127,13 +127,13 @@ public class MapsTest {
     }
 
     @Test
-    public void valueIsAdded() {
+    void valueIsAdded() {
         assertThat(addingValue(HashMap::new, "test", any -> 1).apply(singletonMap("foo", 0)),
                 allOf(hasEntry("foo", 0), hasEntry("test", 1)));
     }
 
     @Test
-    public void valueIsAddedInPlace() {
+    void valueIsAddedInPlace() {
         Map<String,Integer> values = new HashMap<>();
         values.put("foo", 0);
         Function<Map<String, Integer>, ? extends Integer> valueCreator = any -> 1;

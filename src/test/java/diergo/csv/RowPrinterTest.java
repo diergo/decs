@@ -5,25 +5,25 @@ import org.junit.jupiter.api.Test;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class RowPrinterTest {
+class RowPrinterTest {
 
     @Test
-    public void columnsArePrintedAsSeparatedLine() {
+    void columnsArePrintedAsSeparatedLine() {
         assertThat(printRow(new Cells("foo", "bar")), is("foo,bar"));
     }
 
     @Test
-    public void columnsAreQuotedWhenIncludingQuoteSeparatorOrNewline() {
+    void columnsAreQuotedWhenIncludingQuoteSeparatorOrNewline() {
         assertThat(printRow(new Cells("f,oo", "ba\"r", "foo\nbar")), is("\"f,oo\",\"ba\"\"r\",\"foo\nbar\""));
     }
 
     @Test
-    public void nullColumnsIsNotPrinted() {
+    void nullColumnsIsNotPrinted() {
         assertThat(printRow(new Cells("foo", null, "bar")), is("foo,,bar"));
     }
 
     @Test
-    public void commentIsPrintedAsPrefixedLine() {
+    void commentIsPrintedAsPrefixedLine() {
         assertThat(printRow(new Comment("what?"), "#"), is("#what?"));
     }
 

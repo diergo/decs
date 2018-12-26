@@ -20,48 +20,48 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class RowParserTest {
+class RowParserTest {
 
     private RowParser parser;
     private BiFunction<RuntimeException, String, List<Row>> errorHandler;
 
     @Test
-    public void emptyLineIsNoColumns() {
+    void emptyLineIsNoColumns() {
         assertThat(parse("\n"), is(new Cells()));
     }
 
     @Test
-    public void thereAreNoCommentsByDefault() {
+    void thereAreNoCommentsByDefault() {
         assertThat(parse(",", '"', null, false, "#comment,no columns"), is(new Cells("#comment", "no columns")));
     }
 
     @Test
-    public void commentsAreReadAsSingleColumns() {
+    void commentsAreReadAsSingleColumns() {
         assertThat(parse(",", '"', "#", false, "#comment,no columns"), is(new Comment("comment,no columns")));
     }
 
     @Test
-    public void separatedLineIsSplitted() {
+    void separatedLineIsSplitted() {
         assertThat(parse("a,b,c"), is(new Cells("a", "b", "c")));
     }
 
     @Test
-    public void quotedFieldWithSeparatorIsNotSplitted() {
+    void quotedFieldWithSeparatorIsNotSplitted() {
         assertThat(parse("\"hi,ho\""), is(new Cells("hi,ho")));
     }
 
     @Test
-    public void quotedFieldsAreUnquoted() {
+    void quotedFieldsAreUnquoted() {
         assertThat(parse("\"hi\",\"ho\""), is(new Cells("hi", "ho")));
     }
 
     @Test
-    public void quotedFieldWithQuotesIsUnquoted() {
+    void quotedFieldWithQuotesIsUnquoted() {
         assertThat(parse("\"\"\"hi\"\"ho\"\"\",x"), is(new Cells("\"hi\"ho\"", "x")));
     }
 
     @Test
-    public void lineWithUnquotedFieldWithQuotesIsIllegalAndDelegatesToErrorHandler() {
+    void lineWithUnquotedFieldWithQuotesIsIllegalAndDelegatesToErrorHandler() {
         Comment handled = new Comment("error");
         when(errorHandler.apply(any(IllegalArgumentException.class), anyString()))
                 .thenReturn(singletonList(handled));
@@ -76,7 +76,7 @@ public class RowParserTest {
     }
 
     @Test
-    public void errorhandlingWithNoResultingRowIsHandledProperly() {
+    void errorhandlingWithNoResultingRowIsHandledProperly() {
         when(errorHandler.apply(any(IllegalArgumentException.class), anyString()))
                 .thenReturn(emptyList());
         assertThat(parse("hi\"ho,hi ho"), nullValue());
@@ -84,18 +84,18 @@ public class RowParserTest {
     }
 
     @Test
-    public void lineWithUnquotedFieldWithQuotesIsToleratedInLaxMode() {
+    void lineWithUnquotedFieldWithQuotesIsToleratedInLaxMode() {
         assertThat(parse(",", '"', "#", true, "hi\"ho"), is(new Cells("hi\"ho")));
     }
 
     @Test
-    public void quotedFieldWithMissingEndQuoteReturnsNullAndIsStoredInternallyAsAdditionalLine() {
+    void quotedFieldWithMissingEndQuoteReturnsNullAndIsStoredInternallyAsAdditionalLine() {
         assertThat(parse("\"hi,"), nullValue());
         assertThat(parser.apply("ho\""), is(singletonList(new Cells("hi,\nho"))));
     }
 
     @Test
-    public void theAutoSeparatorDeterminerCanBeConfigured() {
+    void theAutoSeparatorDeterminerCanBeConfigured() {
         String separators = ";: ,|";
         for (char separator : separators.toCharArray()) {
             assertThat(parse(separators, '"', null, false, "a" + separator + "b"), is(new Cells("a", "b")));
@@ -104,7 +104,7 @@ public class RowParserTest {
 
     @BeforeEach
     @SuppressWarnings("unchecked")
-    public void createErrorHandler() {
+    void createErrorHandler() {
         errorHandler = mock(BiFunction.class);
     }
 

@@ -3,7 +3,6 @@ package diergo.csv;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -28,7 +27,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @SuppressWarnings("unchecked")
-public class CsvIntegrationTest {
+class CsvIntegrationTest {
 
     private static final Map<String, Class<?>> VALUE_TYPES;
 
@@ -45,7 +44,7 @@ public class CsvIntegrationTest {
     private InputStreamReader csv;
 
     @Test
-    public void csvCanBeReadAndMapped() throws IOException {
+    void csvCanBeReadAndMapped() {
         List<Map<String, Object>> rows = asLines(csv)
                 .map(csvParser().separatedBy(',').build()).flatMap(Collection::stream)
                 .map(rows(emptyCellToNull()))
@@ -67,7 +66,7 @@ public class CsvIntegrationTest {
     }
 
     @Test
-    public void csvCanBeMappedAndWritten() {
+    void csvCanBeMappedAndWritten() {
         StringWriter out = Stream.<Map<String, Object>>builder()
                 .add(createValues(1997, "Ford", "E350", "ac, abs, moon", 3000.0))
                 .add(createValues(1999, "Chevy", "Venture \"Extended Edition\"", "", 4900.0))
@@ -85,7 +84,7 @@ public class CsvIntegrationTest {
     }
 
     @BeforeEach
-    public void prepareCsvResource() {
+    void prepareCsvResource() {
         csv = new InputStreamReader(getClass().getResourceAsStream(EXAMPLE_DATA), ISO_8859_1);
     }
 

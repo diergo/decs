@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import static diergo.csv.CsvParserBuilder.csvParser;
-import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -14,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
-public class CsvParserBuilderTest {
+class CsvParserBuilderTest {
 
     @Test
-    public void byDefaultALineParserIsCreated() throws ReflectiveOperationException {
+    void byDefaultALineParserIsCreated() {
         RowParser parser = (RowParser) csvParser().build();
 
         assertThat(parser.quote, is('"'));
@@ -32,13 +31,13 @@ public class CsvParserBuilderTest {
     }
 
     @Test
-    public void byDefaultAnAutoSeparatorDeterminerIsConfiguredWhichCannotHandleAnEmptyLine() throws ReflectiveOperationException {
+    void byDefaultAnAutoSeparatorDeterminerIsConfiguredWhichCannotHandleAnEmptyLine() {
         RowParser parser = (RowParser) csvParser().build();
         assertThrows(IllegalStateException.class, () -> parser.determiner.apply(""));
     }
 
     @Test
-    public void allConfigurationsArePassedToParser() throws ReflectiveOperationException {
+    void allConfigurationsArePassedToParser() {
         @SuppressWarnings("unchecked")
         BiFunction<RuntimeException, String, List<Row>> errorHandler = mock(BiFunction.class);
         RowParser parser = (RowParser) csvParser().commentsStartWith("#").quotedWith('\'').separatedBy(',').inLaxMode().handlingErrors(errorHandler).build();

@@ -21,14 +21,14 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class CsvReaderPerformanceTest {
+class CsvReaderPerformanceTest {
 
     private static final String MAXMIND_WORLD_CITIES_POP = "/worldcitiespop.txt";
 
     @ParameterizedTest(name = "readMillions({arguments})")
     @CsvSource({"true,false,3000", "false,false,2500", "true,true,1200", "false,true,1000"})
     @Tag("performance")
-    public void readMillions(boolean usingFlatMap, boolean parallel, long maxTime) throws IOException {
+    void readMillions(boolean usingFlatMap, boolean parallel, long maxTime) throws IOException {
         String kind = (usingFlatMap ? "using flat map" : "using filter and map")
                 + ", " + (parallel ? "parallel" : "sequential");
         System.out.println("starting dry run " + kind + "…");

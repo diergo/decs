@@ -22,57 +22,57 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ValuesTest {
+class ValuesTest {
 
     @ParameterizedTest(name = "knownValueAsStringIsPrinted({arguments})")
     @MethodSource("valueAsStringProvider")
-    public void knownValueAsStringIsPrinted(Object value, String expected) {
+    void knownValueAsStringIsPrinted(Object value, String expected) {
         assertThat(valueAsString(singletonMap("test", value), "test"), is(expected));
     }
 
     @Test
-    public void unknownValueAsStringIsNull() {
+    void unknownValueAsStringIsNull() {
         assertThat(valueAsString(singletonMap("test", 1), "unknown"), nullValue());
     }
 
     @Test
-    public void knownValueParsedNullKeepsNull() {
+    void knownValueParsedNullKeepsNull() {
         assertThat(parsedValue(emptyMap()).apply(singletonMap("test", null), "test"), nullValue());
     }
 
     @Test
-    public void knownValueParsedUnchanged() {
+    void knownValueParsedUnchanged() {
         assertThat(parsedValue(emptyMap()).apply(singletonMap("test", "1"), "test"), is("1"));
     }
 
     @Test
-    public void knownValueParsedToUnsupportedTypeRaisesError() {
+    void knownValueParsedToUnsupportedTypeRaisesError() {
         assertThrows(IllegalArgumentException.class,
                 () -> parsedValue(singletonMap("test", Row.class)).apply(singletonMap("test", "ha,ha"), "test"));
     }
 
     @ParameterizedTest(name = "knownValueParsedAsTargetType({arguments})")
     @MethodSource("parsedValueProvider")
-    public void knownValueParsedAsTargetType(String value, Class<?> type, Object expected) {
+    void knownValueParsedAsTargetType(String value, Class<?> type, Object expected) {
         assertThat(parsedValue(singletonMap("test", type)).apply(singletonMap("test", value), "test"), is(expected));
     }
 
     @Test
-    public void valuesAreConvertedOrReplacedByNull() {
+    void valuesAreConvertedOrReplacedByNull() {
         BiFunction<Map<String, String>, String, Boolean> converter = convertedValue(name -> "test".equals(name) ? (value -> value.contains("test")) : null);
         assertThat(converter.apply(singletonMap("test", "my test value"), "test"), is(true));
         assertThat(converter.apply(singletonMap("test", "other value"), "test"), is(false));
         assertThat(converter.apply(singletonMap("test", "other value"), "foo"), nullValue());
     }
 
-    public static Stream<Arguments> valueAsStringProvider() {
+    static Stream<Arguments> valueAsStringProvider() {
         return Stream.of(
                 Arguments.of("foo", "foo"),
                 Arguments.of(1, "1"),
                 Arguments.of(null, null));
     }
 
-    public static Stream<Arguments> parsedValueProvider() {
+    static Stream<Arguments> parsedValueProvider() {
         return Stream.of(
                 Arguments.of("1", Integer.class, 1),
                 Arguments.of("1.5", Float.class, 1.5f),
