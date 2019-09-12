@@ -186,6 +186,7 @@ bintray {
             vcsTag = "v${project.version}"
         }
     }
+    publications = ['mavenJava']
 }
 
 check.dependsOn jacocoTestCoverageVerification, jacocoTestReport
