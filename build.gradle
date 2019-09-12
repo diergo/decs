@@ -1,8 +1,8 @@
 plugins {
     id 'com.jfrog.bintray' version '1.8.4'
-    id 'nebula.optional-base' version '4.0.1'
+    id 'nebula.optional-base' version '5.0.3'
     id 'java'
-    id 'com.github.spotbugs' version '1.6.5'
+    id 'com.github.spotbugs' version '2.0.0'
     id 'jacoco'
     id 'maven-publish'
 }
@@ -186,7 +186,6 @@ bintray {
             vcsTag = "v${project.version}"
         }
     }
-    publications = ['mavenJava']
 }
 
 check.dependsOn jacocoTestCoverageVerification, jacocoTestReport
@@ -194,7 +193,7 @@ build.dependsOn javadoc
 performance.dependsOn downloadTestData
 
 wrapper {
-    gradleVersion = '4.10.3'
+    gradleVersion = '5.6.2'
 }
 
 def getBranch() {
