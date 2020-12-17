@@ -30,14 +30,14 @@ repositories {
 dependencies {
     compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}"
 
-    compile "com.sun.activation:javax.activation:1.2.0", optional
+    implementation "com.sun.activation:javax.activation:1.2.0", optional
 
-    testCompile "org.junit.jupiter:junit-jupiter-api:${junitVersion}",
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}",
         "org.junit.jupiter:junit-jupiter-params:${junitVersion}",
         'org.hamcrest:hamcrest-library:1.3',
         'org.mockito:mockito-core:3.0.0'
 
-    testRuntime "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
 }
 
 test {
@@ -140,18 +140,22 @@ jacocoTestCoverageVerification {
 }
 
 task downloadTestData {
-    ext.localCopy = file('src/test/resources/worldcitiespop.txt')
-    ext.tempFile = file('build/resources/worldcitiespop.txt.gz')
+    ext.localCopy = file('src/test/resources/worldcities.csv')
+    ext.tempFile = file('build/resources/worldcities.zip')
     outputs.file localCopy
     doLast {
+        println "Loading test data from https://simplemaps.com/data/world-cities"
         ant {
             get(
-                    src: "http://www.maxmind.com/download/worldcities/worldcitiespop.txt.gz",
+                    src: "https://simplemaps.com/static/data/world-cities/basic/simplemaps_worldcities_basicv1.73.zip",
                     dest: tempFile,
             )
         }
-        localCopy.withOutputStream { os ->
-            os << resources.gzip(tempFile).read()
+        copy {
+            from(zipTree(tempFile)) {
+                include '*.csv'
+            }
+            into localCopy.parentFile
         }
     }
 }

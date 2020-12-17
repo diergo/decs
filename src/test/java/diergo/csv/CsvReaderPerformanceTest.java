@@ -23,12 +23,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class CsvReaderPerformanceTest {
 
-    private static final String MAXMIND_WORLD_CITIES_POP = "/worldcitiespop.txt";
+    private static final String MAXMIND_WORLD_CITIES_POP = "/worldcities.csv";
 
-    @ParameterizedTest(name = "readMillions({arguments})")
-    @CsvSource({"true,false,3000", "false,false,2500", "true,true,1200", "false,true,1000"})
+    @ParameterizedTest(name = "readThousands({arguments})")
+    @CsvSource({"true,false,50", "false,false,40", "true,true,40", "false,true,40"})
     @Tag("performance")
-    void readMillions(boolean usingFlatMap, boolean parallel, long maxTime) throws IOException {
+    void readThousands(boolean usingFlatMap, boolean parallel, long maxTime) throws IOException {
         String kind = (usingFlatMap ? "using flat map" : "using filter and map")
                 + ", " + (parallel ? "parallel" : "sequential");
         System.out.println("starting dry run " + kind + "…");
@@ -40,7 +40,7 @@ class CsvReaderPerformanceTest {
                 long[] timeAndCount = runOnce(usingFlatMap, parallel);
                 times[loop - 1] = timeAndCount[0];
                 System.out.println(String.format(" took %dms to read %d rows", timeAndCount[0], timeAndCount[1]));
-                assertThat(timeAndCount[1], greaterThan(3000000L));
+                assertThat(timeAndCount[1], greaterThan(25000L));
             } catch (IOException e) {
                 fail(e.getMessage());
             }
