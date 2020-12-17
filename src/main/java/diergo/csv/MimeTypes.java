@@ -10,6 +10,7 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
  * Helpers to read or create MIME types according to
  * <a href="https://tools.ietf.org/html/rfc4180#section-3">RFC 4180</a>.
  */
+@Deprecated
 public class MimeTypes {
 
     public static final String CHARSET = "charset";

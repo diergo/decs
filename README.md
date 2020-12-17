@@ -66,10 +66,7 @@ To integrate the library in your project, use the following dependency:
   </dependency>
 ```
 
-The library has no external dependencies except two optional ones:
-* [SLF4J 1.7](http://www.slf4j.org) for an [error handler](src/main/java/diergo/csv/ErrorHandlers.java)
-* [javax.activation](https://stackoverflow.com/questions/46493613/what-is-the-replacement-for-javax-activation-package-in-java-9) for [MimeTypes](src/main/java/diergo/csv/MimeTypes.java) helper running on Java 11 or later.
-
+The library has no external dependencies.
 
 License
 -------
