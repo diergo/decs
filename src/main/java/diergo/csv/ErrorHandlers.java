@@ -1,7 +1,6 @@
 package diergo.csv;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.function.BiConsumer;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -17,29 +16,38 @@ import static java.util.Collections.emptyList;
 public class ErrorHandlers {
 
     /**
+     * Creates an error handler simply throwing the error and stopping parsing.
+     */
+    public static BiFunction<String, RuntimeException, List<Row>> throwingError() {
+        return (line, error) -> { throw error; };
+    }
+
+    /**
      * Creates an error handler simply ignoring the error by skipping the line.
      */
-    public static BiFunction<RuntimeException, String, List<Row>> ignoreErrors() {
-        return (error, line) -> emptyList();
+    public static BiFunction<String, RuntimeException, List<Row>> ignoreErrors() {
+        return (line, error) -> emptyList();
     }
 
     /**
      * Creates an error handler returning two comments with error and illegal line.
      */
-    public static BiFunction<RuntimeException, String, List<Row>> commentingErrors() {
-        return (error, line) -> asList(new Comment(error.getMessage()), new Comment(line));
+    public static BiFunction<String, RuntimeException, List<Row>> commentingErrors() {
+        return (line, error) -> asList(new Comment(error.getMessage()), new Comment(line));
     }
 
     /**
      * Creates an error handler logging the error and skipping the line. The
      * log is created with level WARN to logger of {@link CsvParserBuilder}.
      * <p>
-     * This has a dependency to <a href="http://www.slf4j.org">SLF4J</a>!
+     * Using <a href="http://www.slf4j.org">SLF4J</a> this can be used like:
+     * <pre>
+     *     loggingErrors((line, error) -> LoggerFactory.getLogger("CSV").warn("{}, the following line is skipped: {}", error.getMessage(), line);
+     * </pre>
      */
-    public static BiFunction<RuntimeException, String, List<Row>> loggingErrors() {
-        Logger log = LoggerFactory.getLogger(CsvParserBuilder.class);
-        return (error, line) -> {
-            log.warn("{}, the following line is skipped: {}", error.getMessage(), line);
+    public static BiFunction<String, RuntimeException, List<Row>> loggingErrors(BiConsumer<String, RuntimeException> logger) {
+        return (line, error) -> {
+            logger.accept(line, error);
             return emptyList();
         };
     }

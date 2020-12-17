@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 class RowParserTest {
 
     private RowParser parser;
-    private BiFunction<RuntimeException, String, List<Row>> errorHandler;
+    private BiFunction<String, RuntimeException, List<Row>> errorHandler;
 
     @Test
     void emptyLineIsNoColumns() {
@@ -63,13 +63,13 @@ class RowParserTest {
     @Test
     void lineWithUnquotedFieldWithQuotesIsIllegalAndDelegatesToErrorHandler() {
         Comment handled = new Comment("error");
-        when(errorHandler.apply(any(IllegalArgumentException.class), anyString()))
+        when(errorHandler.apply(anyString(), any(IllegalArgumentException.class)))
                 .thenReturn(singletonList(handled));
         assertThat(parse("hi\"ho"), is(handled));
 
         ArgumentCaptor<RuntimeException> error = ArgumentCaptor.forClass(RuntimeException.class);
         ArgumentCaptor<String> line = ArgumentCaptor.forClass(String.class);
-        verify(errorHandler).apply(error.capture(), line.capture());
+        verify(errorHandler).apply(line.capture(), error.capture());
         assertThat(error.getValue(), instanceOf(IllegalArgumentException.class));
         assertThat(error.getValue().getMessage(), Matchers.containsString("0:2"));
         assertThat(line.getValue(), is("hi\"ho"));
@@ -77,7 +77,7 @@ class RowParserTest {
 
     @Test
     void errorhandlingWithNoResultingRowIsHandledProperly() {
-        when(errorHandler.apply(any(IllegalArgumentException.class), anyString()))
+        when(errorHandler.apply(anyString(), any(IllegalArgumentException.class)))
                 .thenReturn(emptyList());
         assertThat(parse("hi\"ho,hi ho"), nullValue());
         assertThat(parser.apply("hi ho"), is(singletonList(new Cells("hi ho"))));

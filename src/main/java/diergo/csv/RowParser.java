@@ -21,11 +21,11 @@ class RowParser implements Function<String, List<Row>> {
     final char quote;
     final String commentStart;
     final boolean laxMode;
-    final BiFunction<RuntimeException, String, List<Row>> errorHandler;
+    final BiFunction<String, RuntimeException, List<Row>> errorHandler;
     private final AtomicReference<String> formerLine = new AtomicReference<>();
     private final AtomicInteger lineNo = new AtomicInteger(0);
 
-    RowParser(CharSequence separators, char quote, String commentStart, boolean laxMode, BiFunction<RuntimeException, String, List<Row>> errorHandler) {
+    RowParser(CharSequence separators, char quote, String commentStart, boolean laxMode, BiFunction<String, RuntimeException, List<Row>> errorHandler) {
         this.errorHandler = errorHandler;
         this.determiner = separators.length() == 1 ? line -> separators.charAt(0) : new AutoSeparatorDeterminer(separators);
         this.quote = quote;
@@ -46,7 +46,7 @@ class RowParser implements Function<String, List<Row>> {
             }
             return rows;
         } catch (RuntimeException error) {
-            return errorHandler.apply(error, line);
+            return errorHandler.apply(line, error);
         } finally {
             lineNo.incrementAndGet();
         }

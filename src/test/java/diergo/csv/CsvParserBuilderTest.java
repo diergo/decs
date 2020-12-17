@@ -23,7 +23,7 @@ class CsvParserBuilderTest {
         assertThat(parser.commentStart, nullValue());
         assertThat(parser.laxMode, is(false));
         try {
-            parser.errorHandler.apply(new RuntimeException(), "");
+            parser.errorHandler.apply("", new RuntimeException());
             fail("parsing error not thrown");
         } catch (RuntimeException expected) {
             // ok
@@ -39,7 +39,7 @@ class CsvParserBuilderTest {
     @Test
     void allConfigurationsArePassedToParser() {
         @SuppressWarnings("unchecked")
-        BiFunction<RuntimeException, String, List<Row>> errorHandler = mock(BiFunction.class);
+        BiFunction<String, RuntimeException, List<Row>> errorHandler = mock(BiFunction.class);
         RowParser parser = (RowParser) csvParser().commentsStartWith("#").quotedWith('\'').separatedBy(',').inLaxMode().handlingErrors(errorHandler).build();
 
         assertThat(parser.quote, is('\''));

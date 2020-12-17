@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static diergo.csv.ErrorHandlers.throwingError;
 import static diergo.csv.Row.DEFAULT_QUOTE;
 
 /**
@@ -41,9 +42,7 @@ public class CsvParserBuilder {
     private char quote = DEFAULT_QUOTE;
     private String commentStart = null;
     private boolean laxMode = false;
-    private BiFunction<RuntimeException, String, List<Row>> errorHandler = (error, line) -> {
-        throw error;
-    };
+    private BiFunction<String, RuntimeException, List<Row>> errorHandler = throwingError();
 
     private CsvParserBuilder() {
     }
@@ -57,9 +56,6 @@ public class CsvParserBuilder {
         return this;
     }
 
-    /**
-     * Enables comments prefixed as configured here.
-     */
     public CsvParserBuilder commentsStartWith(String commentStart) {
         this.commentStart = commentStart;
         return this;
@@ -97,9 +93,9 @@ public class CsvParserBuilder {
      * Configures the error handler for input format problems.
      * By default illegal lines create an error.
      *
-     * @see ErrorHandlers
+     * @see ErrorHandlers#throwingError()
      */
-    public CsvParserBuilder handlingErrors(BiFunction<RuntimeException, String, List<Row>> errorHandler) {
+    public CsvParserBuilder handlingErrors(BiFunction<String, RuntimeException, List<Row>> errorHandler) {
         this.errorHandler = errorHandler;
         return this;
     }
