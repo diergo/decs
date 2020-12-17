@@ -1,8 +1,8 @@
 plugins {
-    id 'com.jfrog.bintray' version '1.8.4'
+    id 'com.jfrog.bintray' version '1.8.5'
     id 'nebula.optional-base' version '5.0.3'
     id 'java'
-    id 'com.github.spotbugs' version '2.0.0'
+    id 'com.github.spotbugs' version '4.6.0'
     id 'jacoco'
     id 'maven-publish'
 }
@@ -98,7 +98,7 @@ tasks.withType(Jar) {
     }
 }
 
-tasks.withType(com.github.spotbugs.SpotBugsTask) {
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
     reports {
         xml.enabled = false
         html.enabled = true
@@ -106,7 +106,7 @@ tasks.withType(com.github.spotbugs.SpotBugsTask) {
 }
 
 jacoco {
-    toolVersion = '0.8.2'
+    toolVersion = '0.8.6'
 }
 
 spotbugs {
@@ -194,7 +194,7 @@ build.dependsOn javadoc
 performance.dependsOn downloadTestData
 
 wrapper {
-    gradleVersion = '5.6.2'
+    gradleVersion = '6.7.1'
 }
 
 def getBranch() {
