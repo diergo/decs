@@ -17,7 +17,7 @@ import static java.util.stream.Collector.Characteristics.UNORDERED;
  *
  * @since 3.1.1
  */
-public class Appendables {
+public final class Appendables {
 
     /**
      * Used as a default line separator
@@ -81,6 +81,9 @@ public class Appendables {
      */
     public static Consumer<String> consumeTo(Appendable out) {
         return new StringAppendable<>(out, CRLF);
+    }
+
+    private Appendables() {
     }
 
     private static class StringAppendable<O extends Appendable> implements Consumer<String> {

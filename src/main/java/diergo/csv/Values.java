@@ -17,7 +17,7 @@ import static java.lang.Integer.parseInt;
  *
  * @see Maps#withValuesMapped(Supplier, BiFunction)
  */
-public class Values {
+public final class Values {
 
     /**
      * Converts the value with the key to its string representation.

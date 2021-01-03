@@ -13,7 +13,7 @@ import static java.util.Collections.emptyList;
  *
  * @see CsvParserBuilder#handlingErrors(BiFunction)
  */
-public class ErrorHandlers {
+public final class ErrorHandlers {
 
     /**
      * Creates an error handler simply throwing the error and stopping parsing.
@@ -50,5 +50,8 @@ public class ErrorHandlers {
             logger.accept(line, error);
             return emptyList();
         };
+    }
+
+    private ErrorHandlers() {
     }
 }

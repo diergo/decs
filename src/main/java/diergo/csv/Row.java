@@ -3,10 +3,8 @@ package diergo.csv;
 import java.util.Spliterator;
 import java.util.Spliterators;
 
-import static java.util.Spliterator.IMMUTABLE;
 import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterator.SIZED;
-import static java.util.Spliterator.SUBSIZED;
 
 /**
  * The internal representation of a CSV data row. The cells can be iterated.

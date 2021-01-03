@@ -42,8 +42,8 @@ class RowPrinter implements Function<Row, String> {
 
     private String printValue(String value) {
         boolean containsQuote = value.indexOf(quote) != -1;
-        boolean quote = containsQuote || value.indexOf(separator) != -1 || (value.indexOf('\n') != -1 || value.indexOf('\r') != -1);
-        if (quote) {
+        boolean needsQuote = containsQuote || value.indexOf(separator) != -1 || (value.indexOf('\n') != -1 || value.indexOf('\r') != -1);
+        if (needsQuote) {
             if (containsQuote) {
                 value = quotePattern.matcher(value).replaceAll(quoteReplacement);
             }

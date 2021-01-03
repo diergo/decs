@@ -24,7 +24,7 @@ import static java.util.stream.StreamSupport.stream;
  *
  * @see java.util.stream.Stream#map(Function)
  */
-public class Maps {
+public final class Maps {
 
     /**
      * A mapper to convert rows to data maps using the columns names in header.
