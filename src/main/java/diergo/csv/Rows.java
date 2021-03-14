@@ -10,7 +10,7 @@ import static java.util.stream.StreamSupport.stream;
 /**
  * Helpers to work with {@link Row}s.
  */
-public class Rows {
+public final class Rows {
 
     private static final String[] NO_CELLS = new String[0];
 

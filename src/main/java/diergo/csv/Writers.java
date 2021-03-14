@@ -13,7 +13,7 @@ import static diergo.csv.Appendables.toAppendableUnordered;
  * @deprecated since 3.1.1, use {@link Appendables} instead
  */
 @Deprecated
-public class Writers {
+public final class Writers {
 
     /**
      * Creates a collector writing lines to a specific writer using {@link Appendables#CRLF} as line separator.
@@ -67,5 +67,8 @@ public class Writers {
     @Deprecated
     public static <R extends Writer> Collector<String, Appendable, R> toWriterUnordered(R out, char lineSep) {
         return toAppendableUnordered(out, lineSep);
+    }
+
+    private Writers() {
     }
 }

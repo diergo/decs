@@ -135,11 +135,7 @@ class RowParser implements Function<String, List<Row>> {
         private Map<Character, Integer> voteForSeparators(String line) {
             Map<Character, Integer> votes = new HashMap<>();
             for (char c : possibleSeparators.toString().toCharArray()) {
-                try {
-                    votes.put(c, countCells(line, c));
-                } catch (IllegalArgumentException e) {
-                    votes.put(c, 0);
-                }
+                votes.put(c, countCells(line, c));
             }
             return votes;
         }
@@ -147,12 +143,17 @@ class RowParser implements Function<String, List<Row>> {
         private char getBestVotedSeparator(Map<Character, Integer> votes) {
             return votes.entrySet().stream()
                     .reduce((e1, e2) -> e1.getValue() < e2.getValue() ? e2 : e1)
-                    .get().getKey();
+                    .map(Map.Entry::getKey)
+                    .orElse(possibleSeparators.charAt(0));
         }
 
         private int countCells(String line, char separator) {
-            List<Row> values = RowParser.this.parseLine(line, separator);
-            return values.isEmpty() ? 0 : values.get(0).getLength();
+            try {
+                List<Row> values = RowParser.this.parseLine(line, separator);
+                return values.isEmpty() ? 0 : values.get(0).getLength();
+            } catch (IllegalArgumentException e) {
+                return 0;
+            }
         }
     }
 }
