@@ -26,12 +26,15 @@ As there are no direct dependencies of the tools you can simply extend it for
 your needs by creating new lambdas or functional interfaces and inject them to
 mappings and filters:
 
-```
+```java
+  BiConsumer<String, RuntimeException> logger = (line, error) -> LoggerFactory.getLogger("CSV").warn("Cannot read CSV line '{}'", line, error);
+  Function<String, List<Row>> parser = CsvParserBuilder.csvParser().separatedBy(',').handlingErrors(ErrorHandler.loggingErrors(logger).build();
   List<Map<String, String>> lines = Readers.asLines(new FileReader("input.csv", StandardCharsets.UTF_8))
       // CSV parser turns each line into a row
-      .map(CsvParserBuilder.csvParser().separatedBy(',').build()).flatMap(Collection::stream)
+      .map(parser).flatMap(Collection::stream)
       // turn each line into a map, the first line is treated as header with column names
-      .map(Maps.toMaps()).flatMap(Collection::stream);
+      .map(Maps.toMaps()).flatMap(Collection::stream)
+      .collect(Collectors.toList());
 
   lines.stream()
       // create a stream of rows with an initial header row containing the column names
@@ -53,8 +56,8 @@ To integrate the library in your project, use the following dependency:
 
 **gradle:**
 
-```gradle
-  compile 'diergo:decs:3.1.1'
+```groovy
+  compile 'diergo:decs:3.1.2'
 ```
 
 **maven:**
@@ -62,7 +65,7 @@ To integrate the library in your project, use the following dependency:
   <dependency>
     <groupId>diergo</groupId>
     <artifactId>decs</artifactId>
-    <version>3.1.1</version>
+    <version>3.1.2</version>
   </dependency>
 ```
 
