@@ -1,5 +1,4 @@
 plugins {
-    id 'com.jfrog.bintray' version '1.8.5'
     id 'nebula.optional-base' version '5.0.3'
     id 'java'
     id 'com.github.spotbugs' version '4.6.0'
@@ -10,18 +9,10 @@ plugins {
 ext {
     spotbugsVersion = '4.1.1'
     junitVersion = '5.7.0'
-    branch = getBranch()
-    versionSuffix = getVersionSuffix(branch)
-    if (!project.hasProperty('bintrayUser')) {
-        bintrayUser = System.getProperty("user.name")
-    }
-    if (!project.hasProperty('bintrayKey')) {
-        bintrayKey = ''
-    }
 }
 
 sourceCompatibility = 1.8
-version = "${majorVersion}.${minorVersion}.${patchVersion}${versionSuffix}"
+version = "${majorVersion}.${minorVersion}.${patchVersion}"
 
 repositories {
     jcenter()
@@ -165,49 +156,10 @@ artifacts {
     archives javadocJar
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
-        }
-    }
-}
-
-bintray {
-    user = bintrayUser
-    key = bintrayKey
-    pkg {
-        repo = 'maven'
-        name = project.name
-        desc = project.description
-        version {
-            name = project.version
-            vcsTag = "v${project.version}"
-        }
-    }
-    publications = ['mavenJava']
-}
-
 check.dependsOn jacocoTestCoverageVerification, jacocoTestReport
-build.dependsOn javadoc
+assemble.dependsOn javadoc
 performance.dependsOn downloadTestData
 
 wrapper {
     gradleVersion = '6.7.1'
 }
-
-def getBranch() {
-    return "git rev-parse --abbrev-ref HEAD".execute().text.trim()
-}
-
-def getVersionSuffix(branch) {
-    switch (branch) {
-        case ~/(master|version.*)/:
-            return ''
-        default:
-            return '-SNAPSHOT'
-    }
-}
-
