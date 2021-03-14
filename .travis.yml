@@ -6,7 +6,7 @@ jdk:
 
 deploy:
   provider: releases
-  token: "GITHUB_API_KEY"
+  token: "$GITHUB_API_KEY"
   file: "build/libs/*.jar"
   edge: true
   on:
