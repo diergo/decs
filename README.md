@@ -1,4 +1,4 @@
-# DeCS: Diergo Easy CSV Streamable
+# DeCS: Diergo Easy CSV Streamable [![CI status](https://travis-ci.com/diergo/decs.svg)](https://travis-ci.com/github/diergo/decs)
 
 This Java library supports parsing and generation of comma separated value
 ([csv](https://en.wikipedia.org/wiki/Comma-separated_values)) data as defined
@@ -54,19 +54,33 @@ Dependency [![Release](https://jitpack.io/v/de.diergo/decs.svg)](https://jitpack
 
 To integrate the library in your project, use the following dependency:
 
-**gradle:**
+**Gradle:**
 
 ```groovy
-  compile 'de.diergo:decs:3.1.2'
+repositories {
+    maven { url "https://jitpack.io" }
+}
+
+dependencies {
+    implementation 'de.diergo:decs:3.1.2'
+}
 ```
 
-**maven:**
+**Maven:**
 ```xml
+<repositories>
+  <repository>
+    <id>jitpack</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
+<dependencies>
   <dependency>
     <groupId>de.diergo</groupId>
     <artifactId>decs</artifactId>
     <version>3.1.2</version>
   </dependency>
+</dependencies>
 ```
 
 The library has no external dependencies.
