@@ -49,7 +49,7 @@ Handling of comments, headers and separators is configured using the builders fo
 For the release notes, have a look at the [change log](CHANGELOG.md).
 
 
-Dependency [![Download](https://api.bintray.com/packages/aburmeis/maven/decs/images/download.svg)](https://bintray.com/aburmeis/maven/decs/_latestVersion)
+Dependency [![Release](https://jitpack.io/v/de.diergo/decs.svg)](https://jitpack.io/#de.diergo/decs)
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 To integrate the library in your project, use the following dependency:
@@ -57,13 +57,13 @@ To integrate the library in your project, use the following dependency:
 **gradle:**
 
 ```groovy
-  compile 'diergo:decs:3.1.2'
+  compile 'de.diergo:decs:3.1.2'
 ```
 
 **maven:**
 ```xml
   <dependency>
-    <groupId>diergo</groupId>
+    <groupId>de.diergo</groupId>
     <artifactId>decs</artifactId>
     <version>3.1.2</version>
   </dependency>
