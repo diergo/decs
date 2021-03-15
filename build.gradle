@@ -1,14 +1,14 @@
 plugins {
     id 'nebula.optional-base' version '5.0.3'
     id 'java'
-    id 'com.github.spotbugs' version '4.6.0'
+    id 'com.github.spotbugs' version '4.7.0'
     id 'jacoco'
     id 'maven-publish'
 }
 
 ext {
-    spotbugsVersion = '4.1.1'
-    junitVersion = '5.7.0'
+    spotbugsVersion = '4.2.2'
+    junitVersion = '5.7.1'
 }
 
 sourceCompatibility = 1.8
