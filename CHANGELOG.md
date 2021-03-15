@@ -7,7 +7,7 @@ file. This project adheres to [Semantic Versioning](http://semver.org).
 
 ### 3.1.2
 * removed SLF4J Dependency, error logging now uses a more flexible BiFunction
-* [MimeTypes](src/main/java/diergo/csv/MimeTypes.java) is now deprecated as it is not core functionality, will be removed in 3.2.0
+* removed `MimeTypes`support
 
 ### 3.1.1
 * minimal Java 9 support ([#7](https://github.com/aburmeis/decs/issues/7))
