@@ -58,7 +58,7 @@ task performance(type: Test) {
 javadoc {
     options.memberLevel = 'PROTECTED'
     options.author = false
-    options.header = project.name
+    options.header = "${project.description} ${project.version}"
     options.links(["http://docs.oracle.com/javase/8/docs/api/"] as String[])
     options.encoding = 'UTF-8'
     options.addStringOption('Xdoclint:none', '-quiet')
@@ -149,9 +149,26 @@ task downloadTestData {
     }
 }
 
-artifacts {
-    archives sourcesJar
-    archives javadocJar
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                description = project.description
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+            }
+        }
+    }
 }
 
 check.dependsOn jacocoTestCoverageVerification, jacocoTestReport
