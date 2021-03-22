@@ -44,45 +44,18 @@ mappings and filters:
       .collect(Appendables.toAppendable(new FileWriter("output.csv", StandardCharsets.UTF_8), '\n'));
 ```
 
-There are more ready to use helper functions to filter and map at [Rows](src/main/java/diergo/csv/Rows.java), [Maps](src/main/java/diergo/csv/Maps.java) and [Values](src/main/java/diergo/csv/Values.java).
-Handling of comments, headers and separators is configured using the builders for CSV [parser](src/main/java/diergo/csv/CsvParserBuilder.java) and [printer](src/main/java/diergo/csv/CsvPrinterBuilder.java).
+There are more ready to use helper functions to filter and map at [Rows](src/main/java/diergo/csv/Rows.java),
+[Maps](src/main/java/diergo/csv/Maps.java) and [Values](src/main/java/diergo/csv/Values.java).
+Handling of comments, headers and separators is configured using the builders for CSV
+[parser](src/main/java/diergo/csv/CsvParserBuilder.java) and [printer](src/main/java/diergo/csv/CsvPrinterBuilder.java).
 For the release notes, have a look at the [change log](CHANGELOG.md).
 
 
 Dependency [![Release](https://jitpack.io/v/de.diergo/decs.svg)](https://jitpack.io/#de.diergo/decs)
-----------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 
-To integrate the library in your project, use the following dependency:
-
-**Gradle:**
-
-```groovy
-repositories {
-    maven { url "https://jitpack.io" }
-}
-
-dependencies {
-    implementation 'de.diergo:decs:3.1.2'
-}
-```
-
-**Maven:**
-```xml
-<repositories>
-  <repository>
-    <id>jitpack</id>
-    <url>https://jitpack.io</url>
-  </repository>
-</repositories>
-<dependencies>
-  <dependency>
-    <groupId>de.diergo</groupId>
-    <artifactId>decs</artifactId>
-    <version>3.1.2</version>
-  </dependency>
-</dependencies>
-```
-
+To integrate the library in your project, add the artifact `decs` of group `de.diergo` to your Java dependency
+management. At [JitPack](https://jitpack.io/#de.diergo/decs) you can find examples for Gradle and Maven.
 The library has no external dependencies.
 
 License
