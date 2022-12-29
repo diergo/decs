@@ -5,6 +5,9 @@
 All notable changes to [this project](README.md) will be documented in this
 file. This project adheres to [Semantic Versioning](http://semver.org).
 
+### 3.2.1
+* fix automatic module name to `diergo.csv`
+
 ### 3.2.0
 * removed SLF4J Dependency, error logging now uses a more flexible BiFunction
 * removed `MimeTypes`support
