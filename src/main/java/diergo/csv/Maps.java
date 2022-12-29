@@ -11,8 +11,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.function.UnaryOperator.identity;
@@ -189,13 +187,8 @@ public final class Maps {
         }
 
         @Override
-        @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
         public R apply(Map<String, String> values) {
-            List<String> headers = header.get();
-            if (headers == null && header.compareAndSet(null, new ArrayList<>(values.keySet()))) {
-                // after compareAndSet header is set in any case, so header will never be null
-                headers = header.get();
-            }
+            List<String> headers = header.updateAndGet(old -> old == null ? new ArrayList<>(values.keySet()) : old);
             List<Row> result = new ArrayList<>();
             if (headerNeeded.compareAndSet(true, false)) {
                 result.add(new Cells(headers));

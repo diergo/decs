@@ -2,78 +2,81 @@ import com.github.spotbugs.snom.SpotBugsTask
 
 plugins {
     id 'java-library'
-    id 'com.github.spotbugs' version '4.7.0'
+    id 'com.github.spotbugs' version '5.0.13'
     id 'jacoco'
     id 'maven-publish'
 }
 
 ext {
-    spotbugsVersion = '4.2.2'
-    junitVersion = '5.7.1'
+    junitVersion = '5.9.1'
 }
 
 version = "${majorVersion}.${minorVersion}.${patchVersion}"
 
+// dependencies
+
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
 dependencies {
-    compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}"
-
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}",
         "org.junit.jupiter:junit-jupiter-params:${junitVersion}",
-        'org.hamcrest:hamcrest-library:1.3',
-        'org.mockito:mockito-core:3.8.0'
+        'org.hamcrest:hamcrest:2.2',
+        'org.mockito:mockito-core:4.10.0'
 
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
 }
 
-test {
-    useJUnitPlatform {
-        includeEngines 'junit-jupiter'
-        excludeTags 'performance'
-    }
-    testLogging {
-        events 'skipped', 'failed'
-    }
-    reports {
-        html.enabled = true
-    }
-}
+// compiling
 
-task performance(type: Test) {
-    useJUnitPlatform {
-        includeEngines 'junit-jupiter'
-        includeTags 'performance'
-    }
-    testLogging {
-        events 'skipped', 'failed'
-    }
-    reports {
-        html.enabled = true
-    }
-}
-
-javadoc {
-    options.memberLevel = 'PROTECTED'
-    options.author = false
-    options.header = "${project.description} ${project.version}"
-    options.links(["http://docs.oracle.com/javase/8/docs/api/"] as String[])
-    options.encoding = 'UTF-8'
-    options.addStringOption('Xdoclint:none', '-quiet')
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    withJavadocJar()
+    withSourcesJar()
 }
 
 tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-    options.deprecation = true
-    options.compilerArgs << "-Xlint:unchecked"
+    configure(options) {
+        encoding = 'UTF-8'
+        deprecation = true
+        compilerArgs << "-Xlint:unchecked"
+    }
+}
+
+// unit tests
+
+test {
+    useJUnitPlatform {
+        excludeTags 'performance'
+    }
+    reports {
+        html.required = true
+    }
+}
+
+// publishing
+
+javadoc {
+    options {
+        memberLevel = JavadocMemberLevel.PROTECTED
+        author = false
+        header "${project.description} ${project.version}"
+        links 'https://docs.oracle.com/javase/8/docs/api/'
+        encoding 'UTF-8'
+        addStringOption('Xdoclint:none', '-quiet')
+    }
 }
 
 tasks.withType(Jar) {
+    from(project.projectDir) {
+        include 'LICENSE'
+        into('META-INF')
+    }
     manifest {
         attributes(
-            "Automatic-Module-Name": "diergo.decs",
+            "Automatic-Module-Name": "diergo.csv",
             "Specification-Title": project.description,
             "Specification-Version": "${majorVersion}.${minorVersion}",
             "Specification-Vendor": vendor,
@@ -85,19 +88,30 @@ tasks.withType(Jar) {
     }
 }
 
-tasks.withType(SpotBugsTask) {
-    reports {
-        xml.enabled = false
-        html.enabled = true
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                description = project.description
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+            }
+        }
     }
 }
 
-jacoco {
-    toolVersion = '0.8.6'
-}
+// code analysis
 
-spotbugs {
-    toolVersion = spotbugsVersion
+tasks.withType(SpotBugsTask) {
+    reports {
+        xml.required = false
+        html.required = true
+    }
 }
 
 jacocoTestCoverageVerification {
@@ -116,6 +130,19 @@ jacocoTestCoverageVerification {
                 minimum = 0.8
             }
         }
+    }
+}
+
+// performance test
+
+task performance(type: Test) {
+    group JavaBasePlugin.VERIFICATION_GROUP
+    description 'Runs the performance test suite.'
+    useJUnitPlatform {
+        includeTags 'performance'
+    }
+    reports {
+        html.required = true
     }
 }
 
@@ -140,28 +167,7 @@ task downloadTestData {
     }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    withJavadocJar()
-    withSourcesJar()
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            pom {
-                description = project.description
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-            }
-        }
-    }
-}
+// task dependencies
 
 check.dependsOn jacocoTestCoverageVerification, jacocoTestReport
 assemble.dependsOn javadoc

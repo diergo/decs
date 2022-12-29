@@ -41,9 +41,8 @@ public final class ErrorHandlers {
      * log is created with level WARN to logger of {@link CsvParserBuilder}.
      * <p>
      * Using <a href="http://www.slf4j.org">SLF4J</a> this can be used like:
-     * <pre>
-     *     loggingErrors((line, error) -> LoggerFactory.getLogger("CSV").warn("{}, the following line is skipped: {}", error.getMessage(), line);
-     * </pre>
+     * <br/>
+     * {@code loggingErrors((line, error) -> LoggerFactory.getLogger("CSV").warn("{}, the following line is skipped: {}", error.getMessage(), line);}
      */
     public static BiFunction<String, RuntimeException, List<Row>> loggingErrors(BiConsumer<String, RuntimeException> logger) {
         return (line, error) -> {
