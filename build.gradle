@@ -168,5 +168,5 @@ assemble.dependsOn javadoc
 performance.dependsOn downloadTestData
 
 wrapper {
-    gradleVersion = '6.8.3'
+    gradleVersion = '7.6'
 }

@@ -1,4 +1,4 @@
-# DeCS: Diergo Easy CSV Streamable [![CI status](https://travis-ci.com/diergo/decs.svg)](https://travis-ci.com/github/diergo/decs)
+# DeCS: Diergo Easy CSV Streamable
 
 This Java library supports parsing and generation of comma separated value
 ([csv](https://en.wikipedia.org/wiki/Comma-separated_values)) data as defined
