@@ -30,8 +30,6 @@ jobs:
           distribution: 'temurin'
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
-        env:
-          SPRING: ${{ matrix.spring }}
         with:
           gradle-version: wrapper
           arguments: check
