@@ -1,3 +1,5 @@
+import com.github.spotbugs.snom.SpotBugsTask
+
 plugins {
     id 'java-library'
     id 'com.github.spotbugs' version '6.0.25'
@@ -43,7 +45,7 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
-// unit tests
+// testing
 
 test {
     useJUnitPlatform {
@@ -115,6 +117,13 @@ publishing {
 }
 
 // code analysis
+
+tasks.withType(SpotBugsTask).configureEach {
+    reports {
+        xml.required = false
+        html.required = true
+    }
+}
 
 jacocoTestCoverageVerification {
     violationRules {
