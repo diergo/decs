@@ -37,7 +37,7 @@ java {
     withSourcesJar()
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     configure(options) {
         encoding = 'UTF-8'
         deprecation = true
@@ -69,7 +69,7 @@ javadoc {
     }
 }
 
-tasks.withType(Jar) {
+tasks.withType(Jar).configureEach {
     from(project.projectDir) {
         include 'LICENSE'
         into('META-INF')
@@ -90,7 +90,7 @@ tasks.withType(Jar) {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        maven(MavenPublication) {
             from components.java
             pom {
                 description = project.description
@@ -106,13 +106,6 @@ publishing {
 }
 
 // code analysis
-
-tasks.withType(SpotBugsTask) {
-    reports {
-        xml.required = false
-        html.required = true
-    }
-}
 
 jacocoTestCoverageVerification {
     violationRules {
@@ -135,7 +128,7 @@ jacocoTestCoverageVerification {
 
 // performance test
 
-task performance(type: Test) {
+tasks.register('performance', Test) {
     group JavaBasePlugin.VERIFICATION_GROUP
     description 'Runs the performance test suite.'
     useJUnitPlatform {
@@ -146,7 +139,7 @@ task performance(type: Test) {
     }
 }
 
-task downloadTestData {
+tasks.register('downloadTestData') {
     ext.localCopy = file('src/test/resources/worldcities.csv')
     ext.tempFile = file('build/resources/worldcities.zip')
     outputs.file localCopy
@@ -172,7 +165,3 @@ task downloadTestData {
 check.dependsOn jacocoTestCoverageVerification, jacocoTestReport
 assemble.dependsOn javadoc
 performance.dependsOn downloadTestData
-
-wrapper {
-    gradleVersion = '7.6'
-}
