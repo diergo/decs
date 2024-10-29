@@ -2,13 +2,13 @@ import com.github.spotbugs.snom.SpotBugsTask
 
 plugins {
     id 'java-library'
-    id 'com.github.spotbugs' version '5.0.13'
+    id 'com.github.spotbugs' version '6.0.25'
     id 'jacoco'
     id 'maven-publish'
 }
 
 ext {
-    junitVersion = '5.9.1'
+    junitVersion = '5.11.3'
 }
 
 version = "${majorVersion}.${minorVersion}.${patchVersion}"
@@ -21,12 +21,12 @@ repositories {
 }
 
 dependencies {
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}",
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}",
         "org.junit.jupiter:junit-jupiter-params:${junitVersion}",
         'org.hamcrest:hamcrest:2.2',
-        'org.mockito:mockito-core:4.10.0'
+        'org.mockito:mockito-core:4.11.0'
 
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 // compiling
