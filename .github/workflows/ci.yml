@@ -38,4 +38,4 @@ jobs:
         with:
           gradle-version: ${{ matrix.gradle }}
       - name: Run build
-        run: ./gradlew check
+        run: gradle check
