@@ -2,13 +2,13 @@ import com.github.spotbugs.snom.SpotBugsTask
 
 plugins {
     id 'java-library'
-    id 'com.github.spotbugs' version '6.1.12'
+    id 'com.github.spotbugs' version '6.5.9'
     id 'jacoco'
     id 'maven-publish'
 }
 
 ext {
-    junitVersion = '5.12.2'
+    junitVersion = '5.14.4'
 }
 
 version = "${majorVersion}.${minorVersion}.${patchVersion}"
@@ -147,8 +147,8 @@ jacocoTestCoverageVerification {
 // performance test
 
 tasks.register('performance', Test) {
-    group JavaBasePlugin.VERIFICATION_GROUP
-    description 'Runs the performance test suite.'
+    group = JavaBasePlugin.VERIFICATION_GROUP
+    description = 'Runs the performance test suite.'
     useJUnitPlatform {
         includeTags 'performance'
     }
