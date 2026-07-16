@@ -1,9 +1,6 @@
 package diergo.csv;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -166,7 +163,7 @@ public final class Maps {
             }
             List<String> keys = header.get();
             int i = 0;
-            Map<String, String> result = new HashMap<>();
+            Map<String, String> result = new LinkedHashMap<>();
             for (String value : values) {
                 result.put(keys.get(i++), value);
             }

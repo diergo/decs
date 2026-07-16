@@ -36,17 +36,17 @@ class CsvReaderPerformanceTest {
         long[] times = new long[10];
         rangeClosed(1, times.length).forEachOrdered(loop -> {
             try {
-                System.out.print(String.format("loop %d", loop));
+                System.out.printf("loop %d", loop);
                 long[] timeAndCount = runOnce(usingFlatMap, parallel);
                 times[loop - 1] = timeAndCount[0];
-                System.out.println(String.format(" took %dms to read %d rows", timeAndCount[0], timeAndCount[1]));
+                System.out.printf(" took %dms to read %d rows%n", timeAndCount[0], timeAndCount[1]);
                 assertThat(timeAndCount[1], greaterThan(25000L));
             } catch (IOException e) {
                 fail(e.getMessage());
             }
         });
         double average = LongStream.of(times).average().getAsDouble();
-        System.out.println(String.format("average %s is %.0fms", kind, average));
+        System.out.printf("average %s is %.0fms%n", kind, average);
         assertThat("acceptable average[ms] for " + kind, average, lessThan((double) maxTime));
     }
 

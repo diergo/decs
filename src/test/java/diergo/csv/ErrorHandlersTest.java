@@ -2,7 +2,6 @@ package diergo.csv;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -22,9 +21,7 @@ class ErrorHandlersTest {
 
     @Test
     void throwingStopsParsing() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            throwingError().apply("foo,bar", new IllegalArgumentException("error"));
-        });
+        assertThrows(IllegalArgumentException.class, () -> throwingError().apply("foo,bar", new IllegalArgumentException("error")));
     }
 
     @Test

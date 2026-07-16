@@ -1,21 +1,20 @@
 package diergo.csv;
 
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 class RowPrinter implements Function<Row, String> {
 
     final char separator;
     final char quote;
     final String commentStart;
-    private final Pattern quotePattern;
+    private final String quoteAsString;
     private final String quoteReplacement;
 
     RowPrinter(char separator, char quote, String commentStart) {
         this.separator = separator;
         this.quote = quote;
         this.commentStart = commentStart;
-        quotePattern = Pattern.compile(String.valueOf(quote));
+        quoteAsString = String.valueOf(quote);
         quoteReplacement = new String(new char[]{quote, quote});
     }
 
@@ -45,7 +44,7 @@ class RowPrinter implements Function<Row, String> {
         boolean needsQuote = containsQuote || value.indexOf(separator) != -1 || (value.indexOf('\n') != -1 || value.indexOf('\r') != -1);
         if (needsQuote) {
             if (containsQuote) {
-                value = quotePattern.matcher(value).replaceAll(quoteReplacement);
+                value = value.replace(quoteAsString, quoteReplacement);
             }
             return new StringBuilder(value.length() + 2).append(this.quote).append(value).append(this.quote).toString();
         }

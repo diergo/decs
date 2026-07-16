@@ -2,15 +2,11 @@ package diergo.csv;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static java.lang.Boolean.parseBoolean;
-import static java.lang.Double.parseDouble;
-import static java.lang.Float.parseFloat;
-import static java.lang.Integer.parseInt;
 
 /**
  * Helpers to work with data {@link Map}s.
@@ -55,6 +51,20 @@ public final class Values {
         return convertedValue(name -> value -> parseValue(value, types.getOrDefault(name, String.class)));
     }
 
+    private static final Map<Class<?>, Function<String, Object>> PARSERS;
+
+    static {
+        Map<Class<?>, Function<String, Object>> parsers = new HashMap<>();
+        parsers.put(String.class, value -> value);
+        parsers.put(Boolean.class, Boolean::parseBoolean);
+        parsers.put(Float.class, Float::parseFloat);
+        parsers.put(Double.class, Double::parseDouble);
+        parsers.put(Integer.class, Integer::parseInt);
+        parsers.put(BigDecimal.class, BigDecimal::new);
+        parsers.put(BigInteger.class, BigInteger::new);
+        PARSERS = parsers;
+    }
+
     private Values() {
     }
 
@@ -62,24 +72,11 @@ public final class Values {
         if (type.isEnum()) {
             return parseEnum(value, type);
         }
-        switch (type.getName()) {
-            case "java.lang.String":
-                return value;
-            case "java.lang.Boolean":
-                return parseBoolean(value);
-            case "java.lang.Float":
-                return parseFloat(value);
-            case "java.lang.Double":
-                return parseDouble(value);
-            case "java.lang.Integer":
-                return parseInt(value);
-            case "java.math.BigDecimal":
-                return new BigDecimal(value);
-            case "java.math.BigInteger":
-                return new BigInteger(value);
-            default:
-                throw new IllegalArgumentException("unsupported value type: " + type);
+        Function<String, Object> parser = PARSERS.get(type);
+        if (parser == null) {
+            throw new IllegalArgumentException("unsupported value type: " + type);
         }
+        return parser.apply(value);
     }
 
     private static <E extends Enum<E>> E parseEnum(String value, Class<?> type) {

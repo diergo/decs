@@ -23,6 +23,11 @@ class RowPrinterTest {
     }
 
     @Test
+    void quoteEscapingIsLiteralEvenWhenQuoteIsARegexMetaCharacter() {
+        assertThat(new RowPrinter(',', '.', null).apply(new Cells("ab.cd")), is(".ab..cd."));
+    }
+
+    @Test
     void commentIsPrintedAsPrefixedLine() {
         assertThat(printRow(new Comment("what?"), "#"), is("#what?"));
     }

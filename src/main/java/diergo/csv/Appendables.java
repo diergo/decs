@@ -138,7 +138,7 @@ public final class Appendables {
 
         @Override
         public Set<Characteristics> characteristics() {
-            return ordered ? noneOf(Characteristics.class) : EnumSet.of(UNORDERED, CONCURRENT);
+            return ordered ? EnumSet.of(CONCURRENT) : EnumSet.of(UNORDERED, CONCURRENT);
         }
     }
 }

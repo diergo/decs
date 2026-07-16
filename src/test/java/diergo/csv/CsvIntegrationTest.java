@@ -26,7 +26,6 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@SuppressWarnings("unchecked")
 class CsvIntegrationTest {
 
     private static final Map<String, Class<?>> VALUE_TYPES;
@@ -80,7 +79,7 @@ class CsvIntegrationTest {
                 .map(csvPrinter().separatedBy(',').build())
                 .collect(toAppendable(new StringWriter(), '\n'));
 
-        assertThat(out.toString(), is(readData(csv).replaceAll(",\"\",", ",,")));
+        assertThat(out.toString(), is(readData(csv).replace(",\"\",", ",,")));
     }
 
     @BeforeEach
